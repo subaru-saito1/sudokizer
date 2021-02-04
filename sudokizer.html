@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Sudokizer</title>
+  <meta charset="utf-8">
+  <meta name="author" content="Subaru Saito">
+  <meta name="description" content="Sudoku analyzer tool">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="css/sudokizer.css">
+  <script src="js/front.js" defer></script>
+</head>
+
+
+<body>
+  <h1> Sudokizer </h1>
+  
+  <p>数独アナライザー</p>
+
+  <main>
+
+    <!-- 上部のメニュー -->
+    <div id="main_wrapper">
+      <menu>
+        <ul>
+        <li>ファイル</li>
+        <li>編集</li>
+        <li>表示</li>
+        <li>その他</li>
+        </ul>
+      </menu>
+
+      <div id="sub_wrapper">
+
+        <!-- メイン盤面 -->
+        <canvas id="main_board" width="350" height="350">
+          canvasタグ未対応です。
+        </canvas>
+      
+        <!-- ボタン -->
+        <fieldset>
+          <legend>操作</legend>
+          <p>
+            <label for="qmode">問題モード</label>
+            <input type="radio" name="modeselect" id="qmode" checked> 
+          </p>
+          <p>
+            <label for="amode">解答モード</label>
+            <input type="radio" name="modeselect" id="amode">
+          </p>
+          <p>
+            <label for="kmode">候補モード</label>
+            <input type="checkbox" name="kmode" id="kmode">
+          </p>
+          <input type="button" name="undo" id="undo" value="戻">
+          <input type="button" name="redo" id="redo" value="進">
+          <input type="button" name="ansclear" id="ansclear" value="解答消去">
+          <input type="button" name="kouhoclear" id="kouhoclear" value="候補消去">
+          <input type="button" name="anscheck" id="anscheck" value="チェック">
+          <input type="button" name="autokouho" id="autokouho" value="自動候補入力">
+          <input type="button" name="stepsolve" id="stepsolve" value="&gt;">
+          <input type="button" name="autosolve" id="autosolve" value="&gt;&gt;">
+          <p>
+            <label for="kateilevel">仮定レベル</label>
+            <select name="kateilevel" id="kateilevel">
+              <option value="0"> なし </option>
+              <option value="1"> 1 </option>
+              <option value="2"> 2 </option>
+              <option value="3"> 3 </option>
+              <option value="4"> 4 </option>
+            </select>
+          </p>
+        </fieldset>
+      </div>
+    </div>
+
+    <!-- 情報 -->
+    <aside>
+      <label for="solvelog"> 手筋フロー </label> <br>
+      <textarea name="solvelog" id="solvelog" cols="40" rows="15" readonly>
+      </textarea>
+      <p>難易度：<span class="difficulty">？？？</span></p>
+    </aside>
+
+  </main>
+
+
+  <h2>操作方法</h2>
+
+
+  <footer>
+    <p><a href="../index.html">トップに戻る</a></p>
+    <small> Copyright 2021~. Subaru Saito, All Rights Reserved. </small>
+  </footer>

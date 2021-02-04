@@ -1,0 +1,54 @@
+@charset "utf-8";
+
+
+/**
+ * ページ全体の設定
+ */
+body {
+  background-color: #ccffff;
+  width: 600px;
+  margin: 0px auto;
+}
+
+footer {
+  background-color: #333333;
+  color: #ffffff;
+  padding: 12px;
+  text-align: right;
+}
+footer a {
+  color: #ffffff;
+}
+
+
+/** 
+ * レイアウト設定
+ */
+canvas {
+  float: left;
+}
+aside {
+  clear: both;
+}
+
+
+
+/**
+ * キャンバス
+ */
+canvas {
+  background-color: white;
+}
+
+
+/**
+ * ボタン
+ */
+
+
+/**
+ * 手筋ログ
+ */
+textarea#solvelog {
+  resize: none;
+}

@@ -8,27 +8,138 @@
   <meta name="author" content="Subaru Saito">
   <meta name="description" content="Sudoku analyzer tool">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <!-- fonts-->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+  <!-- static assets -->
   <link rel="stylesheet" href="css/sudokizer.css">
   <script src="js/front.js" defer></script>
 </head>
 
 
 <body>
-  <h1> Sudokizer </h1>
+  <header>
+    <div id="header_in">
+      <h1> Sudokizer </h1>
+      <p>数独作成支援ツール</p>
+      <p><a href="#">操作方法</a></p>
+    </div>
+  </header>
   
-  <p>数独アナライザー</p>
-
   <main>
 
     <!-- 上部のメニュー -->
     <div id="main_wrapper">
       <menu>
         <ul>
-        <li>ファイル</li>
-        <li>編集</li>
-        <li>表示</li>
-        <li>その他</li>
+          <li id="menu_file_p" class="top_menu dropdown_p">ファイル
+            <ul class="dropdown_c">
+              <li class="topmenu_item last_item" id="menu_newfile">新規作成
+                <form class="dropdown_cc">
+                  <p>新規作成しますか？</p>
+                  <input type="button" id="menu_newfile_ok" value="OK">
+                </form>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_urlwrite">URL出力
+                <ul class="dropdown_cc last_item_ul">
+                  <li id="menu_urlwrite_puzpre" class="menu_urlwrite_link">ぱずぷれ形式</li>
+                  <li id="menu_urlwrite_puzzlink" class="menu_urlwrite_link">puzzlink形式</li>
+                </ul>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_imgwrite">画像出力
+                <form class="dropdown_cc">
+                  <div>ファイル名</div>
+                  <input type="text" id="menu_imgwrite_filename" placeholder="sudoku.png">
+                  <input type="button" id="menu_imgwrite_ok" value="OK">
+                </form>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_pbread">pencilBox読込
+                <form class="dropdown_cc">
+                  <input type="file" id="menu_pbread_fileform">
+                  <input type="button" id="menu_pbread_ok" value="OK">
+                </form>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_pbwrite">pencilBox出力
+                <form class="dropdown_cc">
+                  <div>ファイル名</div>
+                  <input type="text" id="menu_pbwrite_filename" placeholder="sudoku.png">
+                  <input type="button" id="menu_pbwrite_ok" value="OK">
+                </form>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_txtread">テキスト読込
+                <form class="dropdown_cc">
+                  <input type="file" id="menu_txtread_fileform">
+                  <input type="button" id="menu_txtread_ok" value="OK">
+                </form>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_txtwrite">テキスト出力
+                <form class="dropdown_cc">
+                  <div>ファイル名</div>
+                  <input type="text" id="menu_txtwrite_filename" placeholder="sudoku.png">
+                  <input type="button" id="menu_txtwrite_ok" value="OK">
+                </form>
+              </li>
+              
+            </ul>
+          </li>
+          
+          <li id="menu_edit_p" class="top_menu dropdown_p">編集
+            <ul class="dropdown_c">
+              <li class="topmenu_item last_item" id="menu_boardcopy">盤面の複製</li>
+              <li class="topmenu_item dropdown_cp" id="menu_boardtrans">盤面の変形
+                <ul class="dropdown_cc last_item_ul">
+                  <li>90度右回転</li>
+                  <li>180度回転</li>
+                  <li>90度左回転</li>
+                  <li>上下反転</li>
+                  <li>左右反転</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+
+          <li id="menu_edit_p" class="top_menu dropdown_p">表示
+            <ul class="dropdown_c">
+              <li class="topmenu_item dropdown_cp" id="menu_dispsize">表示サイズ
+                <form class="dropdown_cc">
+                  <input type="number" id="menu_dispsize_size" min="8" max="64" step="1" value="32">
+                  <input type="button" id="menu_dispsize_ok" value="OK">
+                </form>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_dispfont">フォント
+                <ul class="dropdown_cc last_item_ul">
+                  <li id="font_gothic">ゴシック体</li>
+                  <li id="font_mincho">明朝体</li>
+                </ul>
+              </li>
+              <li class="topmenu_item dropdown_cp" id="menu_dispcolor">表示色
+                <form class="dropdown_cc">
+                  <input type="color" id="menu_dispcolor_bg" value="#ffffff">
+                  <label for="menu_discolor_bg">背景色</label>
+                  <input type="color" id="menu_dispcolor_bg" value="#000000">
+                  <label for="menu_discolor_bg">ヒント</label>
+                  <input type="color" id="menu_dispcolor_bg" value="#00ff00">
+                  <label for="menu_discolor_bg">入力</label>
+                  <input type="color" id="menu_dispcolor_bg" value="#ff0000">
+                  <label for="menu_discolor_bg">除外候補</label>
+                  <input type="color" id="menu_dispcolor_bg" value="#00ff88">
+                  <label for="menu_discolor_bg">第一仮定</label>
+                  <input type="color" id="menu_dispcolor_bg" value="#00ffff">
+                  <label for="menu_discolor_bg">第二仮定</label>
+                  <input type="color" id="menu_dispcolor_bg" value="#0088ff">
+                  <label for="menu_discolor_bg">第三仮定</label>
+                  <input type="color" id="menu_dispcolor_bg" value="#0000ff">
+                  <label for="menu_discolor_bg">第四仮定</label>
+                </form>
+              </li>
+            </ul>
+          </li>
+
+          <li id="menu_other_p" class="top_menu dropdown_p">その他
+            <ul class="dropdown_c">
+              <li class="topmenu_item last_item" id="menu_debugmode">デバッグモード</li>
+            </ul>
+          </li>
         </ul>
       </menu>
 
@@ -40,39 +151,61 @@
         </canvas>
       
         <!-- ボタン -->
-        <fieldset>
-          <legend>操作</legend>
-          <p>
-            <label for="qmode">問題モード</label>
-            <input type="radio" name="modeselect" id="qmode" checked> 
-          </p>
-          <p>
-            <label for="amode">解答モード</label>
-            <input type="radio" name="modeselect" id="amode">
-          </p>
-          <p>
-            <label for="kmode">候補モード</label>
-            <input type="checkbox" name="kmode" id="kmode">
-          </p>
-          <input type="button" name="undo" id="undo" value="戻">
-          <input type="button" name="redo" id="redo" value="進">
-          <input type="button" name="ansclear" id="ansclear" value="解答消去">
-          <input type="button" name="kouhoclear" id="kouhoclear" value="候補消去">
-          <input type="button" name="anscheck" id="anscheck" value="チェック">
-          <input type="button" name="autokouho" id="autokouho" value="自動候補入力">
-          <input type="button" name="stepsolve" id="stepsolve" value="&gt;">
-          <input type="button" name="autosolve" id="autosolve" value="&gt;&gt;">
-          <p>
-            <label for="kateilevel">仮定レベル</label>
-            <select name="kateilevel" id="kateilevel">
-              <option value="0"> なし </option>
-              <option value="1"> 1 </option>
-              <option value="2"> 2 </option>
-              <option value="3"> 3 </option>
-              <option value="4"> 4 </option>
-            </select>
-          </p>
-        </fieldset>
+        <div id="opform">
+          <!-- <legend >操作</legend> -->
+          <fieldset id="inputmode_form">
+            <legend>入力モード</legend>
+            <div id="inputmode_form_switch">
+              <input type="radio" name="modeselect" id="qmode" checked> 
+              <label for="qmode">問題</label>
+              <input type="radio" name="modeselect" id="amode">
+              <label for="amode">解答</label>
+            </div>
+            <div id="inputmode_form_kouho">
+              <input type="checkbox" name="kmode" id="kmode">
+              <label for="kmode">候補入力</label>
+            </div>
+          </fieldset>
+
+          <fieldset id="edit_form">
+            <legend>編集</legend>
+            <div id="edit_form_undoredo">
+              <input type="button" name="undo" id="undo" value="戻る">
+              <br>
+              <input type="button" name="redo" id="redo" value="進む">
+            </div>
+            <div id="edit_form_clear">
+              <input type="button" name="ansclear" id="ansclear" value="解答消去">
+              <br>
+              <input type="button" name="kouhoclear" id="kouhoclear" value="候補消去">
+            </div>
+            <div id="edit_form_kateilevel">
+              <select name="kateilevel" id="kateilevel">
+                <option value="0"> なし </option>
+                <option value="1"> 1 </option>
+                <option value="2"> 2 </option>
+                <option value="3"> 3 </option>
+                <option value="4"> 4 </option>
+              </select>
+              <label for="kateilevel">仮定レベル</label>
+            </div>
+          </fieldset>
+          
+          <fieldset id="support_form">
+            <legend>制作支援</legend>
+            <!-- 
+              <input type="button" name="anscheck" id="anscheck" value="解答チェック"> 
+             -->
+            <input type="button" name="autokouho" id="autokouho" value="自動候補入力">
+            <br>
+            <input type="button" name="stepsolve" id="stepsolve" value="&nbsp;&gt;&nbsp;" title="1ステップ解答">
+            <label>1ステップ解答</label>
+            <br>
+            <input type="button" name="autosolve" id="autosolve" value="&gt;&gt;" title="全回答">
+            <label>自動解答</label>
+          </fieldset>
+        </div>
+
       </div>
     </div>
 
@@ -86,11 +219,13 @@
 
   </main>
 
-
-  <h2>操作方法</h2>
-
-
   <footer>
-    <p><a href="../index.html">トップに戻る</a></p>
-    <small> Copyright 2021~. Subaru Saito, All Rights Reserved. </small>
+    <div id="footer_in">
+      <p><a href="../index.html">トップに戻る</a></p>
+      <small> Copyright 2021~. Subaru Saito, All Rights Reserved. </small>
+    </div>
   </footer>
+
+</body>
+
+</html>

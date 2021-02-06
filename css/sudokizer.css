@@ -6,10 +6,38 @@
  */
 body {
   background-color: #ccffff;
-  width: 600px;
   margin: 0px auto;
 }
-
+header, footer {
+  background-color: #333333;
+  width: 100%;
+  min-width: 600px;
+  color: #ffffff;
+}
+main, #header_in, #footer_in{
+  width: 600px;
+  margin: 0 auto;
+}
+h1 {
+  margin: 0px;
+  padding: 30px 30px 0px;
+  font-family: 'Audiowide', cursive;
+  font-weight: normal;
+  font-size: 3em;
+}
+h1::first-letter {
+  color: rgb(65, 183, 223);
+}
+header p {
+  text-align: right;
+  margin: 0;
+}
+header a:link {
+  color: lightblue;
+}
+header a:visited {
+  color: plum;
+}
 footer {
   background-color: #333333;
   color: #ffffff;
@@ -19,6 +47,7 @@ footer {
 footer a {
   color: #ffffff;
 }
+
 
 
 /** 
@@ -34,17 +63,143 @@ aside {
 
 
 /**
+ * 画面上部メニュー部分
+ */
+menu {
+  padding: 0px;
+}
+menu ul {
+  list-style-type: none;
+  padding: 5px 20px 5px;
+  margin: 0px;
+}
+li.top_menu {
+  display: inline-block;
+  width: 120px;
+  box-sizing: border-box;
+  background-color: #cccccc;
+  border-bottom: 2px solid black;
+  text-align: center;
+  padding: 5px 15px;
+}
+ul.dropdown_c {
+  text-align: left;
+  padding: 5px 0px;
+  width: 8em;
+}
+li.topmenu_item {
+  margin: 2px 0px;
+  padding: 0px 5px;
+}
+.dropdown_cc {
+  text-align: center;
+  width: 16em;
+  overflow-x: auto;
+}
+
+/*　メニューのホバー設定 */
+.dropdown_p, .dropdown_cp {
+  position: relative;
+}
+.dropdown_c, .dropdown_cc {
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.5s;
+  background-color: #dddddd;
+  border: 1px solid black;
+  border-radius: 8px;
+}
+.dropdown_p:hover > .dropdown_c {
+  visibility: visible;
+  opacity: 1;
+}
+.dropdown_cp:hover > .dropdown_cc {
+  visibility: visible;
+  opacity: 1;
+}
+.dropdown_c {
+  top: 100%;
+  left: 0px;
+}
+.dropdown_cc {
+  padding: 5px;
+  left: 50%;
+}
+
+/* メニューホバー時の背景色変更 */
+.dropdown_p:hover {
+  background-color: #52d5fd;
+  text-decoration: underline;
+}
+.dropdown_cp:hover {
+  background-color: #52d5fd;
+  text-decoration: underline;
+}
+.last_item_ul li:hover, .last_item:hover{
+  background-color: #52d5fd;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+/* サブメニュー独自のCSS */
+#menu_urlwrite .dropdown_cc {
+  width: 7em;
+}
+#menu_boardtrans .dropdown_cc {
+  width: 6em;
+  text-align: left;
+}
+#menu_dispsize .dropdown_cc {
+  width: 8em;
+}
+#menu_dispfont .dropdown_cc {
+  width: 7em;
+  text-align: left;
+}
+#menu_dispcolor .dropdown_cc {
+  width: 8em;
+  text-align: left;
+}
+
+
+
+
+/**
  * キャンバス
  */
 canvas {
   background-color: white;
+  margin: 10px;
 }
 
 
 /**
- * ボタン
+ * ボタン部分
  */
-
+div#opform {
+  width: 200px;
+  overflow-x: auto;
+}
+fieldset {
+  padding: 5px;
+  margin: 5px 0px;
+  width: 160px;
+}
+#edit_form_undoredo {
+  float: left;
+  margin-right: 10px;
+}
+#edit_form_clear {
+}
+#edit_form_kateilevel {
+  clear: left;
+  margin: 10px 0px 5px;
+}
+fieldset#support_form input {
+  margin: 5px 0px;
+}
 
 /**
  * 手筋ログ

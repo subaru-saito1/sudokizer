@@ -1,58 +1,78 @@
 @charset "utf-8";
 
 
-/**
+/** =====================================
  * ページ全体の設定
  */
-body {
+body {              /* ページ全体の設定 */
   background-color: #ccffff;
-  margin: 0px auto;
-}
-header, footer {
-  background-color: #333333;
   width: 100%;
-  min-width: 600px;
+  margin: 0px;
+}
+header, footer {    /* ヘッダとフッタの背景設定 */
+  background-color: #333333;
+  padding: 12px;
   color: #ffffff;
 }
-main, #header_in, #footer_in{
-  width: 600px;
+main, #header_in, #footer_in{    /* 全体のセンタリング */
   margin: 0 auto;
 }
-h1 {
+h1 {                /* タイトル */
   margin: 0px;
-  padding: 30px 30px 0px;
+  padding: 15px 30px 0px;
   font-family: 'Audiowide', cursive;
   font-weight: normal;
   font-size: 3em;
 }
-h1::first-letter {
+h1::first-letter {  /* タイトルの1文字目を青に */
   color: rgb(65, 183, 223);
 }
-header p {
+/* ヘッダとフッタの設定 */
+header p, footer p {
   text-align: right;
-  margin: 0;
+  margin: 5px;
 }
-header a:link {
+header a:link, footer a:link { 
   color: lightblue;
 }
-header a:visited {
+header a:visited, footer a:visited {
   color: plum;
 }
-footer {
-  background-color: #333333;
-  color: #ffffff;
-  padding: 12px;
-  text-align: right;
+/* メイン部分設定 */
+#main_wrapper {    /* センタリング */
+  margin: 0 auto;
 }
-footer a {
-  color: #ffffff;
+main {
+  min-height: 
 }
 
 
 
-/** 
- * レイアウト設定
+/** ==================================================
+ *   全体レイアウト設定　レスポンシブ対応
+ *   サイズ指定などの部分はここで実行
  */
+
+/* 650px以上：PCデフォルト設定 */
+main, #header_in, #footer_in {
+  min-width: 600px;
+  max-width: 800px;
+}
+main {
+  min-height: 75vh;
+}
+footer {
+  min-height: 10vh;
+}
+#main_wrapper {
+  display: table;
+  margin: 0 auto;
+}
+li.top_menu {   /* トップめひゅーのボタン幅 */
+  display: inline-block;
+  box-sizing: border-box;
+  width: 120px;
+}
 canvas {
   float: left;
 }
@@ -60,13 +80,33 @@ aside {
   clear: both;
 }
 
+/* 400px ~ 650px以下 */
+@media screen and (max-width: 600px) {
+  main, #header_in, #footer_in {
+    min-width: 400px;
+    max-width: 600px;
+  }
+}
+
+/* 350px ~ 400px  350pxは無視 */
+@media screen and (max-width: 400px) {
+  main, #header_in, #footer_in {
+    min-width: 350px;
+    max-width: 400px;
+  }
+}
+
+
+
 
 
 /**
  * 画面上部メニュー部分
  */
 menu {
+  display: table;
   padding: 0px;
+  margin: 10px auto 5px;
 }
 menu ul {
   list-style-type: none;
@@ -74,11 +114,10 @@ menu ul {
   margin: 0px;
 }
 li.top_menu {
-  display: inline-block;
-  width: 120px;
-  box-sizing: border-box;
-  background-color: #cccccc;
-  border-bottom: 2px solid black;
+  /* background-color: #cccccc; */
+  background-image: linear-gradient(#eeeeee, #aaaaaa);
+  border-bottom: 5px solid rgb(53, 135, 230);
+  box-shadow: 1px 1px 3px #777777;
   text-align: center;
   padding: 5px 15px;
 }
@@ -86,6 +125,12 @@ ul.dropdown_c {
   text-align: left;
   padding: 5px 0px;
   width: 8em;
+  background-image: linear-gradient(to right, #eeeeee, #aaaaaa);
+  box-shadow: 3px 3px 3px #777777;
+}
+.dropdown_cc {
+  background-image: linear-gradient(#eeeeee, #aaaaaa);
+  box-shadow: 3px 3px 3px #777777;
 }
 li.topmenu_item {
   margin: 2px 0px;
@@ -107,7 +152,6 @@ li.topmenu_item {
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.5s;
-  background-color: #dddddd;
   border: 1px solid black;
   border-radius: 8px;
 }

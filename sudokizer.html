@@ -13,7 +13,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
   <!-- static assets -->
   <link rel="stylesheet" href="css/sudokizer.css">
-  <script src="js/front.js" defer></script>
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"><</script>
+  <script defer src="js/init.js"></script>
+  <script defer src="js/front.js"></script>
+  <script defer src="js/main.js"></script>
 </head>
 
 
@@ -170,13 +173,16 @@
           <fieldset id="inputmode_form">
             <legend>入力モード</legend>
             <div id="inputmode_form_switch">
-              <input type="radio" name="modeselect" id="qmode" checked> 
+              <input type="radio" name="modeselect" id="qmode" checked
+                     title="問題入力モードに移行します。F2で切り替え可能です。"> 
               <label for="qmode">問題</label>
-              <input type="radio" name="modeselect" id="amode">
+              <input type="radio" name="modeselect" id="amode"
+                     title="解答入力モードに移行します。F2で切り替え可能です。">
               <label for="amode">解答</label>
             </div>
             <div id="inputmode_form_kouho">
-              <input type="checkbox" name="kmode" id="kmode">
+              <input type="checkbox" name="kmode" id="kmode"
+                     title="候補入力モードに移行します。Shiftで切り替え可能です">
               <label for="kmode">候補入力</label>
             </div>
           </fieldset>
@@ -184,17 +190,22 @@
           <fieldset id="edit_form">
             <legend>編集</legend>
             <div id="edit_form_undoredo">
-              <input type="button" name="undo" id="undo" value="戻る">
+              <input type="button" name="undo" id="undo" value="戻る"
+                     title="操作を一つ戻します">
               <br>
-              <input type="button" name="redo" id="redo" value="進む">
+              <input type="button" name="redo" id="redo" value="進む"
+                     title="操作を一つ進めます">
             </div>
             <div id="edit_form_clear">
-              <input type="button" name="ansclear" id="ansclear" value="解答消去">
+              <input type="button" name="ansclear" id="ansclear" value="解答消去"
+                     title="解答と候補を消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
               <br>
-              <input type="button" name="kouhoclear" id="kouhoclear" value="候補消去">
+              <input type="button" name="kouhoclear" id="kouhoclear" value="候補消去"
+                     title="候補のみ消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
             </div>
             <div id="edit_form_kateilevel">
-              <select name="kateilevel" id="kateilevel">
+              <select name="kateilevel" id="kateilevel"
+                      title="仮置きの深さを設定します。">
                 <option value="0"> なし </option>
                 <option value="1"> 1 </option>
                 <option value="2"> 2 </option>
@@ -208,15 +219,19 @@
           <fieldset id="support_form">
             <legend>制作支援</legend>
             <!-- 
-              <input type="button" name="anscheck" id="anscheck" value="解答チェック"> 
+              <input type="button" name="anscheck" id="anscheck" value="解答チェック"
+                   title="現在の解答が正しいかどうかチェックします">
              -->
-            <input type="button" name="autokouho" id="autokouho" value="自動候補入力">
+            <input type="button" name="autokouho" id="autokouho" value="自動候補入力"
+                   title="候補数字を全て洗い出します">
             <br>
-            <input type="button" name="stepsolve" id="stepsolve" value="&nbsp;&gt;&nbsp;" title="1ステップ解答">
-            <label>1ステップ解答</label>
+            <input type="button" name="autogen" id="autogen" value="半自動生成"
+                   title="?ヒントを埋めて一意解のパズルを生成します（?ヒントが6個以下の場合のみ）">
             <br>
-            <input type="button" name="autosolve" id="autosolve" value="&gt;&gt;" title="全回答">
-            <label>自動解答</label>
+            <input type="button" name="stepsolve" id="stepsolve" value="&nbsp;&gt;&nbsp;"
+                   title="1ステップ解答">
+            <input type="button" name="autosolve" id="autosolve" value="&gt;&gt;"
+                   title="全回答。解の個数も一緒に調べます。">
           </fieldset>
         </div>
       </div>

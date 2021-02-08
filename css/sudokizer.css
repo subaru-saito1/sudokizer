@@ -1,16 +1,24 @@
 @charset "utf-8";
 
+/** =====================================
+ * カラーリング設定
+ */
+:root {
+  --bgcolor: #ccffff;
+  --subcolor: #333333;
+}
+
 
 /** =====================================
  * ページ全体の設定
  */
 body {              /* ページ全体の設定 */
-  background-color: #ccffff;
+  background-color: var(--bgcolor);
   width: 100%;
   margin: 0px;
 }
 header, footer {    /* ヘッダとフッタの背景設定 */
-  background-color: #333333;
+  background-color: var(--subcolor);
   padding: 12px;
   color: #ffffff;
 }
@@ -68,17 +76,43 @@ footer {
   display: table;
   margin: 0 auto;
 }
-li.top_menu {   /* トップめひゅーのボタン幅 */
-  display: inline-block;
+li.top_menu {   /* トップメニューのボタン幅 */
   box-sizing: border-box;
   width: 120px;
 }
+
+/* floatで暫定的に対応 */
 canvas {
   float: left;
+  margin: 10px;
 }
-aside {
+#opform {
+  float: left;
+  padding: 0px;
+}
+#sub_wrapper::after {
+  content: "";
   clear: both;
+  display: table;
 }
+
+aside {
+  margin: 10px;
+}
+aside::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+#solvelog {
+  float: left;
+  margin: 10px;
+}
+#puzzleinfo {
+  float: left;
+  padding-top: 30px;
+}
+
 
 /* 400px ~ 650px以下 */
 @media screen and (max-width: 600px) {
@@ -100,24 +134,31 @@ aside {
 
 
 
-/**
+/** =============================================
  * 画面上部メニュー部分
+ * 全部CSSでポップアップさせるので結構長い
  */
 menu {
   display: table;
   padding: 0px;
   margin: 10px auto 5px;
 }
+#menu_header {
+  background-color: var(--subcolor);
+  color: white;
+  padding-left: 10px;
+  box-shadow: 1px 1px 5px #777777;
+}
 menu ul {
   list-style-type: none;
-  padding: 5px 20px 5px;
+  padding: 0px;
   margin: 0px;
 }
 li.top_menu {
-  /* background-color: #cccccc; */
+  display: table-cell;
   background-image: linear-gradient(#eeeeee, #aaaaaa);
   border-bottom: 5px solid rgb(53, 135, 230);
-  box-shadow: 1px 1px 3px #777777;
+  box-shadow: 1px 1px 5px #777777;
   text-align: center;
   padding: 5px 15px;
 }
@@ -174,22 +215,35 @@ li.topmenu_item {
 
 /* メニューホバー時の背景色変更 */
 .dropdown_p:hover {
-  background-color: #52d5fd;
+  /* background-color: #52d5fd; */
+  background-image: linear-gradient(#c1eaf7, #52d5fd);
   text-decoration: underline;
+  cursor: pointer;
 }
 .dropdown_cp:hover {
-  background-color: #52d5fd;
+  background-image: linear-gradient(to right, #c1eaf7, #52d5fd);
   text-decoration: underline;
+  cursor: pointer;
+}
+.dropdown_cc:hover {
+  cursor: text;
 }
 .last_item_ul li:hover, .last_item:hover{
-  background-color: #52d5fd;
+  background-image: linear-gradient(#c1eaf7, #52d5fd);
   text-decoration: underline;
   font-weight: bold;
+  cursor: pointer;
 }
 
 /* サブメニュー独自のCSS */
 #menu_urlwrite .dropdown_cc {
   width: 7em;
+}
+#menu_imgwrite .dropdown_cc, 
+#menu_pbwrite .dropdown_cc,
+#menu_txtwrite .dropdown_cc {
+  width: 10em;
+  cursor: text;
 }
 #menu_boardtrans .dropdown_cc {
   width: 6em;
@@ -209,13 +263,12 @@ li.topmenu_item {
 
 
 
-
 /**
  * キャンバス
  */
 canvas {
   background-color: white;
-  margin: 10px;
+  
 }
 
 
@@ -248,6 +301,6 @@ fieldset#support_form input {
 /**
  * 手筋ログ
  */
-textarea#solvelog {
+textarea#solvelog_form {
   resize: none;
 }

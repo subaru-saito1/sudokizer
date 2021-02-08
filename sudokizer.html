@@ -13,7 +13,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
   <!-- static assets -->
   <link rel="stylesheet" href="css/sudokizer.css">
-  <script src="js/front.js" defer></script>
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"><</script>
+  <script defer src="js/init.js"></script>
+  <script defer src="js/front.js"></script>
+  <script defer src="js/main.js"></script>
 </head>
 
 
@@ -25,57 +28,65 @@
       <p><a href="#">操作方法</a></p>
     </div>
   </header>
-  
   <main>
-
     <!-- 上部のメニュー -->
     <div id="main_wrapper">
       <menu>
+        <div id="menu_header">メニュー</div>
         <ul>
           <li id="menu_file_p" class="top_menu dropdown_p">ファイル
             <ul class="dropdown_c">
-              <li class="topmenu_item last_item" id="menu_newfile">新規作成
+              <li class="topmenu_item last_item" id="menu_newfile"
+                  title="今の盤面を破棄して新しい数独の盤面を作成します。">新規作成
                 <form class="dropdown_cc">
                   <p>新規作成しますか？</p>
                   <input type="button" id="menu_newfile_ok" value="OK">
                 </form>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_urlwrite">URL出力
+              <li class="topmenu_item dropdown_cp" id="menu_urlwrite"
+                  title="現在の盤面をURL形式で出力します。">URL出力
                 <ul class="dropdown_cc last_item_ul">
-                  <li id="menu_urlwrite_puzpre" class="menu_urlwrite_link">ぱずぷれ形式</li>
-                  <li id="menu_urlwrite_puzzlink" class="menu_urlwrite_link">puzzlink形式</li>
+                  <li id="menu_urlwrite_puzpre" class="menu_urlwrite_link"
+                      title="ぱずぷれv3形式でURLを出力します。">ぱずぷれ形式</li>
+                  <li id="menu_urlwrite_puzzlink" class="menu_urlwrite_link"
+                      title="puzzlink形式でURLを出力します。">puzzlink形式</li>
                 </ul>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_imgwrite">画像出力
+              <li class="topmenu_item dropdown_cp" id="menu_imgwrite"
+                  title="現在の盤面をPNG画像形式で出力します。">画像出力
                 <form class="dropdown_cc">
                   <div>ファイル名</div>
-                  <input type="text" id="menu_imgwrite_filename" placeholder="sudoku.png">
+                  <input type="text" id="menu_imgwrite_filename" placeholder="sudoku.png" size="10">
                   <input type="button" id="menu_imgwrite_ok" value="OK">
                 </form>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_pbread">pencilBox読込
+              <li class="topmenu_item dropdown_cp" id="menu_pbread"
+                  title="pencilBox形式のデータを取り込みます。">pencilBox読込
                 <form class="dropdown_cc">
                   <input type="file" id="menu_pbread_fileform">
                   <input type="button" id="menu_pbread_ok" value="OK">
                 </form>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_pbwrite">pencilBox出力
+              <li class="topmenu_item dropdown_cp" id="menu_pbwrite"
+                  title="現在の盤面をpencilBox形式で出力します。">pencilBox出力
                 <form class="dropdown_cc">
                   <div>ファイル名</div>
-                  <input type="text" id="menu_pbwrite_filename" placeholder="sudoku.png">
+                  <input type="text" id="menu_pbwrite_filename" placeholder="sudoku.png" size="10">
                   <input type="button" id="menu_pbwrite_ok" value="OK">
                 </form>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_txtread">テキスト読込
+              <li class="topmenu_item dropdown_cp" id="menu_txtread"
+                  title="独自フォーマットのテキスト形式で読み込みます。">テキスト読込
                 <form class="dropdown_cc">
                   <input type="file" id="menu_txtread_fileform">
                   <input type="button" id="menu_txtread_ok" value="OK">
                 </form>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_txtwrite">テキスト出力
+              <li class="topmenu_item dropdown_cp" id="menu_txtwrite"
+                  title="現在の盤面を独自フォーマットのテキスト形式で出力します。">テキスト出力
                 <form class="dropdown_cc">
                   <div>ファイル名</div>
-                  <input type="text" id="menu_txtwrite_filename" placeholder="sudoku.png">
+                  <input type="text" id="menu_txtwrite_filename" placeholder="sudoku.png" size="10">
                   <input type="button" id="menu_txtwrite_ok" value="OK">
                 </form>
               </li>
@@ -85,14 +96,16 @@
           
           <li id="menu_edit_p" class="top_menu dropdown_p">編集
             <ul class="dropdown_c">
-              <li class="topmenu_item last_item" id="menu_boardcopy">盤面の複製</li>
-              <li class="topmenu_item dropdown_cp" id="menu_boardtrans">盤面の変形
+              <li class="topmenu_item last_item" id="menu_boardcopy"
+                  title="現在の盤面のコピーを新しいウィンドウで開きます。">盤面の複製</li>
+              <li class="topmenu_item dropdown_cp" id="menu_boardtrans"
+                  title="現在の盤面を回転、反転させます。">盤面の変形
                 <ul class="dropdown_cc last_item_ul">
-                  <li>90度右回転</li>
-                  <li>180度回転</li>
-                  <li>90度左回転</li>
-                  <li>上下反転</li>
-                  <li>左右反転</li>
+                  <li title="90度右に回転させます。">90度右回転</li>
+                  <li title="180度回転させます。">180度回転</li>
+                  <li title="90度左に回転させます。">90度左回転</li>
+                  <li title="上下逆に反転させます。">上下反転</li>
+                  <li title="左右逆に反転させます。">左右反転</li>
                 </ul>
               </li>
             </ul>
@@ -100,35 +113,38 @@
 
           <li id="menu_edit_p" class="top_menu dropdown_p">表示
             <ul class="dropdown_c">
-              <li class="topmenu_item dropdown_cp" id="menu_dispsize">表示サイズ
+              <li class="topmenu_item dropdown_cp" id="menu_dispsize"
+                  title="盤面の表示サイズ（一マスの大きさ）を設定します。">表示サイズ
                 <form class="dropdown_cc">
                   <input type="number" id="menu_dispsize_size" min="8" max="64" step="1" value="32">
                   <input type="button" id="menu_dispsize_ok" value="OK">
                 </form>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_dispfont">フォント
+              <li class="topmenu_item dropdown_cp" id="menu_dispfont"
+                  title="数字のフォントを設定します。">フォント
                 <ul class="dropdown_cc last_item_ul">
                   <li id="font_gothic">ゴシック体</li>
                   <li id="font_mincho">明朝体</li>
                 </ul>
               </li>
-              <li class="topmenu_item dropdown_cp" id="menu_dispcolor">表示色
+              <li class="topmenu_item dropdown_cp" id="menu_dispcolor"
+                  title="盤面の色設定を変更します。">表示色
                 <form class="dropdown_cc">
                   <input type="color" id="menu_dispcolor_bg" value="#ffffff">
                   <label for="menu_discolor_bg">背景色</label>
-                  <input type="color" id="menu_dispcolor_bg" value="#000000">
+                  <input type="color" id="menu_dispcolor_bg" value="#333333">
                   <label for="menu_discolor_bg">ヒント</label>
-                  <input type="color" id="menu_dispcolor_bg" value="#00ff00">
+                  <input type="color" id="menu_dispcolor_bg" value="#0066ff">
                   <label for="menu_discolor_bg">入力</label>
                   <input type="color" id="menu_dispcolor_bg" value="#ff0000">
                   <label for="menu_discolor_bg">除外候補</label>
-                  <input type="color" id="menu_dispcolor_bg" value="#00ff88">
+                  <input type="color" id="menu_dispcolor_bg" value="#00ff00">
                   <label for="menu_discolor_bg">第一仮定</label>
                   <input type="color" id="menu_dispcolor_bg" value="#00ffff">
                   <label for="menu_discolor_bg">第二仮定</label>
-                  <input type="color" id="menu_dispcolor_bg" value="#0088ff">
+                  <input type="color" id="menu_dispcolor_bg" value="#aa44ff">
                   <label for="menu_discolor_bg">第三仮定</label>
-                  <input type="color" id="menu_dispcolor_bg" value="#0000ff">
+                  <input type="color" id="menu_dispcolor_bg" value="#ff88ff">
                   <label for="menu_discolor_bg">第四仮定</label>
                 </form>
               </li>
@@ -137,7 +153,8 @@
 
           <li id="menu_other_p" class="top_menu dropdown_p">その他
             <ul class="dropdown_c">
-              <li class="topmenu_item last_item" id="menu_debugmode">デバッグモード</li>
+              <li class="topmenu_item last_item" id="menu_debugmode"
+                  title="（デバッグ用）コンソール出力をONにします。">デバッグモード</li>
             </ul>
           </li>
         </ul>
@@ -156,13 +173,16 @@
           <fieldset id="inputmode_form">
             <legend>入力モード</legend>
             <div id="inputmode_form_switch">
-              <input type="radio" name="modeselect" id="qmode" checked> 
+              <input type="radio" name="modeselect" id="qmode" checked
+                     title="問題入力モードに移行します。F2で切り替え可能です。"> 
               <label for="qmode">問題</label>
-              <input type="radio" name="modeselect" id="amode">
+              <input type="radio" name="modeselect" id="amode"
+                     title="解答入力モードに移行します。F2で切り替え可能です。">
               <label for="amode">解答</label>
             </div>
             <div id="inputmode_form_kouho">
-              <input type="checkbox" name="kmode" id="kmode">
+              <input type="checkbox" name="kmode" id="kmode"
+                     title="候補入力モードに移行します。Shiftで切り替え可能です">
               <label for="kmode">候補入力</label>
             </div>
           </fieldset>
@@ -170,17 +190,22 @@
           <fieldset id="edit_form">
             <legend>編集</legend>
             <div id="edit_form_undoredo">
-              <input type="button" name="undo" id="undo" value="戻る">
+              <input type="button" name="undo" id="undo" value="戻る"
+                     title="操作を一つ戻します">
               <br>
-              <input type="button" name="redo" id="redo" value="進む">
+              <input type="button" name="redo" id="redo" value="進む"
+                     title="操作を一つ進めます">
             </div>
             <div id="edit_form_clear">
-              <input type="button" name="ansclear" id="ansclear" value="解答消去">
+              <input type="button" name="ansclear" id="ansclear" value="解答消去"
+                     title="解答と候補を消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
               <br>
-              <input type="button" name="kouhoclear" id="kouhoclear" value="候補消去">
+              <input type="button" name="kouhoclear" id="kouhoclear" value="候補消去"
+                     title="候補のみ消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
             </div>
             <div id="edit_form_kateilevel">
-              <select name="kateilevel" id="kateilevel">
+              <select name="kateilevel" id="kateilevel"
+                      title="仮置きの深さを設定します。">
                 <option value="0"> なし </option>
                 <option value="1"> 1 </option>
                 <option value="2"> 2 </option>
@@ -194,35 +219,42 @@
           <fieldset id="support_form">
             <legend>制作支援</legend>
             <!-- 
-              <input type="button" name="anscheck" id="anscheck" value="解答チェック"> 
+              <input type="button" name="anscheck" id="anscheck" value="解答チェック"
+                   title="現在の解答が正しいかどうかチェックします">
              -->
-            <input type="button" name="autokouho" id="autokouho" value="自動候補入力">
+            <input type="button" name="autokouho" id="autokouho" value="自動候補入力"
+                   title="候補数字を全て洗い出します">
             <br>
-            <input type="button" name="stepsolve" id="stepsolve" value="&nbsp;&gt;&nbsp;" title="1ステップ解答">
-            <label>1ステップ解答</label>
+            <input type="button" name="autogen" id="autogen" value="半自動生成"
+                   title="?ヒントを埋めて一意解のパズルを生成します（?ヒントが6個以下の場合のみ）">
             <br>
-            <input type="button" name="autosolve" id="autosolve" value="&gt;&gt;" title="全回答">
-            <label>自動解答</label>
+            <input type="button" name="stepsolve" id="stepsolve" value="&nbsp;&gt;&nbsp;"
+                   title="1ステップ解答">
+            <input type="button" name="autosolve" id="autosolve" value="&gt;&gt;"
+                   title="全回答。解の個数も一緒に調べます。">
           </fieldset>
         </div>
-
       </div>
+
+      <!-- 情報 -->
+      <aside>
+        <div id="solvelog">
+          <label for="solvelog_form"> 手筋フロー </label> <br>
+          <textarea name="solvelog_form" id="solvelog_form" cols="45" rows="10" readonly>
+          </textarea>
+        </div>
+        <div id="puzzleinfo">
+          <div>難易度：<span class="difficulty">???</span></div>
+          <div>難易度計算値：??? pt</div>
+        </div>
+      </aside>
     </div>
-
-    <!-- 情報 -->
-    <aside>
-      <label for="solvelog"> 手筋フロー </label> <br>
-      <textarea name="solvelog" id="solvelog" cols="40" rows="15" readonly>
-      </textarea>
-      <p>難易度：<span class="difficulty">？？？</span></p>
-    </aside>
-
   </main>
 
   <footer>
     <div id="footer_in">
       <p><a href="../index.html">トップに戻る</a></p>
-      <small> Copyright 2021~. Subaru Saito, All Rights Reserved. </small>
+      <p><small> Copyright 2021~. Subaru Saito, All Rights Reserved. </small></p>
     </div>
   </footer>
 

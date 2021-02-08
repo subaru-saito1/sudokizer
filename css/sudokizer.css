@@ -209,9 +209,10 @@ li.topmenu_item {
   left: 0px;
 }
 .dropdown_cc {
-  padding: 5px;
+  padding: 10px;
   left: 50%;
 }
+
 
 /* メニューホバー時の背景色変更 */
 .dropdown_p:hover {
@@ -236,29 +237,32 @@ li.topmenu_item {
 }
 
 /* サブメニュー独自のCSS */
-#menu_urlwrite .dropdown_cc {
+#menu_urlwrite + .dropdown_cc {
   width: 7em;
 }
-#menu_imgwrite .dropdown_cc, 
-#menu_pbwrite .dropdown_cc,
-#menu_txtwrite .dropdown_cc {
+#menu_imgwrite + .dropdown_cc, 
+#menu_pbwrite + .dropdown_cc,
+#menu_txtwrite + .dropdown_cc {
   width: 10em;
   cursor: text;
 }
-#menu_boardtrans .dropdown_cc {
+#menu_boardtrans + .dropdown_cc {
   width: 6em;
   text-align: left;
+  left: 20%;
 }
-#menu_dispsize .dropdown_cc {
+#menu_dispsize + .dropdown_cc {
   width: 8em;
 }
-#menu_dispfont .dropdown_cc {
+#menu_dispfont + .dropdown_cc {
   width: 7em;
   text-align: left;
+  left: 25%;
 }
-#menu_dispcolor .dropdown_cc {
+#menu_dispcolor + .dropdown_cc {
   width: 8em;
   text-align: left;
+  left: 0%;
 }
 
 

@@ -55,6 +55,9 @@ class Board {
 
   /**
    * URL入力関数メインルーチン
+   * 
+   * @param url string: URLのクエリ部分
+   * this.board に変更あり
    */
   urlRead(url) {
     let urlparts = url.split('/');
@@ -103,6 +106,8 @@ class Board {
 
   /**
    * URL検証関数
+   * 
+   * @param urlparts array: URLを/で区切った結果の配列
    */
   urlValidate(urlparts) {
     if (urlparts.length <= 3) {

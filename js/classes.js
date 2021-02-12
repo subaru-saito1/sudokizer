@@ -39,18 +39,60 @@ class Board {
     }
   }
 
+
   /**
    * URL出力関数メインルーチン
+   * 
+   * @return string URLのクエリ部分
    */
   urlWrite() {
-    // ?以降の部分を生成
-    prefix = board['puzname'] + '/' + board['cols'] + '/' + board['rows'] + '/';
-    // boardの中身から読み取っていく処理
-    // ヒント数字は1,2,3,4,5,6,7,8,9
-    // ?ヒントは"." 
-    // 空白はg=1, h=2, i=3, ..., z=20 単位
-    // 解答と候補は無視
-    alert('URL Write');
+    let prefix = this.puzzlename + '/' + this.bsize + '/' + this.bsize + '/';
+    let urlpuz = '';  // パズル部分のURL
+    let spcnt = 0;    // 空白の連続数
+    // URLパズル部分の生成
+    for (let ci = 0; ci < this.numcells; ci++) {
+      let c = this.board[ci].num;
+      // 空白
+      if (c === '0') {
+        spcnt++;
+      } else {
+        // 空白の連続分を出力
+        urlpuz += this.urlWriteSpace(spcnt);
+        spcnt = 0;
+        // ヒント数字
+        if (c >= '1' && c <= '9') {
+          urlpuz += c;
+        // ?ヒント
+        } else if (c === '?') {
+          urlpuz += '.';
+        } else {
+          alert('内部URL出力エラー');
+          console.log(this.board);
+        }
+      }
+    }
+    urlpuz += this.urlWriteSpace(spcnt);
+    
+    return prefix + urlpuz;
+  }
+
+  /**
+   * 連続スペースに相当するパズルURL形式の文字列を出力
+   * 
+   * @param int spcnt 連続するスペースの個数
+   * @return string 空白部分の文字列
+   */
+  urlWriteSpace(spcnt) {
+    let urlpuz = '';
+    while (spcnt > 0) {
+      let tmp_spcnt = spcnt;
+      if (tmp_spcnt > 20) {
+        tmp_spcnt = 20;
+      }
+      urlpuz += String.fromCharCode(102 + tmp_spcnt);   // 102 = 'f'のこと
+      spcnt -= tmp_spcnt;
+    }
+    return urlpuz;
   }
 
   /**
@@ -125,6 +167,7 @@ class Board {
     return true;
   }
 
+  
 }
 
 

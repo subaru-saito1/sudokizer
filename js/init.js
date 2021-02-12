@@ -29,15 +29,12 @@ redraw();             // 初回描画
  * ページロード時の初期盤面作成
  */
 function initBoard() {
-  // 新規盤面生成
-  let board = new Board();
-  // URL取得
-  let urlparts = location.href.split('?');
+  let board = new Board();                  // 新規盤面作成
+  let urlparts = location.href.split('?');  // URL取得
   // URLのクエリ部分が空でなければ盤面生成
   if (urlparts.length > 1) {
     board.urlRead(urlparts[1]);
   }
-  
   return board;
 }
 

@@ -21,18 +21,20 @@ function newFile(evt) {
  * ぱずぷれURL出力
  */
 function urlWritePuzpre(evt) {
-  urlprefix = 'http://pzv.jp/p.html'
-  url = urlprefix + '?' + Sudokizer.board.urlWrite();
-  alert('URL write for puzpre: ' + url);
+  let urlprefix = 'http://pzv.jp/p.html'
+  let url = urlprefix + '?' + Sudokizer.board.urlWrite();
+  alert('URL write for puzpre: \n' + url);
+  console.log(url);
 }
 
 /**
  * puzzlink URL出力
  */
 function urlWritePuzzlink(evt) {
-  urlprefix = 'https://puzz.link/p'
-  url = urlprefix + '?' + Sudokizer.board.urlWrite();
-  alert('URL write for puzzlink: ' + url);
+  let urlprefix = 'https://puzz.link/p'
+  let url = urlprefix + '?' + Sudokizer.board.urlWrite();
+  alert('URL write for puzzlink: \n' + url);
+  console.log(url);
 }
 
 /**

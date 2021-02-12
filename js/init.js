@@ -1,3 +1,4 @@
+"use strict";
 
 /**
  * init.js
@@ -13,18 +14,15 @@
 // グローバル設定類はすべてこのオブジェクトに格納
 let Sudokizer = {};
 
+Sudokizer.bsize = 9;
 Sudokizer.astack = initActionStack();   // アクションスタック作成
 Sudokizer.board  = initBoard();         // 初期盤面の作成
 Sudokizer.config = initConfig();        // フォーム設定類
+console.log(Sudokizer.board);
+console.log(Sudokizer.config);
 
 setEventHandlers();   // イベントハンドラを仕掛ける
 redraw();             // 初回描画
-
-
-
-/**
- * クラス定義
- */
 
 
 /**
@@ -34,7 +32,8 @@ function initBoard() {
   // メモ
   // 1. Boardクラスのコンストラクタを呼び出して空盤面生成
   // 2. URLのGETパラメータがあればそこから盤面を構築する関数を呼び出す
-  return {'Board': 'OK'};
+  let board = new Board();
+  return board;
 }
 
 /**
@@ -152,5 +151,3 @@ function setEventHandlers() {
   $('#main_board').click(clickBoard);
   $('#main_board').keydown(keyDownBoard);
 }
-
-

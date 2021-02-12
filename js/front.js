@@ -133,17 +133,22 @@ function boardInverseLR(evt) {
  * 表示サイズ設定
  */
 function setCellSize(evt) {
-  alert('set cell size');
+  Sudokizer.config.dispsize = $('#menu_dispsize_size').val();
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * フォント設定
+ * フォント設定（なかった）
  */
+/*
 function setFont(evt) {
   alert('set font');
   redraw();
 }
+*/
 
 /**
  * 表示色設定
@@ -159,6 +164,7 @@ function setColor(evt) {
 function setColorDefault(evt) {
   // defcolorset を colorset に shallow copy
   Sudokizer.config.colorset = Object.assign({}, Sudokizer.config.defcolorset);
+  // フォーム側に色を反映
   alert('reste color settings');
   redraw();
 }
@@ -166,39 +172,47 @@ function setColorDefault(evt) {
 /* ============================= デバッグモード ============================= */
 
 /**
- * デバッグモード切替。完成。
+ * デバッグモード切替 ＜完成＞
  */
 function debugMode(evt) {
   Sudokizer.config.debugmode = !Sudokizer.config.debugmode;
-  alert('debug mode');
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
 }
 
 /* ============================= 入力モード設定 ============================== */
 
 /**
- * 問題入力モード
+ * 問題入力モード ＜完成＞
  */
 function setQMode(evt) {
   Sudokizer.config.qamode = 'question';
-  alert('Qmode')
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * 解答入力モード
+ * 解答入力モード ＜完成＞
  */
 function setAMode(evt) {
   Sudokizer.config.qamode = 'answer';
-  alert('Amode');
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * 候補入力モード
+ * 候補入力モード ＜完成＞
  */
 function switchKMode(evt) {
   Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
-  alert('Kmode');
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
@@ -243,10 +257,13 @@ function kouhoClear(evt) {
 }
 
 /**
- * 仮定レベル変更
+ * 仮定レベル変更 ＜完成＞
  */
 function setKateiLevel(evt) {
-  alert('katei Level');
+  Sudokizer.config.kateilevel = $('#opform_kateilevel').val();
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 

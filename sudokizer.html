@@ -125,14 +125,19 @@
                   <input type="button" id="menu_dispsize_ok" value="OK">
                 </form>
               </li>
+              <!--
               <li class="topmenu_item dropdown_cp" title="数字のフォントを設定します。">
                 <span id="menu_dispfont">フォント</span>
-                <ul class="dropdown_cc last_item_ul">
-                  <li id="menu_font1">ゴシック体</li>
-                  <li id="menu_font2">明朝体</li>
-                  <li id="menu_font3">メイリオ</li>
+                <ul class="dropdown_cc">
+                  <input type="radio" name="fontselect" id="menu_font1" value="meilio" checked> 
+                  <label for="menu_font1">メイリオ</label><br>
+                  <input type="radio" name="fontselect" id="menu_font2" value="mincyo"> 
+                  <label for="menu_font2">明朝</label><br>
+                  <input type="radio" name="fontselect" id="menu_font3" value="gothic"> 
+                  <label for="menu_font3">ゴシック</label><br>
                 </ul>
               </li>
+              -->
               <li class="topmenu_item dropdown_cp" title="盤面の色設定を変更します。">
                 <span id="menu_dispcolor">表示色</span>
                 <form class="dropdown_cc">
@@ -186,10 +191,10 @@
           <fieldset id="inputmode_form">
             <legend>入力モード</legend>
             <div id="inputmode_form_switch">
-              <input type="radio" name="modeselect" id="opform_qmode" checked
+              <input type="radio" name="modeselect" id="opform_qmode" value="question" checked
                      title="問題入力モードに移行します。F2で切り替え可能です。"> 
               <label for="opform_qmode">問題</label>
-              <input type="radio" name="modeselect" id="opform_amode"
+              <input type="radio" name="modeselect" id="opform_amode" value="answer"
                      title="解答入力モードに移行します。F2で切り替え可能です。">
               <label for="opform_amode">解答</label>
             </div>

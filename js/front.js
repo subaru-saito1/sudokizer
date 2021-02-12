@@ -334,6 +334,12 @@ function keyDownBoard(evt) {
 }
 
 
+
+/* ==============================================================
+ *                        盤面描画ルーチン
+ * =============================================================
+ */
+
 /**
  * 盤面再描画用呼び出しルーチン
  * Sudokizerの中身が変わった際に呼び出す実装
@@ -346,12 +352,13 @@ function redraw() {
  * 盤面のメイン描画ルーチン
  */
 function drawBoard(board) {
-  alert('darw Board');
-  // 設定に応じてcanvasかsvgか変更
+  // 設定に応じてcanvasかsvgかconsoleか変更
   if (Sudokizer.config.drawmedia === 'canvas') {
     drawBoardCanvas(board);
-  } else {
+  } else if (Sudokizer.config.drawmedia === 'svg') {
     drawBoardSVG(board);
+  } else {
+    drawBoardConsole(board);
   }
 }
 
@@ -365,6 +372,29 @@ function drawBoardCanvas(board) {
 /**
  * SVGへの描画
  */
-function darwBoardCanvas(board) {
+function drawBoardCanvas(board) {
   alert('draw Board SVG');
+}
+
+/**
+ * コンソールへの出力（デバッグ用）
+ */
+function drawBoardConsole(board) {
+  let line = '';
+  let horizon = ' +-------+-------+-------+';
+  for (let i = 0; i < board.numcells; i++) {
+    if (i % 27 === 0) {
+      console.log(horizon);
+    }
+    if (i % 3 === 0) {
+      line += ' |';
+    }
+    line += ' ' + board.board[i].num;
+    if (i % 9 === 8) {
+      line += ' |'
+      console.log(line);
+      line = '';
+    }
+  }
+  console.log(horizon);
 }

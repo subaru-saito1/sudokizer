@@ -52,8 +52,8 @@ function initConfig() {
     'qamode': 'question',
     'kouhomode': false,
     'kateilevel': 0,
-    'drawmedia': 'canvas',
-    'debugmode': false,
+    'drawmedia': 'console',      // 描画する要素 Canvas or svg or console?
+    'debugmode': false,         // デバッグモード
   };
 }
 

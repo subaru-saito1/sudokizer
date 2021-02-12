@@ -53,7 +53,6 @@ class Board {
     alert('URL Write');
   }
 
-  
   /**
    * URL入力関数メインルーチン
    */
@@ -68,7 +67,7 @@ class Board {
     let urlpuz = urlparts[3];
     let ci = 0;      // 今何番目のマスにいるか
     for (let c of urlpuz) {
-      // 超えていたら脱出
+      // マスの範囲を超えていたら脱出
       if (ci >= this.numcells) {
         break;
       }
@@ -77,11 +76,11 @@ class Board {
         this.board[ci].num = c;
         this.board[ci].ishint = true;
         ci++;
-
       // 連続空白
       } else if (c >= 'g' && c <= 'z') {
         let cs = c.charCodeAt(0) - 'g'.charCodeAt(0) + 1;
-        if (ci + cs >= this.numcells) {  // オーバーする場合は不正、脱出
+        // オーバーする場合はそのまま脱出
+        if (ci + cs >= this.numcells) {  
           break;
         }
         for (; cs > 0; cs--) {
@@ -96,7 +95,7 @@ class Board {
         ci++;
       // それ以外の不正な記号
       } else {
-        alert('パズルのフォーマットが不正です');
+        alert('URLのパズルフォーマットが不正です');
         break;
       }
     }
@@ -107,15 +106,15 @@ class Board {
    */
   urlValidate(urlparts) {
     if (urlparts.length <= 3) {
-      alert('不正なURLクエリです');
+      alert('URLクエリが不正です');
       return false;
     }
     if (urlparts[0] !== this.puzzlename) {
-      alert('不正なパズル名です');
+      alert('URLのパズル名が不正です');
       return false;
     }
     if (urlparts[1] !== String(this.bsize) || urlparts[2] != String(this.bsize)) {
-      alert('不正なサイズ指定です');
+      alert('URLの盤面サイズが不正です');
       return false;
     }
     return true;

@@ -21,14 +21,18 @@ function newFile(evt) {
  * ぱずぷれURL出力
  */
 function urlWritePuzpre(evt) {
-  alert('URL write for puzpre');
+  urlprefix = 'http://pzv.jp/p.html'
+  url = urlprefix + '?' + Sudokizer.board.urlWrite();
+  alert('URL write for puzpre: ' + url);
 }
 
 /**
  * puzzlink URL出力
  */
 function urlWritePuzzlink(evt) {
-  alert('URL write for puzzlink');
+  urlprefix = 'https://puzz.link/p'
+  url = urlprefix + '?' + Sudokizer.board.urlWrite();
+  alert('URL write for puzzlink: ' + url);
 }
 
 /**
@@ -69,32 +73,6 @@ function easyTextRead(evt) {
 function easyTextWrite(evt) {
   alert('easytext write');
 }
-
-
-/**
- * URL出力関数メインルーチン
- */
-function urlWrite(board) {
-  // ?以降の部分を生成
-  prefix = board['puzname'] + '/' + board['cols'] + '/' + board['rows'] + '/';
-  // boardの中身から読み取っていく処理
-  // ヒント数字は1,2,3,4,5,6,7,8,9
-  // ?ヒントは"." 
-  // 空白はg=1, h=2, i=3, ..., z=20 単位
-  // 解答と候補は無視
-  alert('URL Write');
-}
-
-/**
- * URL入力関数メインルーチン
- */
-function urlRead(urlstring) {
-  // 1. ?の後ろのみ取り出す
-  // 2. 3つ目の/以降を取り出す
-  // 3. urlWriteと逆の処理でboardを生成
-}
-
-
 
 
 /* =========================== 盤面変換系 ================================= */

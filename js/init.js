@@ -29,10 +29,15 @@ redraw();             // 初回描画
  * ページロード時の初期盤面作成
  */
 function initBoard() {
-  // メモ
-  // 1. Boardクラスのコンストラクタを呼び出して空盤面生成
-  // 2. URLのGETパラメータがあればそこから盤面を構築する関数を呼び出す
+  // 新規盤面生成
   let board = new Board();
+  // URL取得
+  let urlparts = location.href.split('?');
+  // URLのクエリ部分が空でなければ盤面生成
+  if (urlparts.length > 1) {
+    board.urlRead(urlparts[1]);
+  }
+  
   return board;
 }
 

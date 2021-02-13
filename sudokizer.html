@@ -121,7 +121,7 @@
               <li class="topmenu_item dropdown_cp" title="盤面の表示サイズ（一マスの大きさ）を設定します。">
                 <span id="menu_dispsize">表示サイズ</span>
                 <form class="dropdown_cc">
-                  <input type="number" id="menu_dispsize_size" min="8" max="64" step="1" value="36">
+                  <input type="number" id="menu_dispsize_size" min="16" max="64" step="1" value="36">
                   <input type="button" id="menu_dispsize_ok" value="OK">
                 </form>
               </li>
@@ -145,7 +145,7 @@
                   <label for="menu_dispcolor_bg">背景色</label>
                   <input type="color" id="menu_dispcolor_ht" value="#333333">
                   <label for="menu_dispcolor_ht">ヒント</label>
-                  <input type="color" id="menu_dispcolor_in" value="#0066ff">
+                  <input type="color" id="menu_dispcolor_l0" value="#0066ff">
                   <label for="menu_dispcolor_in">入力</label>
                   <input type="color" id="menu_dispcolor_ex" value="#ff0000">
                   <label for="menu_dispcolor_ex">除外候補</label>
@@ -176,11 +176,10 @@
 
       <div id="sub_wrapper">
 
-        <!-- Canvas盤面（無効化
+        <!-- Canvas盤面（無効化）-->
         <canvas id="main_board" width="350" height="350">
           canvasタグ未対応です。
         </canvas>
-        -->
         <!-- SVG盤面 
         <svg id="main_board" width="350" height="350">
         </svg>

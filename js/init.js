@@ -46,8 +46,8 @@ function initConfig() {
   let colorset = {
     'bg': $('#menu_dispcolor_bg').val(),
     'ht': $('#menu_dispcolor_ht').val(),
-    'in': $('#menu_dispcolor_in').val(),
     'ex': $('#menu_dispcolor_ex').val(),
+    'l0': $('#menu_dispcolor_l0').val(),
     'l1': $('#menu_dispcolor_l1').val(),
     'l2': $('#menu_dispcolor_l2').val(),
     'l3': $('#menu_dispcolor_l3').val(),
@@ -66,7 +66,8 @@ function initConfig() {
     'kouhomode': $('#opform_kmode').prop('checked'),
     // 仮定レベル スイッチ
     'kateilevel': $('#opform_kateilevel').val(),
-    'drawmedia': 'console',      // 描画する要素 Canvas or svg or console?
+    'drawmedia': 'canvas',      // 描画する要素 Canvas or svg or console?
+    'drawpadding': 13,            // 描画時のパディング
     'debugmode': false,         // デバッグモード
   };
 }

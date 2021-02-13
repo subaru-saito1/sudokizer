@@ -130,7 +130,7 @@ function boardInverseLR(evt) {
 /* ============================= 表示設定系 ================================ */
 
 /**
- * 表示サイズ設定
+ * 表示サイズ設定 ＜完成＞
  */
 function setCellSize(evt) {
   Sudokizer.config.dispsize = $('#menu_dispsize_size').val();
@@ -151,21 +151,34 @@ function setFont(evt) {
 */
 
 /**
- * 表示色設定
+ * 表示色設定 ＜完成＞
  */
 function setColor(evt) {
-  alert('set color');
+  // 変化があった要素を特定。thisでとってこれる。
+  let aftercolor = $(this).val();
+  let propname = $(this).attr('id').substr(-2);
+  Sudokizer.config.colorset[propname] = aftercolor;
+  // デバッグモード
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * 色設定デフォルト
+ * 色設定デフォルト ＜完成＞
  */
 function setColorDefault(evt) {
   // defcolorset を colorset に shallow copy
   Sudokizer.config.colorset = Object.assign({}, Sudokizer.config.defcolorset);
   // フォーム側に色を反映
-  alert('reste color settings');
+  for (let propname in Sudokizer.config.colorset) {
+    $('#menu_dispcolor_' + propname).val(Sudokizer.config.colorset[propname]);
+  }
+  // デバッグモード
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
@@ -355,7 +368,9 @@ function drawBoard(board) {
   } else if (Sudokizer.config.drawmedia === 'svg') {
     drawBoardSVG(board);
   } else {
-    drawBoardConsole(board);
+    if (Sudokizer.config.debugmode) {
+      drawBoardConsole(board);
+    }
   }
 }
 
@@ -369,7 +384,7 @@ function drawBoardCanvas(board) {
 /**
  * SVGへの描画
  */
-function drawBoardCanvas(board) {
+function drawBoardSVG(board) {
   alert('draw Board SVG');
 }
 

@@ -66,7 +66,7 @@ function initConfig() {
     'kouhomode': $('#opform_kmode').prop('checked'),
     // 仮定レベル スイッチ
     'kateilevel': $('#opform_kateilevel').val(),
-    'drawmedia': 'canvas',      // 描画する要素 Canvas or svg or console?
+    'drawmedia': 'console',      // 描画する要素 Canvas or svg or console?
     'debugmode': false,         // デバッグモード
   };
 }

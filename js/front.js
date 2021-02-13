@@ -130,75 +130,102 @@ function boardInverseLR(evt) {
 /* ============================= 表示設定系 ================================ */
 
 /**
- * 表示サイズ設定
+ * 表示サイズ設定 ＜完成＞
  */
 function setCellSize(evt) {
-  alert('set cell size');
+  Sudokizer.config.dispsize = $('#menu_dispsize_size').val();
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * フォント設定
+ * フォント設定（なかった）
  */
+/*
 function setFont(evt) {
   alert('set font');
   redraw();
 }
+*/
 
 /**
- * 表示色設定
+ * 表示色設定 ＜完成＞
  */
 function setColor(evt) {
-  alert('set color');
+  // 変化があった要素を特定。thisでとってこれる。
+  let aftercolor = $(this).val();
+  let propname = $(this).attr('id').substr(-2);
+  Sudokizer.config.colorset[propname] = aftercolor;
+  // デバッグモード
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * 色設定デフォルト
+ * 色設定デフォルト ＜完成＞
  */
 function setColorDefault(evt) {
   // defcolorset を colorset に shallow copy
   Sudokizer.config.colorset = Object.assign({}, Sudokizer.config.defcolorset);
-  alert('reste color settings');
+  // フォーム側に色を反映
+  for (let propname in Sudokizer.config.colorset) {
+    $('#menu_dispcolor_' + propname).val(Sudokizer.config.colorset[propname]);
+  }
+  // デバッグモード
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /* ============================= デバッグモード ============================= */
 
 /**
- * デバッグモード切替。完成。
+ * デバッグモード切替 ＜完成＞
  */
 function debugMode(evt) {
   Sudokizer.config.debugmode = !Sudokizer.config.debugmode;
-  alert('debug mode');
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
 }
 
 /* ============================= 入力モード設定 ============================== */
 
 /**
- * 問題入力モード
+ * 問題入力モード ＜完成＞
  */
 function setQMode(evt) {
   Sudokizer.config.qamode = 'question';
-  alert('Qmode')
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * 解答入力モード
+ * 解答入力モード ＜完成＞
  */
 function setAMode(evt) {
   Sudokizer.config.qamode = 'answer';
-  alert('Amode');
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
 /**
- * 候補入力モード
+ * 候補入力モード ＜完成＞
  */
 function switchKMode(evt) {
   Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
-  alert('Kmode');
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
@@ -243,10 +270,13 @@ function kouhoClear(evt) {
 }
 
 /**
- * 仮定レベル変更
+ * 仮定レベル変更 ＜完成＞
  */
 function setKateiLevel(evt) {
-  alert('katei Level');
+  Sudokizer.config.kateilevel = $('#opform_kateilevel').val();
+  if (Sudokizer.config.debugmode) {
+    console.log(Sudokizer.config);
+  }
   redraw();
 }
 
@@ -338,7 +368,9 @@ function drawBoard(board) {
   } else if (Sudokizer.config.drawmedia === 'svg') {
     drawBoardSVG(board);
   } else {
-    drawBoardConsole(board);
+    if (Sudokizer.config.debugmode) {
+      drawBoardConsole(board);
+    }
   }
 }
 
@@ -352,7 +384,7 @@ function drawBoardCanvas(board) {
 /**
  * SVGへの描画
  */
-function drawBoardCanvas(board) {
+function drawBoardSVG(board) {
   alert('draw Board SVG');
 }
 

@@ -42,18 +42,30 @@ function initBoard() {
  * グローバル設定オブジェクトの作成
  */
 function initConfig() {
-
-  let colorset = {'bg': '#ffffff'}   // 色設定をHTMLから取得
+  // 色情報を取得
+  let colorset = {
+    'bg': $('#menu_dispcolor_bg').val(),
+    'ht': $('#menu_dispcolor_ht').val(),
+    'in': $('#menu_dispcolor_in').val(),
+    'ex': $('#menu_dispcolor_ex').val(),
+    'l1': $('#menu_dispcolor_l1').val(),
+    'l2': $('#menu_dispcolor_l2').val(),
+    'l3': $('#menu_dispcolor_l3').val(),
+    'l4': $('#menu_dispcolor_l4').val(),
+  }
   const defcolorset = Object.assign({}, colorset);
 
   return {
-    'dispsize': 32,
-    'dispfont': 'ゴシック体',
-    'colorset': colorset,
-    'defcolorset': defcolorset,
-    'qamode': 'question',
-    'kouhomode': false,
-    'kateilevel': 0,
+    'dispsize': $('#menu_dispsize_size').val(),
+    'dispfont': 'メイリオ',      // 暫定
+    'colorset': colorset,       // 色設定
+    'defcolorset': defcolorset, // デフォルト色設定
+    // 問題/解答入力モード スイッチ
+    'qamode': $('input:radio[name="modeselect"]:checked').val(),
+    // 候補入力モード フラグ
+    'kouhomode': $('#opform_kmode').prop('checked'),
+    // 仮定レベル スイッチ
+    'kateilevel': $('#opform_kateilevel').val(),
     'drawmedia': 'console',      // 描画する要素 Canvas or svg or console?
     'debugmode': false,         // デバッグモード
   };
@@ -109,7 +121,7 @@ function setEventHandlers() {
   // 表示サイズ
   $('#menu_dispsize_ok').click(setCellSize);
   // フォント
-  $('[id^="menu_font"]').click(setFont);
+  // $('[id^="menu_font"]').change(setFont);
   // 色設定
   $('[id^="menu_dispcolor"]').change(setColor);
   // 色設定デフォルト
@@ -119,11 +131,11 @@ function setEventHandlers() {
 
   // -------- 右フォーム：入力モード --------
   // 問題入力モード
-  $('#opform_qmode').click(setQMode);
+  $('#opform_qmode').change(setQMode);
   // 解答入力モード
-  $('#opform_amode').click(setAMode);
+  $('#opform_amode').change(setAMode);
   // 候補入力モード
-  $('#opform_kmode').click(switchKMode);
+  $('#opform_kmode').change(switchKMode);
   
   // -------- 右フォーム：編集 --------
   // アンドゥ

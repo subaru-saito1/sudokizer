@@ -82,7 +82,7 @@ li.top_menu {   /* トップメニューのボタン幅 */
 }
 
 /* floatで暫定的に対応 */
-canvas {
+#main_board {
   float: left;
   margin: 10px;
 }
@@ -270,9 +270,8 @@ li.topmenu_item {
 /**
  * キャンバス
  */
-canvas {
+#main_board {
   background-color: white;
-  
 }
 
 

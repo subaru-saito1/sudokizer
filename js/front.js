@@ -133,7 +133,17 @@ function boardInverseLR(evt) {
  * 表示サイズ設定 ＜完成＞
  */
 function setCellSize(evt) {
-  Sudokizer.config.dispsize = $('#menu_dispsize_size').val();
+  let sizeobj = $('#menu_dispsize_size');
+  let csize = sizeobj.val();
+  // 有効範囲にいる場合のみ変更
+  if (csize >= sizeobj.attr('min') && csize <= sizeobj.attr('max')) {
+    Sudokizer.config.dispsize = csize;
+    // canvasサイズ変更
+    let boardsize = Sudokizer.config.drawpadding * 2 + csize * Sudokizer.board.bsize;
+    $('#main_board').attr('width', boardsize);
+    $('#main_board').attr('height', boardsize);
+  }
+  // デバッグモード
   if (Sudokizer.config.debugmode) {
     console.log(Sudokizer.config);
   }
@@ -355,58 +365,13 @@ function keyDownBoard(evt) {
  * Sudokizerの中身が変わった際に呼び出す実装
  */
 function redraw() {
-  drawBoard(Sudokizer.board);
-}
-
-/**
- * 盤面のメイン描画ルーチン
- */
-function drawBoard(board) {
-  // 設定に応じてcanvasかsvgかconsoleか変更
   if (Sudokizer.config.drawmedia === 'canvas') {
-    drawBoardCanvas(board);
+    Sudokizer.board.drawBoardCanvas();
   } else if (Sudokizer.config.drawmedia === 'svg') {
-    drawBoardSVG(board);
+    Sudokizer.board.drawBoardSVG();
   } else {
     if (Sudokizer.config.debugmode) {
-      drawBoardConsole(board);
+      Sudokizer.board.drawBoardConsole();
     }
   }
-}
-
-/**
- * canvasへの描画
- */
-function drawBoardCanvas(board) {
-  alert('draw Board Canvas');
-}
-
-/**
- * SVGへの描画
- */
-function drawBoardSVG(board) {
-  alert('draw Board SVG');
-}
-
-/**
- * コンソールへの出力（デバッグ用）
- */
-function drawBoardConsole(board) {
-  let line = '';
-  let horizon = ' +-------+-------+-------+';
-  for (let i = 0; i < board.numcells; i++) {
-    if (i % 27 === 0) {
-      console.log(horizon);
-    }
-    if (i % 3 === 0) {
-      line += ' |';
-    }
-    line += ' ' + board.board[i].num;
-    if (i % 9 === 8) {
-      line += ' |'
-      console.log(line);
-      line = '';
-    }
-  }
-  console.log(horizon);
 }

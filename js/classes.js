@@ -13,9 +13,10 @@
  */
 class Cell {
   constructor() {
-    this.num = '0';          // 空白
+    this.num = '0';        // 空白
     this.ishint = false;   // ヒントフラグ
     this.qhint = false;    // ?ヒントフラグ
+    this.klevel = 0;       // 仮定レベル
     this.kouho = [];       // 候補リスト
     this.exkouho = [];     // 除外候補リスト
     for (let i = 0; i < Sudokizer.bsize; i++) {
@@ -166,8 +167,151 @@ class Board {
     }
     return true;
   }
-
   
+
+  /**
+   * canvasへの描画
+   */
+  drawBoardCanvas() {
+    let canvas = document.querySelector('#main_board');
+    let ctx = canvas.getContext('2d');
+    let ofs = Sudokizer.config.drawpadding;
+    let csize = Sudokizer.config.dispsize;
+    let allsize = ofs * 2 + csize * this.bsize;  // 全体のサイズ
+
+    // 背景描画
+    ctx.fillStyle = Sudokizer.config.colorset.bg;
+    ctx.fillRect(0, 0, allsize, allsize);
+    ctx.fillStyle = "black";
+    // セルの描画
+    for (let i = 0; i < this.bsize; i++) {
+      for (let j = 0; j < this.bsize; j++) {
+        ctx.strokeRect(ofs + csize * j, ofs + csize * i, csize, csize);
+      }
+    }
+    // 境界線描画
+    ctx.lineWidth = 3;
+    let csqrt = Math.sqrt(this.bsize);
+    for (let i = 0; i < csqrt; i++) {
+      for (let j = 0; j < csqrt; j++) {
+        ctx.strokeRect(ofs + csize * j * csqrt, ofs + csize * i * csqrt,
+                       csize * csqrt, csize * csqrt);
+      }
+    }
+    ctx.lineWidth = 1;
+    // テキスト描画
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    this.drawBoardCanvasTexts(ctx, ofs, csize);
+    // カーソル描画
+    // 問題 or 解答 or 候補で色分け
+  }
+
+  /**
+   * canvasへの描画：ヒント数字と候補数字の部分
+   * @param object ctx  : 描画コンテキスト
+   * @param int ofs  : 盤面描画オフセット
+   * @param int csize: セルの大きさ
+   */
+  drawBoardCanvasTexts(ctx, ofs, csize) {
+    for (let i = 0; i < this.bsize; i++) {
+      for (let j = 0; j < this.bsize; j++) {
+        let cid = i * this.bsize + j;
+        let ofsx = ofs + j * csize;
+        let ofsy = ofs + i * csize;
+        let fontsize = csize / 1.2;
+        // ヒントマス
+        if (this.board[cid].ishint) {
+          // ヒント数字
+          ctx.fillStyle = Sudokizer.config.colorset.ht;
+          if (this.board[cid].num !== '0') {
+            ctx.font = fontsize + 'px sans-serif';
+            ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
+          }
+          // 除外候補数字 (?ヒントマスのみ)
+          ctx.fillStyle = Sudokizer.config.colorset.ex;
+          if (this.board[cid].num === '?') {
+            this.drawBoardCanvasKouho(ctx, this.board[cid].kouho, ofsx, ofsy, csize, true)
+          }
+        // 通常マス
+        } else {
+          ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].klevel];
+          // 入力数字（非ヒントの入力済みマス）
+          if (this.board[cid].num !== '0') {
+            ctx.font = fontsize + 'px sans-serif';;
+            ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
+          // 候補数字（非ヒントの空白マス）
+          } else {
+            this.drawBoardCanvasKouho(ctx, this.board[cid].kouho, ofsx, ofsy, csize, false)
+          }
+        }
+      }
+    }
+    ctx.fillStyle = "black";
+  }
+
+  /**
+   * canvasへの候補数字の描画
+   * @param object ctx : 描画コンテキスト
+   * @param array kouho: 候補のブール配列
+   * @param int ofsx   : 横方向マスオフセット
+   * @param int ofsy   : 縦方向マスオフセット
+   * @param int csize  : セルサイズ
+   * @param bool exflg : 除外候補かどうかのフラグ
+   */
+  drawBoardCanvasKouho(ctx, kouho, ofsx, ofsy, csize, exflg) {
+    let fontsize = csize / 3.5;         
+    let csqrt = Math.sqrt(this.bsize);  // 3
+
+    ctx.font = fontsize + 'px sans-serif';;
+    for (let ki = 0; ki < csqrt; ki++) {
+      for (let kj = 0; kj < csqrt; kj++) {
+        let k = ki * csqrt + kj;
+        // k番目の候補がONだった場合、候補を所定位置に表示
+        if (kouho[k]) {
+          let posx = ofsx + (csize / csqrt) * (kj + 0.5);    // フォントx座標
+          let posy = ofsy + (csize / csqrt) * (ki + 0.5);   // フォントy座標
+          ctx.fillText(k + 1, posx, posy);
+          // 除外候補の場合は斜線を引く
+          if (exflg) {
+            ctx.fillText('＼', posx, posy);
+          }
+        }
+      }
+    }
+  }
+
+
+  /**
+   * SVGへの描画
+   */
+  drawBoardSVG() {
+    alert('draw Board SVG');
+  }
+
+  /**
+   * コンソールへの出力（デバッグ用）
+   */
+  drawBoardConsole() {
+    let line = '';
+    let horizon = ' +-------+-------+-------+';
+    for (let i = 0; i < this.numcells; i++) {
+      if (i % 27 === 0) {
+        console.log(horizon);
+      }
+      if (i % 3 === 0) {
+        line += ' |';
+      }
+      line += ' ' + this.board[i].num;
+      if (i % 9 === 8) {
+        line += ' |'
+        console.log(line);
+        line = '';
+      }
+    }
+    console.log(horizon);
+  }
+
 }
 
 

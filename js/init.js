@@ -166,4 +166,11 @@ function setEventHandlers() {
   // -------------- Canvas --------------
   $('#main_board').click(clickBoard);
   $('body').keydown(keyDownBoard);
+
+  // -------- ページ離脱時の警告 ----------
+  window.addEventListener('beforeunload', function(evt) {
+    let msg = '変更が失われますが、よろしいですか？';
+    evt.returnValue = msg;
+    return msg;
+  })
 }

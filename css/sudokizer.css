@@ -64,7 +64,7 @@ main {
 /* 650px以上：PCデフォルト設定 */
 main, #header_in, #footer_in {
   min-width: 600px;
-  max-width: 800px;
+  max-width: 850px;
 }
 main {
   min-height: 75vh;

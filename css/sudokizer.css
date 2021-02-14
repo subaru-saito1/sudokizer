@@ -241,8 +241,7 @@ li.topmenu_item {
   width: 7em;
 }
 #menu_imgwrite + .dropdown_cc, 
-#menu_pbwrite + .dropdown_cc,
-#menu_txtwrite + .dropdown_cc {
+#menu_pbwrite + .dropdown_cc {
   width: 10em;
   cursor: text;
 }

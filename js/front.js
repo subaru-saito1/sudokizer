@@ -65,22 +65,6 @@ function pencilBoxWrite(evt) {
   alert('pencilBox Write');
 }
 
-/**
- * 独自テキスト形式読み込み
- */
-function easyTextRead(evt) {
-  alert('easytext read');
-  // Sudokizer.astack.push(action);
-}
-
-/**
- * 独自テキスト形式出力
- */
-function easyTextWrite(evt) {
-  alert('easytext write');
-}
-
-
 /* =========================== 盤面変換系 ================================= */
 
 /**

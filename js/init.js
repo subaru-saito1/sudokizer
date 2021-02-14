@@ -100,10 +100,6 @@ function setEventHandlers() {
   $('#menu_pbread_ok').click(pencilBoxRead);
   // pencilbox出力
   $('#menu_pbwrite_ok').click(pencilBoxWrite);
-  // テキスト読み込み
-  $('#menu_txtread_ok').click(easyTextRead);
-  // テキスト書き込み
-  $('#menu_txtwrite_ok').click(easyTextWrite);
   
   // -------- メインメニュー：編集 ----------
   // 盤面の複製
@@ -122,8 +118,6 @@ function setEventHandlers() {
   // -------- メインメニュー：表示 --------
   // 表示サイズ
   $('#menu_dispsize_ok').click(setCellSize);
-  // フォント
-  // $('[id^="menu_font"]').change(setFont);
   // 色設定
   $('[id^="menu_dispcolor"]').change(setColor);
   // 色設定デフォルト

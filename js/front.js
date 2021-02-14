@@ -350,7 +350,6 @@ function allSolve(evt) {
  * 盤面へのクリック
  */
 function clickBoard(evt) {
-  // alert('board clicked');
   console.log(evt);
   // Sudokizer.astack.push(action);
 }
@@ -358,8 +357,35 @@ function clickBoard(evt) {
  * 盤面へのキーボード押下
  */
 function keyDownBoard(evt) {
-  alert('keyboard downed');
-  console.log(evt);
+  let cursorKeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  let numKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+  // カーソル移動
+  if (cursorKeys.includes(evt.key)) {
+    evt.preventDefault();   // 矢印キーでの画面移動無効化
+    console.log('CURSOR:', evt.key);
+  }
+  // 数字入力
+  if (numKeys.includes(evt.key)) {
+    console.log('NUMBER:', evt.key);
+  }
+  // ？ヒント入力
+  if (evt.key === '-') {
+    console.log('? hint');
+  }
+  // スペース入力
+  if (evt.key === ' ') {
+    evt.preventDefault();   // 画面移動無効化
+    console.log('space');
+  }
+  // 問題解答スイッチ
+  if (evt.key === 'F2') {
+    console.log('QA switch');
+  }
+  // 候補スイッチ
+  if (evt.key === 'Shift') {
+    console.log('kouho switch');
+  }
   // Sudokizer.astack.push(action);
 }
 

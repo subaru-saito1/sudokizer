@@ -350,24 +350,37 @@ function clickBoard(evt) {
 function keyDownBoard(evt) {
   let cursorKeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   let numKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  let cpos = Sudokizer.config.cursorpos;
 
   // カーソル移動
   if (cursorKeys.includes(evt.key)) {
     evt.preventDefault();   // 矢印キーでの画面移動無効化
-    console.log('CURSOR:', evt.key);
+    keyDownCursorMove(cpos, evt.key);
   }
   // 数字入力
   if (numKeys.includes(evt.key)) {
-    console.log('NUMBER:', evt.key);
+    keyDownNumInput(cpos, evt.key);
   }
-  // ？ヒント入力
+  // ？ヒント入力（問題モードのみ）
   if (evt.key === '-') {
-    console.log('? hint');
+    if (Sudokizer.config.qamode === 'question') {
+      if (Sudokizer.board.board[cpos].num === '?') {
+        Sudokizer.board.board[cpos].num = '0';
+        Sudokizer.board.board[cpos].ishint = false;
+      } else {
+        Sudokizer.board.board[cpos].num = '?';
+        Sudokizer.board.board[cpos].ishint = true;
+      }
+    }
   }
-  // スペース入力
+  // スペース入力：マスの中身削除
   if (evt.key === ' ') {
     evt.preventDefault();   // 画面移動無効化
-    console.log('space');
+    if (Sudokizer.config.qamode === 'question') {
+      Sudokizer.board.board[cpos].clear('question');
+    } else {
+      Sudokizer.board.board[cpos].clear('answer');
+    }
   }
   // 問題解答スイッチ
   if (evt.key === 'F2') {
@@ -380,7 +393,6 @@ function keyDownBoard(evt) {
       $('#opform_qmode').prop("checked", true);
       $('#opform_amode').prop("checked", false);
     }
-    redraw();
   }
   // 候補スイッチ
   if (evt.key === 'Shift') {
@@ -392,12 +404,79 @@ function keyDownBoard(evt) {
     } else {
       $('#opform_kmode').prop("checked", true);
     }
-    redraw();
   }
+  redraw();
   // Sudokizer.astack.push(action);
 }
 
+/**
+ * 矢印キーによるカーソル移動
+ * @param int cpos: 現在のカーソル位置
+ * @param string keycode: キーボードのコード
+ */
+function keyDownCursorMove(cpos, keycode) {
+  let bs = Sudokizer.board.bsize;  // 9
+  // 上
+  if (keycode === 'k' || keycode === 'ArrowUp') {
+    if (Math.floor(cpos / bs) !== 0) {
+      Sudokizer.config.cursorpos = cpos - bs;
+    }
+  }
+  // 下
+  if (keycode === 'j' || keycode === 'ArrowDown') {
+    if (Math.floor(cpos / bs) !== bs - 1) {
+      Sudokizer.config.cursorpos = cpos + bs;
+    }
+  }
+  // 左
+  if (keycode === 'h' || keycode === 'ArrowLeft') {
+    if (cpos % bs !== 0) {
+      Sudokizer.config.cursorpos = cpos - 1;
+    }
+  }
+  // 右
+  if (keycode === 'l' || keycode === 'ArrowRight') {
+    if (cpos % bs !== bs - 1) {
+      Sudokizer.config.cursorpos = cpos + 1;
+    }
+  }
+}
 
+/**
+ * 数字キーによる数字入力
+ * @param int cpos: 現在のカーソル位置
+ * @param string keycode: 入力されたキー
+ */
+function keyDownNumInput(cpos, keycode) {
+  // 通常数字入力
+  if (!Sudokizer.config.kouhomode) {
+    // 問題モード：ヒントON
+    if (Sudokizer.config.qamode === 'question') {
+      Sudokizer.board.board[cpos].num = keycode;
+      Sudokizer.board.board[cpos].ishint = true;
+    // 解答モード：ヒントじゃない場合に入力、仮定レベル設定
+    } else {
+      if (!Sudokizer.board.board[cpos].ishint) {
+        Sudokizer.board.board[cpos].num = keycode;
+        Sudokizer.board.board[cpos].klevel = Sudokizer.config.kateilevel;
+      }
+    }
+  // 候補数字入力
+  } else {
+    // 問題モード：？ヒントの場合、除外候補を設定
+    if (Sudokizer.config.qamode === 'question') {
+      if (Sudokizer.board.board[cpos].ishint && Sudokizer.board.board[cpos].num === '?') {
+        Sudokizer.board.board[cpos].exkouho[keycode - 1] = 
+          !Sudokizer.board.board[cpos].exkouho[keycode - 1];
+      }
+    // 解答モード：候補数字を設定
+    } else {
+      if (!Sudokizer.board.board[cpos].ishint && Sudokizer.board.board[cpos].num === '0')
+      Sudokizer.board.board[cpos].kouho[keycode - 1] = 
+        !Sudokizer.board.board[cpos].kouho[keycode - 1];
+    }
+  }
+}
 
 /* ==============================================================
  *                        盤面描画ルーチン

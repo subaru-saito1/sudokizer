@@ -165,5 +165,5 @@ function setEventHandlers() {
 
   // -------------- Canvas --------------
   $('#main_board').click(clickBoard);
-  $('#main_board').keydown(keyDownBoard);
+  $('body').keydown(keyDownBoard);
 }

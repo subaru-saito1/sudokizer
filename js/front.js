@@ -215,9 +215,6 @@ function debugMode(evt) {
  */
 function setQMode(evt) {
   Sudokizer.config.qamode = 'question';
-  if (Sudokizer.config.debugmode) {
-    console.log(Sudokizer.config);
-  }
   redraw();
 }
 
@@ -226,9 +223,6 @@ function setQMode(evt) {
  */
 function setAMode(evt) {
   Sudokizer.config.qamode = 'answer';
-  if (Sudokizer.config.debugmode) {
-    console.log(Sudokizer.config);
-  }
   redraw();
 }
 
@@ -237,9 +231,6 @@ function setAMode(evt) {
  */
 function switchKMode(evt) {
   Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
-  if (Sudokizer.config.debugmode) {
-    console.log(Sudokizer.config);
-  }
   redraw();
 }
 
@@ -380,11 +371,28 @@ function keyDownBoard(evt) {
   }
   // 問題解答スイッチ
   if (evt.key === 'F2') {
-    console.log('QA switch');
+    if (Sudokizer.config.qamode === 'question') {
+      Sudokizer.config.qamode = 'answer';
+      $('#opform_qmode').prop("checked", false);
+      $('#opform_amode').prop("checked", true);
+    } else {
+      Sudokizer.config.qamode = 'question';
+      $('#opform_qmode').prop("checked", true);
+      $('#opform_amode').prop("checked", false);
+    }
+    redraw();
   }
   // 候補スイッチ
   if (evt.key === 'Shift') {
-    console.log('kouho switch');
+    Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
+    // UIの方も連動して状態を変更する
+    let chk_status = $('#opform_kmode').prop("checked");
+    if (chk_status) {
+      $('#opform_kmode').prop("checked", false);
+    } else {
+      $('#opform_kmode').prop("checked", true);
+    }
+    redraw();
   }
   // Sudokizer.astack.push(action);
 }

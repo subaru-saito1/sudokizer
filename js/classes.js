@@ -182,7 +182,7 @@ class Board {
     // 背景描画
     ctx.fillStyle = Sudokizer.config.colorset.bg;
     ctx.fillRect(0, 0, allsize, allsize);
-    ctx.fillStyle = "black";
+    ctx.strokeStyle = "black";
     // セルの描画
     for (let i = 0; i < this.bsize; i++) {
       for (let j = 0; j < this.bsize; j++) {
@@ -204,7 +204,7 @@ class Board {
     ctx.textBaseline = 'middle';
     this.drawBoardCanvasTexts(ctx, ofs, csize);
     // カーソル描画
-    // 問題 or 解答 or 候補で色分け
+    this.drawBoardCanvasCursor(ctx, ofs, csize);
   }
 
   /**
@@ -225,7 +225,7 @@ class Board {
           // ヒント数字
           ctx.fillStyle = Sudokizer.config.colorset.ht;
           if (this.board[cid].num !== '0') {
-            ctx.font = fontsize + 'px sans-serif';
+            ctx.font = fontsize + 'px ' + Sudokizer.config.dispfont;
             ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
           }
           // 除外候補数字 (?ヒントマスのみ)
@@ -238,7 +238,7 @@ class Board {
           ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].klevel];
           // 入力数字（非ヒントの入力済みマス）
           if (this.board[cid].num !== '0') {
-            ctx.font = fontsize + 'px sans-serif';;
+            ctx.font = fontsize + 'px ' + Sudokizer.config.dispfont;
             ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
           // 候補数字（非ヒントの空白マス）
           } else {
@@ -279,6 +279,33 @@ class Board {
         }
       }
     }
+  }
+
+  /**
+   * canvasへのカーソルの描画
+   * @param object ctx : 描画コンテキスト
+   * @param int ofs    : 盤面のオフセット
+   * @param int csize  : マスのサイズ
+   */
+  drawBoardCanvasCursor(ctx, ofs, csize) {
+    let cpos = Sudokizer.config.cursorpos;
+    let cx = cpos % this.bsize;
+    let cy = Math.floor(cpos / this.bsize);
+
+    ctx.lineWidth = 2;
+    if (Sudokizer.config.qamode === 'question') {   // 問題モード
+      ctx.strokeStyle = Sudokizer.config.colorset.ex;
+    } else {                                        // 解答モード
+      ctx.strokeStyle = Sudokizer.config.colorset['l' + Sudokizer.config.kateilevel];
+    }
+    if (Sudokizer.config.kouhomode) {  // 候補モード：点線
+      ctx.setLineDash([5, 3]);
+    }
+    ctx.strokeRect(ofs + cx * csize + 2, ofs + cy * csize + 2, csize - 4, csize - 4);
+    // 各種描画プロパティを元に戻す
+    ctx.setLineDash([]); 
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
   }
 
 

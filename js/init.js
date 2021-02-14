@@ -56,10 +56,11 @@ function initConfig() {
   const defcolorset = Object.assign({}, colorset);
 
   return {
-    'dispsize': $('#menu_dispsize_size').val(),
-    'dispfont': 'メイリオ',      // 暫定
-    'colorset': colorset,       // 色設定
-    'defcolorset': defcolorset, // デフォルト色設定
+    'cursorpos': 0,                              // カーソル位置
+    'dispsize': $('#menu_dispsize_size').val(),  // マスのサイズ
+    'dispfont': 'sans-serif',                    // 暫定
+    'colorset': colorset,                        // 色設定
+    'defcolorset': defcolorset,                  // デフォルト色設定
     // 問題/解答入力モード スイッチ
     'qamode': $('input:radio[name="modeselect"]:checked').val(),
     // 候補入力モード フラグ
@@ -67,7 +68,7 @@ function initConfig() {
     // 仮定レベル スイッチ
     'kateilevel': $('#opform_kateilevel').val(),
     'drawmedia': 'canvas',      // 描画する要素 Canvas or svg or console?
-    'drawpadding': 13,            // 描画時のパディング
+    'drawpadding': 13,          // 描画時のパディング
     'debugmode': false,         // デバッグモード
   };
 }

@@ -13,14 +13,14 @@
  */
 class Cell {
   constructor() {
-    this.num = '?';        // 0で空白、1~9で数字、?でヒント
-    this.ishint = true;   // ヒントフラグ
+    this.num = '0';        // 0で空白、1~9で数字、?でヒント
+    this.ishint = false;   // ヒントフラグ
     this.klevel = '0';     // 仮定レベル
     this.kouho = [];       // 候補リスト
     this.exkouho = [];     // 除外候補リスト
     for (let i = 0; i < Sudokizer.bsize; i++) {
       this.kouho.push(false);
-      this.exkouho.push(true);
+      this.exkouho.push(false);
     }
   }
 
@@ -82,7 +82,7 @@ class Board {
     for (let ci = 0; ci < this.numcells; ci++) {
       let c = this.board[ci].num;
       // 空白
-      if (c === '0') {
+      if (c === '0' || !this.board[ci].ishint) {
         spcnt++;
       } else {
         // 空白の連続分を出力

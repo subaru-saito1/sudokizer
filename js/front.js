@@ -13,7 +13,11 @@
  * 新規盤面作成
  */
 function newFile(evt) {
-  alert('New File');
+  // 新規オブジェクト作成というよりは盤面状態を全リセット
+  for (let i = 0; i < Sudokizer.board.numcells; i++) {
+    Sudokizer.board.board[i].clear('question');
+  }
+  redraw();
   // Sudokizer.astack.clear(action);
 }
 
@@ -246,9 +250,9 @@ function switchKMode(evt) {
  */
 function actionUndo(evt) {
   // とりあえずここにメモ: ActionStackのメソッド
-  // - undo：ポインタを1個前に戻して盤面をチェックアウト + redraw()
-  // - redo：ポインタを1個次に進めて盤面をチェックアウト + redraw()
-  // - push：現在のポインタの位置にアクションを「破壊的に」追加 + redraw()
+  // - undo：ポインタを1個前に戻して盤面をチェックアウト
+  // - redo：ポインタを1個次に進めて盤面をチェックアウト
+  // - push：現在のポインタの位置にアクションを「破壊的に」追加
   // - clear: actionstack初期化 + redraw()
 
   // Sudokizer.astack.undo();
@@ -267,7 +271,10 @@ function actionRedo(evt) {
  * 解答消去
  */
 function answerClear(evt) {
-  alert('clear answer');
+  for (let i = 0; i < Sudokizer.board.numcells; i++) {
+    Sudokizer.board.board[i].clear('answer');
+  }
+  redraw();
   // Sudokizer.astack.push(action);
 }
 
@@ -275,7 +282,10 @@ function answerClear(evt) {
  * 候補消去
  */
 function kouhoClear(evt) {
-  alert('clear kouho');
+  for (let i = 0; i < Sudokizer.board.numcells; i++) {
+    Sudokizer.board.board[i].clear('kouho');
+  }
+  redraw();
   // Sudokizer.astack.push(action);
 }
 

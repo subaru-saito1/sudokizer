@@ -13,15 +13,43 @@
  */
 class Cell {
   constructor() {
-    this.num = '0';        // 空白
-    this.ishint = false;   // ヒントフラグ
-    this.qhint = false;    // ?ヒントフラグ
-    this.klevel = 0;       // 仮定レベル
+    this.num = '?';        // 0で空白、1~9で数字、?でヒント
+    this.ishint = true;   // ヒントフラグ
+    this.klevel = '0';     // 仮定レベル
     this.kouho = [];       // 候補リスト
     this.exkouho = [];     // 除外候補リスト
     for (let i = 0; i < Sudokizer.bsize; i++) {
       this.kouho.push(false);
-      this.exkouho.push(false);
+      this.exkouho.push(true);
+    }
+  }
+
+  /**
+   * セルの中身をクリアする
+   * @param string mode: クリアモード(question, answer, kouho)
+   */
+  clear(mode) {
+    if (mode === 'question') {
+      this.num = '0';
+      this.ishint = false;
+      this.klevel = '0';
+      for (let i = 0; i < Sudokizer.bsize; i++) {
+        this.exkouho[i] = false;
+        this.kouho[i] = false;
+      }
+    } else {
+      if (!this.ishint) {
+        // 仮定レベル0なら全消し、それ以外ならそのレベルのものだけ削除
+        if (Sudokizer.config.kateilevel === '0' ||
+            Sudokizer.config.kateilevel === this.klevel) {
+          if (mode === 'answer') {
+            this.num = '0';
+          }
+          for (let i = 0; i < Sudokizer.bsize; i++) {
+            this.kouho[i] = false;
+          }
+        }
+      }
     }
   }
 }
@@ -137,7 +165,6 @@ class Board {
       } else if (c === '.') {
         this.board[ci].num = '?';
         this.board[ci].ishint = true;
-        this.board[ci].qhint = true;
         ci++;
       // それ以外の不正な記号
       } else {
@@ -231,7 +258,7 @@ class Board {
           // 除外候補数字 (?ヒントマスのみ)
           ctx.fillStyle = Sudokizer.config.colorset.ex;
           if (this.board[cid].num === '?') {
-            this.drawBoardCanvasKouho(ctx, this.board[cid].kouho, ofsx, ofsy, csize, true)
+            this.drawBoardCanvasKouho(ctx, this.board[cid].exkouho, ofsx, ofsy, csize, true)
           }
         // 通常マス
         } else {

@@ -341,9 +341,20 @@ function allSolve(evt) {
  * 盤面へのクリック
  */
 function clickBoard(evt) {
-  console.log(evt);
-  // Sudokizer.astack.push(action);
+  let csize = Sudokizer.config.dispsize;
+  let bsize = Sudokizer.board.bsize;
+  let mx = evt.offsetX - Sudokizer.config.drawpadding;  // 盤面座標系のx座標
+  let my = evt.offsetY - Sudokizer.config.drawpadding;  // 盤面座標系のy座標
+  // 範囲内に収まっているか検査
+  if (mx >= 0 && mx < csize * bsize && my >= 0 && my < csize * bsize) {
+    let cx = Math.floor(mx / Sudokizer.config.dispsize);  // 盤面の横座標
+    let cy = Math.floor(my / Sudokizer.config.dispsize);  // 盤面の縦座標
+    let ci = cy * Sudokizer.board.bsize + cx;
+    Sudokizer.config.cursorpos = ci;
+  }
+  redraw();
 }
+
 /**
  * 盤面へのキーボード押下
  */

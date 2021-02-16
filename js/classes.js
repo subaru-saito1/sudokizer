@@ -52,6 +52,20 @@ class Cell {
       }
     }
   }
+
+  /**
+   * セルの中身をコピーする
+   */
+  copyInto(fromcell) {
+    this.num = fromcell.num;
+    this.ishint = fromcell.ishint;
+    this.klevel = fromcell.klevel;
+    for (let k = 0; k < Sudokizer.board.bsize; k++) {
+      this.kouho[k] = fromcell.kouho[k];
+      this.exkouho[k] = fromcell.exkouho[k];
+    }
+  }
+
 }
 
 
@@ -70,6 +84,18 @@ class Board {
     for (let i = 0; i < this.numcells; i++) {
       this.board.push(new Cell(this.bsize));
     }
+  }
+
+  /**
+   * 盤面の複製
+   * @return object: 新しい盤面のディープコピー
+   */
+  copyFrom() {
+    let newboard = new Board();
+    for (let i = 0; i < this.numcells; i++) {
+      newboard.board[i].copyInto(this.board[i]) 
+    }
+    return newboard;
   }
 
   // ================================ URL出力 ==================================
@@ -200,27 +226,9 @@ class Board {
     return true;
   }
 
-  // ============================== 盤面の複製 ====================================
+  // ============================== 盤面の変形 ====================================
 
-  /**
-   * 盤面の複製
-   * @return object: 新しい盤面のディープコピー
-   */
-  copyBoard() {
-    // 色々怖いので以下のコードは封印
-    // let newboard = JSON.parse(JSON.stringify(this));
-    let newboard = new Board();
-    for (let i = 0; i < this.numcells; i++) {
-      newboard.board[i].num = this.board[i].num;
-      newboard.board[i].ishint = this.board[i].ishint;
-      newboard.board[i].klevel = this.board[i].klevel;
-      for (let j = 0; j < this.bsize; j++) {
-        newboard.board[i].kouho[j] = this.board[i].kouho[j];
-        newboard.board[i].exkouho[j] = this.board[i].exkouho[j];
-      }
-    }
-    return newboard;
-  }
+  
 
 
   

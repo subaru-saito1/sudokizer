@@ -54,10 +54,14 @@ class Cell {
   }
 }
 
+
 /**
  * Boardクラス
  */
 class Board {
+  /**
+   * コンストラクタ
+   */
   constructor() {
     this.puzzlename = 'sudoku';
     this.bsize = Sudokizer.bsize;
@@ -68,6 +72,7 @@ class Board {
     }
   }
 
+  // ================================ URL出力 ==================================
 
   /**
    * URL出力関数メインルーチン
@@ -194,7 +199,33 @@ class Board {
     }
     return true;
   }
+
+  // ============================== 盤面の複製 ====================================
+
+  /**
+   * 盤面の複製
+   * @return object: 新しい盤面のディープコピー
+   */
+  copyBoard() {
+    // 色々怖いので以下のコードは封印
+    // let newboard = JSON.parse(JSON.stringify(this));
+    let newboard = new Board();
+    for (let i = 0; i < this.numcells; i++) {
+      newboard.board[i].num = this.board[i].num;
+      newboard.board[i].ishint = this.board[i].ishint;
+      newboard.board[i].klevel = this.board[i].klevel;
+      for (let j = 0; j < this.bsize; j++) {
+        newboard.board[i].kouho[j] = this.board[i].kouho[j];
+        newboard.board[i].exkouho[j] = this.board[i].exkouho[j];
+      }
+    }
+    return newboard;
+  }
+
+
   
+
+  // ============================== canvas描画 ====================================
 
   /**
    * canvasへの描画

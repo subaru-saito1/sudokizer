@@ -14,7 +14,6 @@
 // グローバル設定類はすべてこのオブジェクトに格納
 let Sudokizer = {};
 
-Sudokizer.bsize = 9;
 Sudokizer.astack = initActionStack();   // アクションスタック作成
 Sudokizer.board  = initBoard();         // 初期盤面の作成
 Sudokizer.config = initConfig();        // フォーム設定類

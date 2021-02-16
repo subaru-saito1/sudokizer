@@ -12,13 +12,13 @@
  * Cellsクラス
  */
 class Cell {
-  constructor() {
+  constructor(bsize) {
     this.num = '0';        // 0で空白、1~9で数字、?でヒント
     this.ishint = false;   // ヒントフラグ
     this.klevel = '0';     // 仮定レベル
     this.kouho = [];       // 候補リスト
     this.exkouho = [];     // 除外候補リスト
-    for (let i = 0; i < Sudokizer.bsize; i++) {
+    for (let i = 0; i < bsize; i++) {
       this.kouho.push(false);
       this.exkouho.push(false);
     }
@@ -33,7 +33,7 @@ class Cell {
       this.num = '0';
       this.ishint = false;
       this.klevel = '0';
-      for (let i = 0; i < Sudokizer.bsize; i++) {
+      for (let i = 0; i < Sudokizer.board.bsize; i++) {
         this.exkouho[i] = false;
         this.kouho[i] = false;
       }
@@ -45,7 +45,7 @@ class Cell {
           if (mode === 'answer') {
             this.num = '0';
           }
-          for (let i = 0; i < Sudokizer.bsize; i++) {
+          for (let i = 0; i < Sudokizer.board.bsize; i++) {
             this.kouho[i] = false;
           }
         }
@@ -64,11 +64,11 @@ class Board {
    */
   constructor() {
     this.puzzlename = 'sudoku';
-    this.bsize = Sudokizer.bsize;
-    this.numcells = Sudokizer.bsize ** 2;
+    this.bsize = 9;
+    this.numcells = this.bsize ** 2;
     this.board = [];
     for (let i = 0; i < this.numcells; i++) {
-      this.board.push(new Cell());
+      this.board.push(new Cell(this.bsize));
     }
   }
 

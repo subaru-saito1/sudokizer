@@ -71,7 +71,8 @@ function pencilBoxWrite(evt) {
  * 現在の盤面を新しいウィンドウにコピー
  */
 function boardNewWindow(evt) {
-  alert('Copy Board');
+  console.log("copy board");
+  Sudokizer.board.copyBoard();
 }
 
 /**

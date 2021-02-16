@@ -72,7 +72,7 @@ function pencilBoxWrite(evt) {
  */
 function boardNewWindow(evt) {
   console.log("copy board");
-  Sudokizer.board.copyBoard();
+  Sudokizer.board.copyFrom();
 }
 
 /**

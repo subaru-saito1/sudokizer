@@ -56,7 +56,8 @@ function initConfig() {
 
   return {
     'cursorpos': 0,                              // カーソル位置
-    'dispsize': $('#menu_dispsize_size').val(),  // マスのサイズ
+    // マスのサイズ
+    'dispsize': Number($('#menu_dispsize_size').val()),
     'dispfont': 'sans-serif',                    // 暫定
     'colorset': colorset,                        // 色設定
     'defcolorset': defcolorset,                  // デフォルト色設定

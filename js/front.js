@@ -71,15 +71,20 @@ function pencilBoxWrite(evt) {
  * 現在の盤面を新しいウィンドウにコピー
  */
 function boardNewWindow(evt) {
-  console.log("copy board");
-  Sudokizer.board.copyFrom();
+  console.log("copy board")
+  // 仮実装、コピーチェック用
+  let newboard = Sudokizer.board.transCreate();
+  Sudokizer.board = newboard;
+  redraw();
 }
 
 /**
  * 90度右回転
  */
 function boardRotate90Deg(evt) {
-  alert('rotate 90deg right');
+  let newboard = Sudokizer.board.transCreate('rotate90');
+  Sudokizer.board = newboard;
+  redraw();
   // Sudokizer.astack.push(action);
 }
 
@@ -87,7 +92,9 @@ function boardRotate90Deg(evt) {
  * 180度右回転
  */
 function boardRotate180Deg(evt) {
-  alert('rotate 180deg');
+  let newboard = Sudokizer.board.transCreate('rotate180');
+  Sudokizer.board = newboard;
+  redraw();
   // Sudokizer.astack.push(action);
 }
 
@@ -95,7 +102,9 @@ function boardRotate180Deg(evt) {
  * 90度左回転
  */
 function boardRotate270Deg(evt) {
-  alert('rotate 90deg left');
+  let newboard = Sudokizer.board.transCreate('rotate270');
+  Sudokizer.board = newboard;
+  redraw();
   // Sudokizer.astack.push(action);
 }
 
@@ -103,7 +112,9 @@ function boardRotate270Deg(evt) {
  * 上下反転
  */
 function boardInverseUD(evt) {
-  alert('inverse up-to-down');
+  let newboard = Sudokizer.board.transCreate('inverseUD');
+  Sudokizer.board = newboard;
+  redraw();
   // Sudokizer.astack.push(action);
 }
 
@@ -111,7 +122,9 @@ function boardInverseUD(evt) {
  * 左右反転
  */
 function boardInverseLR(evt) {
-  alert('inverse left-to-right');
+  let newboard = Sudokizer.board.transCreate('inverseLR');
+  Sudokizer.board = newboard;
+  redraw();
   // Sudokizer.astack.push(action);
 }
 

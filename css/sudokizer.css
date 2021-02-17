@@ -6,6 +6,7 @@
 :root {
   --bgcolor: #ccffff;
   --subcolor: #333333;
+  --hlcolor: rgb(65, 183, 223);
 }
 
 
@@ -33,7 +34,7 @@ h1 {                /* タイトル */
   font-size: 3em;
 }
 h1::first-letter {  /* タイトルの1文字目を青に */
-  color: rgb(65, 183, 223);
+  color: var(--hlcolor);
 }
 /* ヘッダとフッタの設定 */
 header p, footer p {
@@ -236,10 +237,30 @@ li.topmenu_item {
   cursor: pointer;
 }
 
-/* サブメニュー独自のCSS */
+/* ======================= サブメニュー独自のCSS ======================== */
+
+/* URL出力フォーム */
 #menu_urlwrite + .dropdown_cc {
-  width: 7em;
+  width: 15em;
 }
+div#menu_urlwrite_form {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+div#menu_urlwrite_form2 {
+  margin-right: 15px;
+}
+input#menu_urlwrite_ok {
+  width: 7em;
+  margin: 7px;
+}
+textarea#url_output {
+  resize: none;
+}
+
+
+
 #menu_imgwrite + .dropdown_cc, 
 #menu_pbwrite + .dropdown_cc {
   width: 10em;
@@ -266,7 +287,7 @@ li.topmenu_item {
 
 
 
-/**
+/** ============================================================
  * キャンバス
  */
 #main_board {
@@ -274,7 +295,7 @@ li.topmenu_item {
 }
 
 
-/**
+/** ===========================================================
  * ボタン部分
  */
 div#opform {

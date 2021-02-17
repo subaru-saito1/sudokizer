@@ -21,6 +21,26 @@ function newFile(evt) {
   // Sudokizer.astack.clear(action);
 }
 
+
+/**
+ * URL出力
+ */
+function urlWrite(evt) {
+  let urlprefix = '';
+  if ($('#menu_urlwrite_puzzlink').prop('checked')) {
+    urlprefix = 'https://puzz.link/p';
+  } else {
+    urlprefix = 'http://pzv.jp/p.html';
+  }
+  let reedit = $('#menu_urlwrite_reedit').prop('checked');
+  let url = urlprefix + '?' + Sudokizer.board.urlWrite(reedit);
+  // URL表示
+  $('#url_output').val(url);
+  if (Sudokizer.config.debugmode) {
+    console.log(url);
+  }
+}
+
 /**
  * ぱずぷれURL出力
  */

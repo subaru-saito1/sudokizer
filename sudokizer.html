@@ -47,12 +47,34 @@
               </li>
               <li class="topmenu_item dropdown_cp" title="現在の盤面をURL形式で出力します。">
                 <span id="menu_urlwrite">URL出力</span>
+                <form class="dropdown_cc">
+                  <div id="menu_urlwrite_form">
+                    <div id="menu_urlwrite_form1">
+                      <input type="radio" name="urlselect" id="menu_urlwrite_puzzlink" checked
+                         value="puzzlink" title="puzzlink形式でURLを出力します。">
+                      <label for="menu_urlwrite_puzzlink">puzzlink</label>
+                      <br>
+                      <input type="radio" name="urlselect" id="menu_urlwrite_puzpre"
+                         value="puzpre" title="ぱずぷれ形式でURLを出力します。">
+                      <label for="menu_urlwrite_puzpre">ぱずぷれ</label>
+                    </div>
+                    <div id="menu_urlwrite_form2">
+                      <input type="checkbox" id="menu_urlwrite_reedit"
+                         title="再編集用URLとして出力します。">
+                      <label for="menu_urlwrite_reedit">再編集用</label>
+                    </div>
+                  </div>
+                  <input type="button" id="menu_urlwrite_ok" value="OK">
+                  <textarea id="url_output" cols="30" rows="5" readonly></textarea>
+                </form>
+                <!--
                 <ul class="dropdown_cc last_item_ul">
                   <li id="menu_urlwrite_puzpre" class="menu_urlwrite_link"
                       title="ぱずぷれv3形式でURLを出力します。">ぱずぷれ形式</li>
                   <li id="menu_urlwrite_puzzlink" class="menu_urlwrite_link"
                       title="puzzlink形式でURLを出力します。">puzzlink形式</li>
                 </ul>
+                -->
               </li>
               <li class="topmenu_item dropdown_cp" title="現在の盤面をPNG画像形式で出力します。">
                 <span id="menu_imgwrite">画像出力</span>

@@ -76,7 +76,7 @@
                 <span id="menu_imgwrite">画像出力</span>
                 <form class="dropdown_cc">
                   <div>ファイル名</div>
-                  <input type="text" id="menu_imgwrite_filename" placeholder="sudoku.png" size="10">
+                  <input type="text" id="menu_imgwrite_filename" value="sudoku.png" size="12">
                   <input type="button" id="menu_imgwrite_ok" value="OK">
                 </form>
               </li>
@@ -91,7 +91,7 @@
                 <span id="menu_pbwrite">pencilBox出力</span>
                 <form class="dropdown_cc">
                   <div>ファイル名</div>
-                  <input type="text" id="menu_pbwrite_filename" placeholder="sudoku.png" size="10">
+                  <input type="text" id="menu_pbwrite_filename" value="sudoku.txt" size="12">
                   <input type="button" id="menu_pbwrite_ok" value="OK">
                 </form>
               </li>
@@ -178,11 +178,11 @@
 
       <div id="sub_wrapper">
 
-        <!-- Canvas盤面（無効化）-->
+        <!-- Canvas盤面-->
         <canvas id="main_board" width="350" height="350">
           canvasタグ未対応です。
         </canvas>
-        <!-- SVG盤面 
+        <!-- SVG盤面 (無効化)
         <svg id="main_board" width="350" height="350">
         </svg>
         -->

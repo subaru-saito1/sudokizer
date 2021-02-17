@@ -47,9 +47,22 @@ function urlWrite(evt) {
  * 画像出力
  */
 function imgWrite(evt) {
-  // 1. ファイル名取得
-  // 2. 画像保存
-  alert('Image Write');
+  // ファイル名取得
+  let filename = $('#menu_imgwrite_filename').val();
+  let canvas = document.querySelector('#main_board');
+  // let csize = $('#menu_imgwrite_dispsize').val();
+  // 保存用に一時的に描画モードを変更
+  drawForDownload();
+  // 画像保存
+  canvas.toBlob((blob) => {
+    let dlanchor = document.createElement('a');
+    dlanchor.href = window.URL.createObjectURL(blob);
+    dlanchor.download = filename;
+    dlanchor.click();
+    dlanchor.remove();
+  })
+  // 元の盤面に戻す
+  redraw();
 }
 
 /**
@@ -357,13 +370,13 @@ function clickBoard(evt) {
  * 盤面へのキーボード押下
  */
 function keyDownBoard(evt) {
-  let cursorKeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  let cursorKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   let numKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
   let cpos = Sudokizer.config.cursorpos;
 
   // カーソル移動
   if (cursorKeys.includes(evt.key)) {
-    evt.preventDefault();   // 矢印キーでの画面移動無効化
+    evt.preventDefault();
     keyDownCursorMove(cpos, evt.key);
   }
   // 数字入力
@@ -497,13 +510,29 @@ function keyDownNumInput(cpos, keycode) {
  * Sudokizerの中身が変わった際に呼び出す実装
  */
 function redraw() {
+  let drawconfig = {
+    'cursor': true,
+    'dispsize': Sudokizer.config.dispsize,
+  }
   if (Sudokizer.config.drawmedia === 'canvas') {
-    Sudokizer.board.drawBoardCanvas();
+    Sudokizer.board.drawBoardCanvas(drawconfig);
   } else if (Sudokizer.config.drawmedia === 'svg') {
-    Sudokizer.board.drawBoardSVG();
+    Sudokizer.board.drawBoardSVG(drawconfig);
   } else {
     if (Sudokizer.config.debugmode) {
       Sudokizer.board.drawBoardConsole();
     }
   }
+}
+
+/**
+ * 盤面保存用描画ルーチン
+ * カーソルを描画しない等の別処理
+ */
+function drawForDownload() {
+  let drawconfig = {
+    'cursor': false,
+    'dispsize': Sudokizer.config.dispsize,
+  };
+  Sudokizer.board.drawBoardCanvas(drawconfig);
 }

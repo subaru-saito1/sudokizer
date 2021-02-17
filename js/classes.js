@@ -270,11 +270,11 @@ class Board {
   /**
    * canvasへの描画
    */
-  drawBoardCanvas() {
+  drawBoardCanvas(cfg) {
     let canvas = document.querySelector('#main_board');
     let ctx = canvas.getContext('2d');
     let ofs = Sudokizer.config.drawpadding;
-    let csize = Sudokizer.config.dispsize;
+    let csize = cfg.dispsize;
     let allsize = ofs * 2 + csize * this.bsize;  // 全体のサイズ
 
     // 背景描画
@@ -302,7 +302,9 @@ class Board {
     ctx.textBaseline = 'middle';
     this.drawBoardCanvasTexts(ctx, ofs, csize);
     // カーソル描画
-    this.drawBoardCanvasCursor(ctx, ofs, csize);
+    if (cfg === undefined || cfg.cursor) {
+      this.drawBoardCanvasCursor(ctx, ofs, csize);
+    }
   }
 
   /**

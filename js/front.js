@@ -44,26 +44,6 @@ function urlWrite(evt) {
 }
 
 /**
- * ぱずぷれURL出力
- */
-function urlWritePuzpre(evt) {
-  let urlprefix = 'http://pzv.jp/p.html'
-  let url = urlprefix + '?' + Sudokizer.board.urlWrite();
-  alert('URL write for puzpre: \n' + url);
-  console.log(url);
-}
-
-/**
- * puzzlink URL出力
- */
-function urlWritePuzzlink(evt) {
-  let urlprefix = 'https://puzz.link/p'
-  let url = urlprefix + '?' + Sudokizer.board.urlWrite();
-  alert('URL write for puzzlink: \n' + url);
-  console.log(url);
-}
-
-/**
  * 画像出力
  */
 function imgWrite(evt) {
@@ -93,11 +73,9 @@ function pencilBoxWrite(evt) {
  * 現在の盤面を新しいウィンドウにコピー
  */
 function boardNewWindow(evt) {
-  console.log("copy board")
-  // 仮実装、コピーチェック用
-  let newboard = Sudokizer.board.transCreate();
-  Sudokizer.board = newboard;
-  redraw();
+  let preurl = location.href.split('?')[0];    // URL本体取得
+  let puzurl = Sudokizer.board.urlWrite(false);  // パズル部分取得
+  open(preurl + '?' + puzurl);
 }
 
 /**

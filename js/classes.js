@@ -136,8 +136,10 @@ class Board {
    * 
    * @return string URLのクエリ部分
    */
-  urlWrite() {
-    let prefix = this.puzzlename + '/' + this.bsize + '/' + this.bsize + '/';
+  urlWrite(reedit) {
+    // URL前半部分を構築
+    let prefix = reedit ? this.puzzlename + '_edit' : this.puzzlename;
+    prefix += ('/' + this.bsize + '/' + this.bsize + '/');
     let urlpuz = '';  // パズル部分のURL
     let spcnt = 0;    // 空白の連続数
     // URLパズル部分の生成

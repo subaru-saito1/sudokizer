@@ -90,10 +90,8 @@ function setEventHandlers() {
   // -------- メインメニュー：ファイル --------
   // 新規作成
   $('#menu_newfile').click(newFile);
-  // ぱずぷれURL出力
-  $('#menu_urlwrite_puzpre').click(urlWritePuzpre);
-  // puzzlink URL出力
-  $('#menu_urlwrite_puzzlink').click(urlWritePuzzlink);
+  // URL出力
+  $('#menu_urlwrite_ok').click(urlWrite);
   // 画像出力
   $('#menu_imgwrite_ok').click(imgWrite);
   // pencilbox読み込み

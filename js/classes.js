@@ -248,7 +248,8 @@ class Board {
       alert('URLクエリが不正です');
       return false;
     }
-    if (urlparts[0] !== this.puzzlename) {
+    if (urlparts[0] !== this.puzzlename && 
+        urlparts[0] !== this.puzzlename + '_edit') {
       alert('URLのパズル名が不正です');
       return false;
     }

@@ -259,11 +259,9 @@ textarea#url_output {
   resize: none;
 }
 
-
-
 #menu_imgwrite + .dropdown_cc, 
 #menu_pbwrite + .dropdown_cc {
-  width: 10em;
+  width: 15em;
   cursor: text;
 }
 #menu_boardtrans + .dropdown_cc {

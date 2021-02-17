@@ -87,16 +87,47 @@ class Board {
   }
 
   /**
-   * 盤面の複製
-   * @return object: 新しい盤面のディープコピー
+   * 回転・反転・コピーを行う関数
+   * @param string cmd: rotate90, rotate180, rotate270, inverseUD, inverseLR
+   * 　　　　　　　　    未指定の場合は新規コピー
+   * @return 変形後の新しい盤面オブジェクト
    */
-  copyFrom() {
+  transCreate(cmd) {
     let newboard = new Board();
-    for (let i = 0; i < this.numcells; i++) {
-      newboard.board[i].copyInto(this.board[i]) 
+    for (let c = 0; c < this.numcells; c++) {
+      let i = Math.floor(c / this.bsize);
+      let j = c % this.bsize;
+      let c2 = 0;                // cの変形後の位置
+      // 90度回転
+      if (cmd === 'rotate90') {
+        let i2 = j;
+        let j2 = this.bsize - i - 1;
+        c2 = i2 * this.bsize + j2;
+      // 180度回転
+      } else if (cmd === 'rotate180') {
+        c2 = this.numcells - c - 1;
+      // 270度回転
+      } else if (cmd === 'rotate270') {
+        let i2 = this.bsize - j - 1;
+        let j2 = i;
+        c2 = i2 * this.bsize + j2;
+      // 上下反転
+      } else if (cmd === 'inverseUD') {
+        let i2 = this.bsize - i - 1;
+        c2 = i2 * this.bsize + j;
+      // 左右反転
+      } else if (cmd === 'inverseLR') {
+        let j2 = this.bsize - j - 1;
+        c2 = i * this.bsize + j2;
+      // それ以外の場合はコピー
+      } else {
+        c2 = c;
+      }
+      newboard.board[c2].copyInto(this.board[c]);
     }
     return newboard;
   }
+
 
   // ================================ URL出力 ==================================
 
@@ -225,8 +256,6 @@ class Board {
     }
     return true;
   }
-
-  // ============================== 盤面の変形 ====================================
 
   
 

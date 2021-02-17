@@ -13,12 +13,14 @@
  * 新規盤面作成
  */
 function newFile(evt) {
-  // 新規オブジェクト作成というよりは盤面状態を全リセット
-  for (let i = 0; i < Sudokizer.board.numcells; i++) {
-    Sudokizer.board.board[i].clear('question');
+  if (confirm('新規作成しますか？')) {
+    // 新規オブジェクト作成というよりは盤面状態を全リセット
+    for (let i = 0; i < Sudokizer.board.numcells; i++) {
+      Sudokizer.board.board[i].clear('question');
+    }
+    redraw();
+    // Sudokizer.astack.clear(action);
   }
-  redraw();
-  // Sudokizer.astack.clear(action);
 }
 
 

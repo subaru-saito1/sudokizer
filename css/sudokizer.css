@@ -240,6 +240,10 @@ textarea#url_output {
 #menu_pbwrite + .dropdown_cc {
   width: 15em;
   cursor: text;
+  left: 30%;
+}
+#menu_pbread + .dropdown_cc {
+  left: 30%;
 }
 #menu_boardtrans + .dropdown_cc {
   width: 6em;

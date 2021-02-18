@@ -15,9 +15,7 @@
 function newFile(evt) {
   if (confirm('新規作成しますか？')) {
     // 新規オブジェクト作成というよりは盤面状態を全リセット
-    for (let i = 0; i < Sudokizer.board.numcells; i++) {
-      Sudokizer.board.board[i].clear('question');
-    }
+    Sudokizer.board.clear();
     redraw();
     // Sudokizer.astack.clear(action);
   }
@@ -69,7 +67,17 @@ function imgWrite(evt) {
  * pencilBox形式読み込み
  */
 function pencilBoxRead(evt) {
-  alert('pencilBox Read');
+  let file = $('#menu_pbread_fileform').prop('files')[0];
+  let reader = new FileReader();
+  reader.readAsText(file, 'Shift-JIS');
+  reader.onload = function() {
+    let lines = reader.result.split('\r\n');
+    if (lines[0] === '--') {
+      Sudokizer.board.pbReadNikolicom(lines)
+    } else {
+      Sudokizer.board.pbReadNormal(lines)
+    } 
+  }
   // Sudokizer.astack.push(action);
 }
 

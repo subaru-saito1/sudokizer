@@ -80,9 +80,20 @@ class Board {
     this.puzzlename = 'sudoku';
     this.bsize = 9;
     this.numcells = this.bsize ** 2;
+    this.author_ja = '';      // 作者情報
+    this.author_en = '';      // 作者情報
     this.board = [];
     for (let i = 0; i < this.numcells; i++) {
       this.board.push(new Cell(this.bsize));
+    }
+  }
+
+  /**
+   * 盤面の初期化 
+   */
+  clear() {
+    for (let c = 0; c < this.numcells; c++) {
+      this.board[c].clear('question');
     }
   }
 
@@ -94,6 +105,10 @@ class Board {
    */
   transCreate(cmd) {
     let newboard = new Board();
+    // 作者情報引継ぎ
+    newboard.author_ja = this.board.author_ja;
+    newboard.author_en = this.board.author_en;
+    
     for (let c = 0; c < this.numcells; c++) {
       let i = Math.floor(c / this.bsize);
       let j = c % this.bsize;
@@ -261,6 +276,52 @@ class Board {
   }
 
   
+  // ============================ pencilBox入出力 ================================
+
+  /**
+   * nikolicom形式でファイルを読み込み
+   * @param array lines  読み込んだ文字列のリスト
+   */
+  pbReadNikolicom(lines) {
+    try {
+      this.author_ja = lines[1].split(':')[1];
+      this.author_en = lines[1].split(':')[2];
+      this.clear();     // 盤面初期化
+      // ヒント盤面
+      for (let l = 3; l < 12; l++) {
+        for (let j = 0; j < this.bsize; j++) {
+          if (lines[l][j] !== '0') {
+            let c = (l - 3) * this.bsize + j;
+            this.board[c].ishint = true;
+          }
+        }
+      }
+      let lines2 = lines[12].split('\n');
+      // 解答盤面
+      for (let l = 0; l < 9; l++) {
+        for (let j = 0; j < this.bsize; j++) {
+          let c = l * this.bsize + j;
+          this.board[c].num = lines2[l][j];
+        }
+      }
+    } catch(err) {
+      console.log(err);
+      alert('盤面の読み込みに失敗しました');
+    }
+    // デバッグモード
+    if (Sudokizer.config.debugmode) {
+      console.log(this);
+    }
+    redraw();
+  }
+
+  /**
+   * 通常のpencilbox形式でファイル読み込み
+   * @param array lines  読み込んだ文字列のリスト
+   */
+  pbReadNormal(lines) {
+    console.log('normal');
+  }
 
 
   

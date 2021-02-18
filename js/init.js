@@ -95,6 +95,7 @@ function setEventHandlers() {
   // 画像出力
   $('#menu_imgwrite_ok').click(imgWrite);
   // pencilbox読み込み
+  $('#menu_pbread_fileform').change(pencilBoxRead);
   $('#menu_pbread_ok').click(pencilBoxRead);
   // pencilbox出力
   $('#menu_pbwrite_ok').click(pencilBoxWrite);

@@ -276,22 +276,19 @@ textarea#url_output {
   flex-flow: row wrap;
 }
 div#opform {
-  overflow-x: auto;
   padding: 0px;
   display: flex;
   flex-flow: column wrap;
   justify-content: 'space-around';
   align-items: center;
 }
-div#opform_wrapper1 {
-  display: flex;
-  flex-flow: row;
-}
+
 #main_board {
   margin: 10px;
 }
+
 /* 400px ~ 650px以下 */
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 580px) {
   div#opform {
     flex-flow: row wrap;
   }

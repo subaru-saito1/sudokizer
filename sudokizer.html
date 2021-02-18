@@ -122,10 +122,10 @@
             <ul class="dropdown_c">
               <li class="topmenu_item dropdown_cp" title="盤面の表示サイズ（一マスの大きさ）を設定します。">
                 <span id="menu_dispsize">表示サイズ</span>
-                <form class="dropdown_cc">
+                <div class="dropdown_cc">
                   <input type="number" id="menu_dispsize_size" min="16" max="64" step="1" value="36">
                   <input type="button" id="menu_dispsize_ok" value="OK">
-                </form>
+                </div>
               </li>
               <!--
               <li class="topmenu_item dropdown_cp" title="数字のフォントを設定します。">
@@ -179,7 +179,7 @@
       <div id="sub_wrapper">
 
         <!-- Canvas盤面-->
-        <canvas id="main_board" width="350" height="350">
+        <canvas id="main_board" tabindex="0" width="350" height="350">
           canvasタグ未対応です。
         </canvas>
         <!-- SVG盤面 (無効化)
@@ -234,6 +234,7 @@
               <label for="opform_kateilevel">仮定レベル</label>
             </div>
           </fieldset>
+          
           <fieldset id="support_form">
             <legend>制作支援</legend>
             <!-- 

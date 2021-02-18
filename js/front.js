@@ -153,10 +153,6 @@ function setCellSize(evt) {
   // 有効範囲にいる場合のみ変更
   if (csize >= sizeobj.attr('min') && csize <= sizeobj.attr('max')) {
     Sudokizer.config.dispsize = csize;
-    // canvasサイズ変更
-    let boardsize = Sudokizer.config.drawpadding * 2 + csize * Sudokizer.board.bsize;
-    $('#main_board').attr('width', boardsize);
-    $('#main_board').attr('height', boardsize);
   }
   // デバッグモード
   if (Sudokizer.config.debugmode) {
@@ -532,7 +528,7 @@ function redraw() {
 function drawForDownload() {
   let drawconfig = {
     'cursor': false,
-    'dispsize': Sudokizer.config.dispsize,
+    'dispsize': $('#menu_imgwrite_size').val(),
   };
   Sudokizer.board.drawBoardCanvas(drawconfig);
 }

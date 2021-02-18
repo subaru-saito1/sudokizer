@@ -38,16 +38,18 @@
           <li class="top_menu dropdown_p">
             <span id="menu_file_p">ファイル</span>
             <ul class="dropdown_c">
+
               <li class="topmenu_item last_item" title="新しい数独の盤面を作成します。">
                 <span id="menu_newfile">新規作成</span>
               </li>
+
               <li class="topmenu_item dropdown_cp" title="現在の盤面をURL形式で出力します。">
                 <span id="menu_urlwrite">URL出力</span>
                 <form class="dropdown_cc">
                   <div id="menu_urlwrite_form">
                     <div id="menu_urlwrite_form1">
                       <input type="radio" name="urlselect" id="menu_urlwrite_puzzlink" checked
-                         value="puzzlink" title="puzzlink形式でURLを出力します。">
+                             value="puzzlink" title="puzzlink形式でURLを出力します。">
                       <label for="menu_urlwrite_puzzlink">puzzlink</label>
                       <br>
                       <input type="radio" name="urlselect" id="menu_urlwrite_puzpre"
@@ -56,30 +58,27 @@
                     </div>
                     <div id="menu_urlwrite_form2">
                       <input type="checkbox" id="menu_urlwrite_reedit"
-                         title="再編集用URLとして出力します。">
+                             title="再編集用URLとして出力します。">
                       <label for="menu_urlwrite_reedit">再編集用</label>
                     </div>
                   </div>
                   <input type="button" id="menu_urlwrite_ok" value="OK">
                   <textarea id="url_output" cols="30" rows="5" readonly></textarea>
                 </form>
-                <!--
-                <ul class="dropdown_cc last_item_ul">
-                  <li id="menu_urlwrite_puzpre" class="menu_urlwrite_link"
-                      title="ぱずぷれv3形式でURLを出力します。">ぱずぷれ形式</li>
-                  <li id="menu_urlwrite_puzzlink" class="menu_urlwrite_link"
-                      title="puzzlink形式でURLを出力します。">puzzlink形式</li>
-                </ul>
-                -->
               </li>
+
               <li class="topmenu_item dropdown_cp" title="現在の盤面をPNG画像形式で出力します。">
                 <span id="menu_imgwrite">画像出力</span>
                 <form class="dropdown_cc">
-                  <div>ファイル名</div>
+                  <label for="menu_imgwrite_size">サイズ</label>
+                  <input type="number" id="menu_imgwrite_size" 
+                         min="16" max="64" step="1" value="36"
+                         title="ダウンロードする画像のマスのサイズを指定します。">
                   <input type="text" id="menu_imgwrite_filename" value="sudoku.png" size="12">
                   <input type="button" id="menu_imgwrite_ok" value="OK">
                 </form>
               </li>
+
               <li class="topmenu_item dropdown_cp" title="pencilBox形式のデータを取り込みます。">
                 <span id="menu_pbread">pencilBox読込</span>
                 <form class="dropdown_cc">
@@ -87,6 +86,7 @@
                   <input type="button" id="menu_pbread_ok" value="OK">
                 </form>
               </li>
+
               <li class="topmenu_item dropdown_cp" title="現在の盤面をpencilBox形式で出力します。">
                 <span id="menu_pbwrite">pencilBox出力</span>
                 <form class="dropdown_cc">

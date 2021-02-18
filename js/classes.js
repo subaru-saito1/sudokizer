@@ -275,7 +275,10 @@ class Board {
     let ctx = canvas.getContext('2d');
     let ofs = Sudokizer.config.drawpadding;
     let csize = cfg.dispsize;
-    let allsize = ofs * 2 + csize * this.bsize;  // 全体のサイズ
+    // 全体のサイズ設定
+    let allsize = ofs * 2 + csize * this.bsize;
+    $('#main_board').attr('width', allsize);
+    $('#main_board').attr('height', allsize);
 
     // 背景描画
     ctx.fillStyle = Sudokizer.config.colorset.bg;

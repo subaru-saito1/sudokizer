@@ -287,8 +287,14 @@ class Board {
       this.author_ja = lines[1].split(':')[1];
       this.author_en = lines[1].split(':')[2];
       this.clear();     // 盤面初期化
+      // サイズバリデーション
+      if (!(Number(lines[2][1]) === this.bsize && 
+            Number(lines[2][3]) === this.bsize)) {
+        console.log(lines[2][1], lines[2][3])
+        throw 'BoardSizeError';
+      }
       // ヒント盤面
-      for (let l = 3; l < 12; l++) {
+      for (let l = 3; l < 3 + this.bsize; l++) {
         for (let j = 0; j < this.bsize; j++) {
           if (lines[l][j] !== '0') {
             let c = (l - 3) * this.bsize + j;
@@ -296,9 +302,9 @@ class Board {
           }
         }
       }
-      let lines2 = lines[12].split('\n');
+      let lines2 = lines[12].split('\n');  // なんか後半だけ\n区切りだった
       // 解答盤面
-      for (let l = 0; l < 9; l++) {
+      for (let l = 0; l < this.bsize; l++) {
         for (let j = 0; j < this.bsize; j++) {
           let c = l * this.bsize + j;
           this.board[c].num = lines2[l][j];
@@ -320,10 +326,66 @@ class Board {
    * @param array lines  読み込んだ文字列のリスト
    */
   pbReadNormal(lines) {
-    console.log('normal');
+    try {
+      this.clear();     // 盤面初期化
+      // サイズバリデーション
+      if (Number(lines[0]) !== this.bsize) {
+        throw 'BoardSizeError';
+      }
+      // ヒント読み込み
+      for (let l = 1; l < 1 + this.bsize; l++) {
+        let tokens = lines[l].split(' ');
+        for (let j = 0; j < this.bsize; j++) {
+          if (tokens[j] !== '.') {
+            let c = (l - 1) * this.bsize + j;
+            this.board[c].num = tokens[j];
+          }
+        }
+      } 
+      // 解答読み込み
+      for (let l = 10; l < 10 + this.bsize; l++) {
+        let tokens = lines[l].split(' ');
+        for (let j = 0; j < this.bsize; j++) {
+          let c = (l - 10) * this.bsize + j;
+          if (tokens[j] === '.') {
+            // ?ヒント
+            if (this.board[c].num === '0') {
+              this.board[c].num = '?';
+            }
+            this.board[c].ishint = true;
+          } else {
+            this.board[c].num = tokens[j];
+          }
+        }
+      }
+    } catch(err) {
+      console.log(err);
+      alert('盤面の読み込みに失敗しました');
+    }
+    // デバッグモード
+    if (Sudokizer.config.debugmode) {
+      console.log(this);
+    }
+    redraw();
   }
 
+  /**
+   * nikolicom形式での出力
+   * @return dousimasyo
+   */
+  pbWriteNikolicom() {
+    console.log('write nikoli.com');
+    return;
+  }
 
+  /**
+   * 通常のpencilbox形式での出力
+   * @return dousimasyo
+   */
+  pbWriteNormal() {
+    console.log('write normal pencilbox');
+    return;
+  }
   
 
   // ============================== canvas描画 ====================================

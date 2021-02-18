@@ -45,7 +45,7 @@
 
               <li class="topmenu_item dropdown_cp" title="現在の盤面をURL形式で出力します。">
                 <span id="menu_urlwrite">URL出力</span>
-                <form class="dropdown_cc">
+                <div class="dropdown_cc">
                   <div id="menu_urlwrite_form">
                     <div id="menu_urlwrite_form1">
                       <input type="radio" name="urlselect" id="menu_urlwrite_puzzlink" checked
@@ -64,36 +64,36 @@
                   </div>
                   <input type="button" id="menu_urlwrite_ok" value="OK">
                   <textarea id="url_output" cols="30" rows="5" readonly></textarea>
-                </form>
+                </div>
               </li>
 
               <li class="topmenu_item dropdown_cp" title="現在の盤面をPNG画像形式で出力します。">
                 <span id="menu_imgwrite">画像出力</span>
-                <form class="dropdown_cc">
+                <div class="dropdown_cc">
                   <label for="menu_imgwrite_size">サイズ</label>
                   <input type="number" id="menu_imgwrite_size" 
                          min="16" max="64" step="1" value="36"
                          title="ダウンロードする画像のマスのサイズを指定します。">
                   <input type="text" id="menu_imgwrite_filename" value="sudoku.png" size="12">
                   <input type="button" id="menu_imgwrite_ok" value="OK">
-                </form>
+                </div>
               </li>
 
               <li class="topmenu_item dropdown_cp" title="pencilBox形式のデータを取り込みます。">
                 <span id="menu_pbread">pencilBox読込</span>
-                <form class="dropdown_cc">
+                <div class="dropdown_cc">
                   <input type="file" id="menu_pbread_fileform">
                   <input type="button" id="menu_pbread_ok" value="OK">
-                </form>
+                </div>
               </li>
 
               <li class="topmenu_item dropdown_cp" title="現在の盤面をpencilBox形式で出力します。">
                 <span id="menu_pbwrite">pencilBox出力</span>
-                <form class="dropdown_cc">
+                <div class="dropdown_cc">
                   <div>ファイル名</div>
                   <input type="text" id="menu_pbwrite_filename" value="sudoku.txt" size="12">
                   <input type="button" id="menu_pbwrite_ok" value="OK">
-                </form>
+                </div>
               </li>
             </ul>
           </li>
@@ -142,7 +142,7 @@
               -->
               <li class="topmenu_item dropdown_cp" title="盤面の色設定を変更します。">
                 <span id="menu_dispcolor">表示色</span>
-                <form class="dropdown_cc">
+                <div class="dropdown_cc">
                   <input type="color" id="menu_dispcolor_bg" value="#ffffff">
                   <label for="menu_dispcolor_bg">背景色</label>
                   <input type="color" id="menu_dispcolor_ht" value="#333333">
@@ -160,7 +160,7 @@
                   <input type="color" id="menu_dispcolor_l4" value="#ff88ff">
                   <label for="menu_dispcolor_l4">第四仮定</label>
                   <input type="button" id="menu_color_reset" value="デフォルトに戻す">
-                </form>
+                </div>
               </li>
             </ul>
           </li>

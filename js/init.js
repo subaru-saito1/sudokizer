@@ -14,14 +14,14 @@
 // グローバル設定類はすべてこのオブジェクトに格納
 let Sudokizer = {};
 
-Sudokizer.astack = initActionStack();   // アクションスタック作成
+Sudokizer.astack = new ActionStack();   // アクションスタック作成
 Sudokizer.board  = initBoard();         // 初期盤面の作成
 Sudokizer.config = initConfig();        // フォーム設定類
 console.log(Sudokizer.board);
 console.log(Sudokizer.config);
 
 setEventHandlers();   // イベントハンドラを仕掛ける
-redraw();             // 初回描画
+redraw();             // 初回同期
 
 
 /**
@@ -70,16 +70,6 @@ function initConfig() {
     'drawmedia': 'canvas',      // 描画する要素 Canvas or svg or console?
     'drawpadding': 13,          // 描画時のパディング
     'debugmode': false,         // デバッグモード
-  };
-}
-
-/**
- * アクションスタック作成。
- * これはコンストラクタ呼び出しでいいかもしれない。
- */
-function initActionStack() {
-  return {
-    'ActionStack': 'OK',
   };
 }
 

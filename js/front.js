@@ -72,20 +72,41 @@ function pencilBoxRead(evt) {
   reader.readAsText(file, 'Shift-JIS');
   reader.onload = function() {
     let lines = reader.result.split('\r\n');
+    let authorinfo;
     if (lines[0] === '--') {
-      Sudokizer.board.pbReadNikolicom(lines)
+      authorinfo = Sudokizer.board.pbReadNikolicom(lines)
     } else {
-      Sudokizer.board.pbReadNormal(lines)
+      authorinfo = Sudokizer.board.pbReadNormal(lines)
     } 
+    // 著者情報の設定
+    $('#menu_pbwrite_authorja').val(authorinfo[0]);
+    $('#menu_pbwrite_authoren').val(authorinfo[1]);
+    // Sudokizer.astack.push(action);
   }
-  // Sudokizer.astack.push(action);
 }
 
 /**
  * pencilBox出力
  */
 function pencilBoxWrite(evt) {
-  alert('pencilBox Write');
+  let filename = $('#menu_pbwrite_filename').val();
+  let authorinfo = [$('#menu_pbwrite_authorja').val(),
+                    $('#menu_pbwrite_authoren').val()];
+  let filestring = '';
+  if ($('#menu_pbwrite_normal').prop('checked')) {
+    filestring = Sudokizer.board.pbWriteNormal(authorinfo);
+  } else {
+    // nikolicom仕様の場合、事前にバリデーションが必要
+    if (!Sudokizer.board.validateNikolicom()) {
+      return;
+    };
+    filestring = Sudokizer.board.pbWriteNikolicom(authorinfo);
+  }
+  let dlanchor = document.createElement('a');
+  dlanchor.href = URL.createObjectURL(new Blob([filestring], {type: "text/plain"}));
+  dlanchor.download = filename;
+  dlanchor.click();
+  dlanchor.remove();
 }
 
 /* =========================== 盤面変換系 ================================= */

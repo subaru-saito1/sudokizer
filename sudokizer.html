@@ -79,19 +79,34 @@
                 </div>
               </li>
 
-              <li class="topmenu_item dropdown_cp" title="pencilBox形式のデータを取り込みます。">
-                <span id="menu_pbread">pencilBox読込</span>
+              <li class="topmenu_item dropdown_cp" title="PencilBox形式のデータを取り込みます。">
+                <span id="menu_pbread">PencilBox読込</span>
                 <div class="dropdown_cc">
                   <input type="file" id="menu_pbread_fileform">
                   <input type="button" id="menu_pbread_ok" value="OK">
                 </div>
               </li>
 
-              <li class="topmenu_item dropdown_cp" title="現在の盤面をpencilBox形式で出力します。">
-                <span id="menu_pbwrite">pencilBox出力</span>
+              <li class="topmenu_item dropdown_cp" title="現在の盤面をPencilBox形式で出力します。">
+                <span id="menu_pbwrite">PencilBox出力</span>
                 <div class="dropdown_cc">
-                  <div>ファイル名</div>
+                  <input type="radio" name="pbselect" id="menu_pbwrite_normal" checked
+                         value="normal" title="通常のPencilBox形式で保存します。">
+                  <label for="menu_pbwrite_normal">PencilBox形式</label>
+                  <br>
+                  <input type="radio" name="pbselect" id="menu_pbwrite_nikolicom"
+                        value="nikolicom" title="nikoli.com形式で保存します。">
+                  <label for="menu_pbwrite_nikolicom">nikoli.com形式</label>
+                  <br>
+                  <label for="menu_pbwrite_authorja">作者名　　</label>
+                  <input type="text" id="menu_pbwrite_authorja" value="" size="12">
+                  <br>
+                  <label for="menu_pbwrite_authoren">作者名(英)</label>
+                  <input type="text" id="menu_pbwrite_authoren" value="" size="12">
+                  <br>
+                  <label for="menu_pbwrite_filename">ファイル名</label>
                   <input type="text" id="menu_pbwrite_filename" value="sudoku.txt" size="12">
+                  <br>
                   <input type="button" id="menu_pbwrite_ok" value="OK">
                 </div>
               </li>

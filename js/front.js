@@ -119,7 +119,6 @@ function boardNewWindow(evt) {
   let puzurl = Sudokizer.board.urlWrite(false);  // パズル部分取得
   open(preurl + '?' + puzurl);
 }
-
 /**
  * 90度右回転
  */
@@ -129,7 +128,6 @@ function boardRotate90Deg(evt) {
   redraw();
   // Sudokizer.astack.push(action);
 }
-
 /**
  * 180度右回転
  */
@@ -139,7 +137,6 @@ function boardRotate180Deg(evt) {
   redraw();
   // Sudokizer.astack.push(action);
 }
-
 /**
  * 90度左回転
  */
@@ -149,7 +146,6 @@ function boardRotate270Deg(evt) {
   redraw();
   // Sudokizer.astack.push(action);
 }
-
 /**
  * 上下反転
  */
@@ -159,7 +155,6 @@ function boardInverseUD(evt) {
   redraw();
   // Sudokizer.astack.push(action);
 }
-
 /**
  * 左右反転
  */
@@ -189,16 +184,6 @@ function setCellSize(evt) {
   }
   redraw();
 }
-
-/**
- * フォント設定（なかった）
- */
-/*
-function setFont(evt) {
-  alert('set font');
-  redraw();
-}
-*/
 
 /**
  * 表示色設定 ＜完成＞
@@ -253,7 +238,6 @@ function setQMode(evt) {
   Sudokizer.config.qamode = 'question';
   redraw();
 }
-
 /**
  * 解答入力モード ＜完成＞
  */
@@ -261,7 +245,6 @@ function setAMode(evt) {
   Sudokizer.config.qamode = 'answer';
   redraw();
 }
-
 /**
  * 候補入力モード ＜完成＞
  */
@@ -276,22 +259,13 @@ function switchKMode(evt) {
  * undo
  */
 function actionUndo(evt) {
-  // とりあえずここにメモ: ActionStackのメソッド
-  // - undo：ポインタを1個前に戻して盤面をチェックアウト
-  // - redo：ポインタを1個次に進めて盤面をチェックアウト
-  // - push：現在のポインタの位置にアクションを「破壊的に」追加
-  // - clear: actionstack初期化 + redraw()
-
-  // Sudokizer.astack.undo();
-  alert('undo')
+  Sudokizer.astack.undo();
 }
-
 /**
  * redo
  */
 function actionRedo(evt) {
-  // Sudokizer.astack.redo();
-  alert('redo');
+  Sudokizer.astack.redo();
 }
 
 /**
@@ -533,6 +507,7 @@ function keyDownNumInput(cpos, keycode) {
 /**
  * 盤面再描画用呼び出しルーチン
  * Sudokizerの中身が変わった際に呼び出す実装
+ * ＜※　再描画他、様々なイベント発生時の後処理として使用する＞
  */
 function redraw() {
   let drawconfig = {
@@ -548,6 +523,9 @@ function redraw() {
       Sudokizer.board.drawBoardConsole();
     }
   }
+
+  // 再描画以外の諸々の同期処理
+  sync_undoredo();     // 戻る、進むボタンのdisabled状態制御
 }
 
 /**
@@ -560,4 +538,22 @@ function drawForDownload() {
     'dispsize': $('#menu_imgwrite_size').val(),
   };
   Sudokizer.board.drawBoardCanvas(drawconfig);
+}
+
+/**
+ * Undo, Redoボタンの状態同期
+ */
+function sync_undoredo() {
+  // Undo: スタックが空 (sp = 0) のとき
+  if (Sudokizer.astack.sp === 0) {
+    $('#opform_undo').prop('disabled', true);
+  } else {
+    $('#opform_undo').prop('disabled', false);
+  }
+  // Redo: スタックが最新 (sp = spmax) のとき
+  if (Sudokizer.astack.sp === Sudokizer.astack.spmax) {
+    $('#opform_redo').prop('disabled', true);
+  } else {
+    $('#opform_redo').prop('disabled', false);
+  }
 }

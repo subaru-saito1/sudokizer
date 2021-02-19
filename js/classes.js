@@ -148,6 +148,7 @@ class Board {
   }
 
 
+  
   // ================================ URL出力 ==================================
 
   /**
@@ -465,6 +466,7 @@ class Board {
   }
   
 
+
   // ============================== canvas描画 ====================================
 
   /**
@@ -611,12 +613,11 @@ class Board {
     ctx.lineWidth = 1;
   }
 
-
   /**
    * SVGへの描画
    */
   drawBoardSVG() {
-    alert('draw Board SVG');
+    console.log('draw Board SVG');
   }
 
   /**
@@ -654,9 +655,12 @@ class Board {
  */
 class ActionStack {
   constructor() {
-    this.stack = [new Action('default')];
+    this.stack = [
+      new Action([{cmd:'default', pos:-1, num:-1}])
+    ];
     this.sp = 0;      // スタックポインタ
     this.spmax = 0;   // 現在の最新位置
+    console.log(this.stack, this.sp, this.spmax);
   }
   /**
    * アクションをプッシュ
@@ -669,6 +673,7 @@ class ActionStack {
     } else {
       this.stack[this.sp] = newaction;
     }
+    console.log(this.stack, this.sp, this.spmax);
   }
   /**
    * 操作を一つ元に戻す
@@ -678,6 +683,7 @@ class ActionStack {
       this.stack[this.sp].revert();
       this.sp--;
     }
+    console.log(this.stack, this.sp, this.spmax);
   }
   /**
    * 操作を一つ進める
@@ -686,6 +692,67 @@ class ActionStack {
     if (this.sp < spmax) {
       this.sp++;
       this.stack[this.sp].commit();
+    }
+    console.log(this.stack, this.sp, this.spmax);
+  }
+}
+
+/**
+ * Actionクラス
+ */
+class Action {
+  constructor(oplist) {
+    this.oplist = oplist;
+  }
+
+  /**
+   * アクションリストをグローバル盤面に適用する
+   */
+  commit() {
+    for (op of this.oplist) {
+      // マスに入力する
+      if (op.cmd === 'ansins') {
+      // マスから削除する
+      } else if (op.cmd === 'ansdel') {
+      // ヒントマスを入力する
+      } else if (op.cmd === 'hintins') {
+      // ヒントマスから削除する
+      } else if (op.cmd === 'hintdel') {
+      // 候補をONにする
+      } else if (op.cmd === 'kouhoon') {
+      // 候補をOFFにする
+      } else if (op.cmd === 'kouhooff') {
+      // 除外候補をONにする
+      } else if (op.cmd === 'exkouhoon') {
+      // 除外候補をOFFにする
+      } else if (op.cmd === 'exkouhooff') {
+      }
+    }
+  }
+
+  /**
+   * アクションリストを逆適用する。
+   */
+  revert() {
+    revlist = this.oplist.slice().reverse();   // 非破壊リバース
+    for (op of revlist) {
+      // マスに入力する
+      if (op.cmd === 'ansins') {
+      // マスから削除する
+      } else if (op.cmd === 'ansdel') {
+      // ヒントマスを入力する
+      } else if (op.cmd === 'hintins') {
+      // ヒントマスから削除する
+      } else if (op.cmd === 'hintdel') {
+      // 候補をONにする
+      } else if (op.cmd === 'kouhoon') {
+      // 候補をOFFにする
+      } else if (op.cmd === 'kouhooff') {
+      // 除外候補をONにする
+      } else if (op.cmd === 'exkouhoon') {
+      // 除外候補をOFFにする
+      } else if (op.cmd === 'exkouhooff') {
+      }
     }
   }
 }

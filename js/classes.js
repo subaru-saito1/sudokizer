@@ -279,51 +279,9 @@ class Board {
   // ============================ pencilBox入出力 ================================
 
   /**
-   * nikolicom形式でファイルを読み込み
-   * @param array lines  読み込んだ文字列のリスト
-   */
-  pbReadNikolicom(lines) {
-    try {
-      this.author_ja = lines[1].split(':')[1];
-      this.author_en = lines[1].split(':')[2];
-      this.clear();     // 盤面初期化
-      // サイズバリデーション
-      if (!(Number(lines[2][1]) === this.bsize && 
-            Number(lines[2][3]) === this.bsize)) {
-        console.log(lines[2][1], lines[2][3])
-        throw 'BoardSizeError';
-      }
-      // ヒント盤面
-      for (let l = 3; l < 3 + this.bsize; l++) {
-        for (let j = 0; j < this.bsize; j++) {
-          if (lines[l][j] !== '0') {
-            let c = (l - 3) * this.bsize + j;
-            this.board[c].ishint = true;
-          }
-        }
-      }
-      let lines2 = lines[12].split('\n');  // なんか後半だけ\n区切りだった
-      // 解答盤面
-      for (let l = 0; l < this.bsize; l++) {
-        for (let j = 0; j < this.bsize; j++) {
-          let c = l * this.bsize + j;
-          this.board[c].num = lines2[l][j];
-        }
-      }
-    } catch(err) {
-      console.log(err);
-      alert('盤面の読み込みに失敗しました');
-    }
-    // デバッグモード
-    if (Sudokizer.config.debugmode) {
-      console.log(this);
-    }
-    redraw();
-  }
-
-  /**
    * 通常のpencilbox形式でファイル読み込み
    * @param array lines  読み込んだ文字列のリスト
+   * @return array 著者情報の配列（nikolicom側とインタフェースを合わせたいので）
    */
   pbReadNormal(lines) {
     try {
@@ -367,24 +325,139 @@ class Board {
       console.log(this);
     }
     redraw();
+    return ['', ''];    // 著者情報（空）
   }
 
   /**
-   * nikolicom形式での出力
-   * @return dousimasyo
+   * nikolicom形式でファイルを読み込み
+   * @param array lines  読み込んだ文字列のリスト
+   * @return array 著者情報の配列
    */
-  pbWriteNikolicom() {
-    console.log('write nikoli.com');
-    return;
+  pbReadNikolicom(lines) {
+    try {
+      this.author_ja = lines[1].split(':')[1];
+      this.author_en = lines[1].split(':')[2];
+      this.clear();     // 盤面初期化
+      // サイズバリデーション
+      if (!(Number(lines[2][1]) === this.bsize && 
+            Number(lines[2][3]) === this.bsize)) {
+        console.log(lines[2][1], lines[2][3])
+        throw 'BoardSizeError';
+      }
+      // ヒント盤面
+      for (let l = 3; l < 3 + this.bsize; l++) {
+        for (let j = 0; j < this.bsize; j++) {
+          if (lines[l][j] !== '0') {
+            let c = (l - 3) * this.bsize + j;
+            this.board[c].ishint = true;
+          }
+        }
+      }
+      let lines2 = lines[12].split('\n');  // なんか後半だけ\n区切りだった
+      // 解答盤面
+      for (let l = 0; l < this.bsize; l++) {
+        for (let j = 0; j < this.bsize; j++) {
+          let c = l * this.bsize + j;
+          this.board[c].num = lines2[l][j];
+        }
+      }
+    } catch(err) {
+      console.log(err);
+      alert('盤面の読み込みに失敗しました');
+    }
+    // デバッグモード
+    if (Sudokizer.config.debugmode) {
+      console.log(this);
+    }
+    redraw();
+    return [this.author_ja, this.author_en];
   }
 
   /**
    * 通常のpencilbox形式での出力
    * @return dousimasyo
    */
-  pbWriteNormal() {
-    console.log('write normal pencilbox');
-    return;
+  pbWriteNormal(authorinfo) {
+    let ret = '';     // ここにファイル内容を文字列で書いていく
+    let nl = '\n';    // 改行コード
+    ret += this.bsize + nl;   // 1行目：サイズ情報
+    // ヒント情報
+    for (let i = 0; i < this.bsize; i++) {
+      for (let j = 0; j < this.bsize; j++) {
+        let c = i * this.bsize + j;
+        if (this.board[c].ishint && this.board[c].num !== '?') {
+          ret += this.board[c].num + ' ';  // ?以外のヒントマス
+        } else {
+          ret += '. ';                // 解答マス + ?マス
+        }
+      }
+      ret += nl;
+    }
+    // 解答情報
+    for (let i = 0; i < this.bsize; i++) {
+      for (let j = 0; j < this.bsize; j++) {
+        let c = i * this.bsize + j;
+        if (this.board[c].ishint) {
+          ret += '. ';
+        } else {
+          ret += this.board[c].num + ' ';
+        }
+      }
+      ret += nl;
+    }
+    // デバッグモード
+    if (Sudokizer.config.debugmode) {
+      console.log(ret);
+    }
+    return ret;
+  }
+
+  /**
+   * nikolicom形式での出力
+   * @return dousimasyo
+   */
+  pbWriteNikolicom(authorinfo) {
+    let ret = '';     // ここにファイル内容を文字列で書いていく
+    let nl = '\n';    // 改行コード
+    ret += '--' + nl;                                        // 1行目
+    ret += ':' + authorinfo[0] + ':' + authorinfo[1] + nl;   // 2行目（作者情報）
+    ret += ';' + this.bsize + '*' + this.bsize + nl;         // 3行目（サイズ情報）
+    // ヒント情報
+    for (let i = 0; i < this.bsize; i++) {
+      for (let j = 0; j < this.bsize; j++) {
+        let c = i * this.bsize + j;
+        if (this.board[c].ishint) {
+          ret += this.board[c].num;  // ヒントマス
+        } else {
+          ret += '0';                // 解答マス
+        }
+      }
+      ret += nl;
+    }
+    // 解答情報
+    for (let i = 0; i < this.bsize; i++) {
+      for (let j = 0; j < this.bsize; j++) {
+        let c = i * this.bsize + j;
+        ret += this.board[c].num;
+      }
+      ret += nl;
+    }
+    ret += '--' + nl;
+    // デバッグモード
+    if (Sudokizer.config.debugmode) {
+      console.log(ret);
+    }
+    return ret;
+  }
+
+  /**
+   * nikolicom形式で出力する際の事前バリデーション
+   * - ?ヒントがないか
+   * - 解答がちゃんと埋まっているか
+   */
+  validateNikolicom() {
+    // 暫定
+    return true;
   }
   
 

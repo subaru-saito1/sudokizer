@@ -13,7 +13,7 @@
  * 新規盤面作成
  */
 function newFile(evt) {
-  if (confirm('新規作成しますか？')) {
+  if (confirm('新規作成しますか？\n（※この操作は元に戻せません）')) {
     // 新規オブジェクト作成というよりは盤面状態を全リセット
     Sudokizer.board.clear();
     redraw();

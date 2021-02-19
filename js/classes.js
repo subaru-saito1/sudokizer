@@ -8,6 +8,8 @@
  */
 
 
+// =========================================================================
+
 /**
  * Cellsクラス
  */
@@ -68,6 +70,8 @@ class Cell {
 
 }
 
+
+// =====================================================================
 
 /**
  * Boardクラス
@@ -638,6 +642,52 @@ class Board {
     console.log(horizon);
   }
 
+}
+
+
+// =================================================================
+
+/**
+ * ActionStackクラス
+ * 
+ * Undo, Redoに関する操作のスタック
+ */
+class ActionStack {
+  constructor() {
+    this.stack = [new Action('default')];
+    this.sp = 0;      // スタックポインタ
+    this.spmax = 0;   // 現在の最新位置
+  }
+  /**
+   * アクションをプッシュ
+   */
+  push(newaction) {
+    this.sp++;
+    this.spmax = sp;  // 現在以降のアクションを無効化
+    if (spmax > this.stack.length) {
+      this.stack.push(newaction)
+    } else {
+      this.stack[this.sp] = newaction;
+    }
+  }
+  /**
+   * 操作を一つ元に戻す
+   */
+  undo() {
+    if (this.sp > 0) {
+      this.stack[this.sp].revert();
+      this.sp--;
+    }
+  }
+  /**
+   * 操作を一つ進める
+   */
+  redo() {
+    if (this.sp < spmax) {
+      this.sp++;
+      this.stack[this.sp].commit();
+    }
+  }
 }
 
 

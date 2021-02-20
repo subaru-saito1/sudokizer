@@ -380,17 +380,18 @@ function clickBoard(evt) {
  * 盤面へのキーボード押下
  */
 function keyDownBoard(evt) {
-  let cursorKeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-  let numKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  let cursorkeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  let numkeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  let kateikeys = ['z', 'x', 'c', 'v', 'b'];
   let cpos = Sudokizer.config.cursorpos;
 
   // カーソル移動
-  if (cursorKeys.includes(evt.key)) {
+  if (cursorkeys.includes(evt.key)) {
     evt.preventDefault();
     keyDownCursorMove(cpos, evt.key);
   }
   // 数字入力
-  if (numKeys.includes(evt.key)) {
+  if (numkeys.includes(evt.key)) {
     keyDownNumInput(cpos, evt.key);
   }
   // ？ヒント入力（問題モードのみ）
@@ -434,6 +435,10 @@ function keyDownBoard(evt) {
     } else {
       $('#opform_kmode').prop("checked", true);
     }
+  }
+  // 仮定スイッチ
+  if (kateikeys.includes(evt.key)) {
+    keyDownKateiSwitch(evt.key);
   }
   redraw();
   // Sudokizer.astack.push(action);
@@ -505,6 +510,27 @@ function keyDownNumInput(cpos, keycode) {
       }
     }
   }
+}
+
+/**
+ * キーボードにより仮定レベルの切り替え
+ */
+function keyDownKateiSwitch(keycode) {
+  if (keycode === 'z') {
+    Sudokizer.config.kateilevel = '0';
+  } else if (keycode === 'x') {
+    Sudokizer.config.kateilevel = '1';
+  } else if (keycode === 'c') {
+    Sudokizer.config.kateilevel = '2';
+  } else if (keycode === 'v') {
+    Sudokizer.config.kateilevel = '3';
+  } else if (keycode === 'b') {
+    Sudokizer.config.kateilevel = '4';
+  } else {
+    throw 'keyDownKateiSwitch Invalid KeyCode';
+  }
+  // フォーム側も同期
+  $('#opform_kateilevel').val(Sudokizer.config.kateilevel);
 }
 
 /* ==============================================================

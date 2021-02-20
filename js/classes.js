@@ -164,7 +164,7 @@ class Board {
       this.board[cpos].kouho[num - 1] = false;
       this.board[cpos].kklevel[num - 1] = '0';
     } else {
-      throw 'kouhoOnAtomic Validation Error';
+      throw 'kouhoOffAtomic Validation Error';
     }  
   }
   // 除外候補ON
@@ -185,6 +185,121 @@ class Board {
       this.board[cpos].exkouho[num - 1] = false;
     } else {
       throw 'exkouhoOffAtomic Validation Error';
+    }
+  }
+
+
+  // ==================== 基本アクション ======================
+
+  /**
+   * マス解答入力
+   */
+  ansIns(cpos, num, klevel) {
+    this.ansInsAtomic(cpos, num, klevel);
+    for (let i = 0; i < this.bsize; i++) {
+      // 候補消去
+      if (this.board[cpos].kouho[i]) {
+        this.kouhoOffAtomic(cpos, i+1, this.board[cpos].kklevel[i]);
+      }
+    }
+  }
+
+  /**
+   * マス解答消去
+   */
+  ansDel(cpos) {
+    if (!this.board[cpos].ishint) {
+      let num = this.board[cpos].num;
+      let klevel = this.board[cpos].klevel;
+      // 空白マス：ヒント除去
+      if (this.board[cpos].num === '0') {
+        for (let i = 0; i < this.bsize; i++) {
+          if (this.board[cpos].kouho[i] &&
+              (Sudokizer.config.kateilevel === '0' ||
+               Sudokizer.config.kateilevel === this.board[cpos].kklevel[i])) {
+            this.kouhoOffAtomic(cpos, i+1, this.board[cpos].kklevel[i]);
+          }
+        }
+      // 入力マス：仮定レベル条件を満たした場合のみ削除
+      } else {
+        if (Sudokizer.config.kateilevel === '0' ||
+            Sudokizer.config.kateilevel === klevel) {
+          this.ansDelAtomic(cpos, num, klevel);
+        }
+      }
+    }
+  }
+
+  /**
+   * マスヒント入力
+   */
+  hintIns(cpos, num) {
+    // 新規ヒント追加の場合：候補消去
+    if (!this.board[cpos].ishint) {
+      for (let i = 0; i < this.bsize; i++) {
+        if (this.board[cpos].kouho[i]) {
+          this.kouhoOffAtomic(cpos, i+1, this.board[cpos].kklevel[i]);
+        }
+      }
+    // ヒント塗り替えの場合：除外候補消去
+    } else {
+      for (let i = 0; i < this.bsize; i++) {
+        if (this.board[cpos].exkouho[i]) {
+          this.exkouhoOffAtomic(cpos, i+1);
+        }
+      }
+    }
+    this.hintInsAtomic(cpos, num);
+  }
+
+  /**
+   * マスヒント消去
+   */
+  hintDel(cpos) {
+    let num = this.board[cpos].num;
+    let klevel = this.board[cpos].klevel;
+    // ヒントマスの場合(ヒント＋除外候補消去)
+    if (this.board[cpos].ishint) {
+      for (let i = 0; i < this.bsize; i++) {
+        if (this.board[cpos].exkouho[i]) {
+          this.exkouhoOffAtomic(cpos, i+1);
+        }
+      }
+      this.hintDelAtomic(cpos, num);
+    } else {
+      // 空白の場合（候補除去）
+      if (this.board[cpos].num === '0') {
+        for (let i = 0; i < this.bsize; i++) {
+          if (this.board[pos].kouho[i]) {
+            this.kouhoOffAtomic(cpos, i+1, klevel);
+          }
+        }
+      // 入力済みマスの場合
+      } else {
+        this.ansDelAtomic(cpos, num, klevel);
+      }
+    }
+  }
+
+  /**
+   * 候補設定
+   */
+  kouhoSet(cpos, num, klevel) {
+    if (this.board[cpos].kouho[num - 1]) {
+      this.kouhoOffAtomic(cpos, num, klevel);
+    } else {
+      this.kouhoOnAtomic(cpos, num, klevel);
+    }
+  }
+
+  /**
+   * 除外候補設定
+   */
+  exkouhoSet(cpos, num) {
+    if (this.board[cpos].exkouho[num - 1]) {
+      this.exkouhoOffAtomic(cpos, num);
+    } else {
+      this.exkouhoOnAtomic(cpos, num);
     }
   }
 

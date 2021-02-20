@@ -20,9 +20,11 @@ class Cell {
     this.klevel = '0';     // 仮定レベル
     this.kouho = [];       // 候補リスト
     this.exkouho = [];     // 除外候補リスト
+    this.kklevel = [];     // 候補の仮定レベルリスト
     for (let i = 0; i < bsize; i++) {
       this.kouho.push(false);
       this.exkouho.push(false);
+      this.kklevel.push('0');
     }
   }
 
@@ -38,6 +40,7 @@ class Cell {
       for (let i = 0; i < Sudokizer.board.bsize; i++) {
         this.exkouho[i] = false;
         this.kouho[i] = false;
+        this.kklevel[i] = '0';
       }
     } else {
       if (!this.ishint) {
@@ -48,10 +51,18 @@ class Cell {
             this.num = '0';
           }
           for (let i = 0; i < Sudokizer.board.bsize; i++) {
-            this.kouho[i] = false;
             this.exkouho[i] = false;
           }
         }
+        // 候補数字消去
+        for (let i = 0; i < Sudokizer.board.bsize; i++) {
+          if (Sudokizer.config.kateilevel === '0' ||
+              Sudokizer.config.kateilevel === this.kklevel[i]) {
+            this.kouho[i] = false;
+            this.kklevel[i] = '0';
+          }
+        }
+        
       }
     }
   }
@@ -66,6 +77,7 @@ class Cell {
     for (let k = 0; k < Sudokizer.board.bsize; k++) {
       this.kouho[k] = fromcell.kouho[k];
       this.exkouho[k] = fromcell.exkouho[k];
+      this.kklevel[k] = fromcell.kklevel[k];
     }
   }
 
@@ -94,6 +106,44 @@ class Board {
   }
 
   // ============================ 基本盤面操作 ===============================
+
+  // =============== アトミックアクション ================
+  // これらはバリデーション処理を一切しないので注意
+  ansInsAtomic(cpos, num, klevel) {
+    this.board[cpos].num = num;
+    this.board[cpos].klevel = klevel;
+  }
+  ansDelAtomic(cpos, num, klevel) {
+    this.board[cpos].num = '0';
+    this.board[cpos].klevel = '0';
+  }
+  hintInsAtomic(cpos, num) {
+    this.board[cpos].num = num;
+    this.board[cpos].ishint = true;
+  }
+  hintDelAtomic(cpos, num) {
+    this.board[cpos].num = '0';
+    this.board[cpos].ishint = false;
+  }
+  kouhoOnAtomic(cpos, num, klevel) {
+    this.board[cpos].kouho[num - 1] = true;
+    this.board[cpos].kklevel[num - 1] = klevel;
+  }
+  kouhoOffAtomic(cpos, num, klevel) {
+    this.board[cpos].kouho[num - 1] = false;
+    this.board[cpos].kklevel[num - 1] = '0';
+  }
+  exkouhoOnAtomic(cpos, num) {
+    this.board[cpos].exkouho[num - 1] = true;
+  }
+  exkouhoOffAtomic(cpos, num) {
+    this.board[cpos].exkouho[num - 1] = false;
+  }
+
+
+
+
+  // ================ 初期化系 =================
   /**
    * 盤面の初期化 
    */
@@ -129,8 +179,7 @@ class Board {
   }
 
 
-  // ============================ 複合盤面操作 ===============================
-
+  // ============== 複合盤面操作 =============
   /**
    * 回転・反転のラッパー関数
    * @param string cmd: 下記参照
@@ -187,6 +236,7 @@ class Board {
     }
     return newboard;
   }
+
 
   // ============================== 操作差分獲得 ==================================
   diff(newboard) {

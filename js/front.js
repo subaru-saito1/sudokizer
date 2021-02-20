@@ -14,13 +14,24 @@
  */
 function newFile(evt) {
   if (confirm('新規作成しますか？\n（※この操作は元に戻せません）')) {
-    // 新規オブジェクト作成というよりは盤面状態を全リセット
-    Sudokizer.board.clear();
+    Sudokizer.board = new Board();         // 盤面初期化
+    Sudokizer.astack = new ActionStack();  // アクションスタック初期化
     redraw();
-    // Sudokizer.astack.clear(action);
   }
 }
-
+/**
+ * 新規盤面作成（戻るで復帰可能バージョン）
+ * とりあえず実装だけしておくが今は使っていない
+ */
+/*
+function newFile(evt) {
+  if (confirm('新規作成しますか？')) {
+    let ret = Sudokizer.board.clear();    // 新規作成せず盤面状態を消去
+    Sudokizer.board = ret[0];                     // 消去後の盤面に差し替え
+    Sudokizer.astack.push(new Action(ret[1]));    // 差分をプッシュ
+    redraw();
+  }
+}
 
 /**
  * URL出力
@@ -123,46 +134,46 @@ function boardNewWindow(evt) {
  * 90度右回転
  */
 function boardRotate90Deg(evt) {
-  let newboard = Sudokizer.board.transCreate('rotate90');
-  Sudokizer.board = newboard;
+  let ret = Sudokizer.board.transform('rotate90');
+  Sudokizer.board = ret[0];              // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();
-  // Sudokizer.astack.push(action);
 }
 /**
  * 180度右回転
  */
 function boardRotate180Deg(evt) {
-  let newboard = Sudokizer.board.transCreate('rotate180');
-  Sudokizer.board = newboard;
+  let ret = Sudokizer.board.transform('rotate180');
+  Sudokizer.board = ret[0];              // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();
-  // Sudokizer.astack.push(action);
 }
 /**
  * 90度左回転
  */
 function boardRotate270Deg(evt) {
-  let newboard = Sudokizer.board.transCreate('rotate270');
-  Sudokizer.board = newboard;
+  let ret = Sudokizer.board.transform('rotate270');
+  Sudokizer.board = ret[0];              // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();
-  // Sudokizer.astack.push(action);
 }
 /**
  * 上下反転
  */
 function boardInverseUD(evt) {
-  let newboard = Sudokizer.board.transCreate('inverseUD');
-  Sudokizer.board = newboard;
+  let ret = Sudokizer.board.transform('inverseUD');
+  Sudokizer.board = ret[0];              // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();
-  // Sudokizer.astack.push(action);
 }
 /**
  * 左右反転
  */
 function boardInverseLR(evt) {
-  let newboard = Sudokizer.board.transCreate('inverseLR');
-  Sudokizer.board = newboard;
+  let ret = Sudokizer.board.transform('inverseLR');
+  Sudokizer.board = ret[0];              // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();
-  // Sudokizer.astack.push(action);
 }
 
 
@@ -260,34 +271,34 @@ function switchKMode(evt) {
  */
 function actionUndo(evt) {
   Sudokizer.astack.undo();
+  redraw();
 }
 /**
  * redo
  */
 function actionRedo(evt) {
   Sudokizer.astack.redo();
+  redraw();
 }
 
 /**
  * 解答消去
  */
 function answerClear(evt) {
-  for (let i = 0; i < Sudokizer.board.numcells; i++) {
-    Sudokizer.board.board[i].clear('answer');
-  }
+  let ret = Sudokizer.board.ansClear();  // [newboard, diff]
+  Sudokizer.board = ret[0];              // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();
-  // Sudokizer.astack.push(action);
 }
 
 /**
  * 候補消去
  */
 function kouhoClear(evt) {
-  for (let i = 0; i < Sudokizer.board.numcells; i++) {
-    Sudokizer.board.board[i].clear('kouho');
-  }
+  let ret = Sudokizer.board.kouhoClear();    // [newboard, diff]
+  Sudokizer.board = ret[0];                  // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1])); // アクション追加
   redraw();
-  // Sudokizer.astack.push(action);
 }
 
 /**

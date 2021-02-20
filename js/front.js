@@ -506,6 +506,7 @@ function keyDownNumInput(cpos, keycode) {
       if (!Sudokizer.board.board[cpos].ishint && Sudokizer.board.board[cpos].num === '0')
       Sudokizer.board.board[cpos].kouho[keycode - 1] = 
         !Sudokizer.board.board[cpos].kouho[keycode - 1];
+      Sudokizer.board.board[cpos].kklevel[keycode - 1] = Sudokizer.config.kateilevel;
     }
   }
 }

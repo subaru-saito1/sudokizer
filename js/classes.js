@@ -49,6 +49,7 @@ class Cell {
           }
           for (let i = 0; i < Sudokizer.board.bsize; i++) {
             this.kouho[i] = false;
+            this.exkouho[i] = false;
           }
         }
       }
@@ -92,13 +93,53 @@ class Board {
     }
   }
 
+  // ============================ 基本盤面操作 ===============================
   /**
    * 盤面の初期化 
    */
   clear() {
+    let newboard = this.transCreate();
     for (let c = 0; c < this.numcells; c++) {
-      this.board[c].clear('question');
+      newboard.board[c].clear('question');
     }
+    let alist = this.diff(newboard);
+    return [newboard, alist];
+  }
+  /**
+   * 解答消去
+   */
+  ansClear() {
+    let newboard = this.transCreate();   // 差分をとるためコピー先で操作を実行
+    for (let c = 0; c < this.numcells; c++) {
+      newboard.board[c].clear('answer');
+    }
+    let alist = this.diff(newboard);     // 操作の差分を取得
+    return [newboard, alist];
+  }
+  /**
+   * 候補消去
+   */
+  kouhoClear() {
+    let newboard = this.transCreate();   // 差分をとるためコピー先で操作を実行
+    for (let c = 0; c < this.numcells; c++) {
+      newboard.board[c].clear('kouho');
+    }
+    let alist = this.diff(newboard);     // 操作の差分を取得
+    return [newboard, alist];
+  }
+
+
+  // ============================ 複合盤面操作 ===============================
+
+  /**
+   * 回転・反転のラッパー関数
+   * @param string cmd: 下記参照
+   * @return [newboard, alist] 新規盤面と差分リスト
+   */
+  transform(cmd) {
+    let newboard = this.transCreate(cmd);
+    let alist = this.diff(newboard);
+    return [newboard, alist];
   }
 
   /**
@@ -147,8 +188,13 @@ class Board {
     return newboard;
   }
 
+  // ============================== 操作差分獲得 ==================================
+  diff(newboard) {
+    // this.board -> newboard.board の差分をActionList形式で取得
+    return [{'op': 'placeholder'}];
+  }
 
-  
+
   // ================================ URL出力 ==================================
 
   /**
@@ -656,7 +702,7 @@ class Board {
 class ActionStack {
   constructor() {
     this.stack = [
-      new Action([{cmd:'default', pos:-1, num:-1}])
+      new Action([{cmd:'default'}])
     ];
     this.sp = 0;      // スタックポインタ
     this.spmax = 0;   // 現在の最新位置
@@ -667,8 +713,8 @@ class ActionStack {
    */
   push(newaction) {
     this.sp++;
-    this.spmax = sp;  // 現在以降のアクションを無効化
-    if (spmax > this.stack.length) {
+    this.spmax = this.sp;  // 現在以降のアクションを無効化
+    if (this.spmax > this.stack.length) {
       this.stack.push(newaction)
     } else {
       this.stack[this.sp] = newaction;
@@ -689,11 +735,18 @@ class ActionStack {
    * 操作を一つ進める
    */
   redo() {
-    if (this.sp < spmax) {
+    if (this.sp < this.spmax) {
       this.sp++;
       this.stack[this.sp].commit();
     }
     console.log(this.stack, this.sp, this.spmax);
+  }
+  /**
+   * スタックを空にする
+   */
+  clear() {
+    this.sp = 0;
+    this.spmax = 0;
   }
 }
 
@@ -709,7 +762,7 @@ class Action {
    * アクションリストをグローバル盤面に適用する
    */
   commit() {
-    for (op of this.oplist) {
+    for (let op of this.oplist) {
       // マスに入力する
       if (op.cmd === 'ansins') {
       // マスから削除する
@@ -734,8 +787,8 @@ class Action {
    * アクションリストを逆適用する。
    */
   revert() {
-    revlist = this.oplist.slice().reverse();   // 非破壊リバース
-    for (op of revlist) {
+    let revlist = this.oplist.slice().reverse();   // 非破壊リバース
+    for (let op of revlist) {
       // マスに入力する
       if (op.cmd === 'ansins') {
       // マスから削除する

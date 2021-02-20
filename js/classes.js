@@ -624,26 +624,25 @@ class Board {
         // ヒントマス
         if (this.board[cid].ishint) {
           // ヒント数字
-          ctx.fillStyle = Sudokizer.config.colorset.ht;
           if (this.board[cid].num !== '0') {
+            ctx.fillStyle = Sudokizer.config.colorset.ht;
             ctx.font = fontsize + 'px ' + Sudokizer.config.dispfont;
             ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
           }
           // 除外候補数字 (?ヒントマスのみ)
-          ctx.fillStyle = Sudokizer.config.colorset.ex;
           if (this.board[cid].num === '?') {
-            this.drawBoardCanvasKouho(ctx, cid, this.board[cid].exkouho, ofsx, ofsy, csize, true)
+            this.drawBoardCanvasKouho(ctx, cid, ofsx, ofsy, csize);
           }
         // 通常マス
         } else {
-          ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].klevel];
           // 入力数字（非ヒントの入力済みマス）
           if (this.board[cid].num !== '0') {
+            ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].klevel];
             ctx.font = fontsize + 'px ' + Sudokizer.config.dispfont;
             ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
           // 候補数字（非ヒントの空白マス）
           } else {
-            this.drawBoardCanvasKouho(ctx, cid, this.board[cid].kouho, ofsx, ofsy, csize, false)
+            this.drawBoardCanvasKouho(ctx, cid, ofsx, ofsy, csize);
           }
         }
       }
@@ -655,30 +654,35 @@ class Board {
    * canvasへの候補数字の描画
    * @param object ctx : 描画コンテキスト
    * @param int cid    : マス番号
-   * @param array kouho: 候補のブール配列
    * @param int ofsx   : 横方向マスオフセット
    * @param int ofsy   : 縦方向マスオフセット
    * @param int csize  : セルサイズ
-   * @param bool exflg : 除外候補かどうかのフラグ
    */
-  drawBoardCanvasKouho(ctx, cid, kouho, ofsx, ofsy, csize, exflg) {
+  drawBoardCanvasKouho(ctx, cid, ofsx, ofsy, csize) {
     let fontsize = csize / 3.5;         
     let csqrt = Math.sqrt(this.bsize);  // 3
 
-    ctx.font = fontsize + 'px sans-serif';;
-    for (let ki = 0; ki < csqrt; ki++) {
-      for (let kj = 0; kj < csqrt; kj++) {
-        let k = ki * csqrt + kj;
-        // k番目の候補がONだった場合、候補を所定位置に表示
-        if (kouho[k]) {
-          // 通常候補の場合：いちいち色を設定してから数字を描画
-          if (!exflg) {
+    ctx.font = fontsize + 'px sans-serif';
+    // 通常候補
+    if (!this.board[cid].ishint) {
+      for (let ki = 0; ki < csqrt; ki++) {
+        for (let kj = 0; kj < csqrt; kj++) {
+          let k = ki * csqrt + kj;
+          if (this.board[cid].kouho[k]) {
             ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].kklevel[k]];
             let posx = ofsx + (csize / csqrt) * (kj + 0.5);    // フォントx座標
             let posy = ofsy + (csize / csqrt) * (ki + 0.5);   // フォントy座標
             ctx.fillText(k + 1, posx, posy);
-          // 除外候補の場合は斜線を引く
-          } else {
+          }
+        }
+      }
+    // 除外候補
+    } else {
+      ctx.fillStyle = Sudokizer.config.colorset.ex;
+      for (let ki = 0; ki < csqrt; ki++) {
+        for (let kj = 0; kj < csqrt; kj++) {
+          let k = ki * csqrt + kj;
+          if (this.board[cid].exkouho[k]) {
             let posx = ofsx + (csize / csqrt) * (kj + 0.5);    // フォントx座標
             let posy = ofsy + (csize / csqrt) * (ki + 0.5);   // フォントy座標
             ctx.fillText(k + 1, posx, posy);

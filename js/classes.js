@@ -56,9 +56,10 @@ class Cell {
         }
         // 候補数字消去
         for (let i = 0; i < Sudokizer.board.bsize; i++) {
-          if (Sudokizer.config.kateilevel === '0' ||
-              Sudokizer.config.kateilevel === this.kklevel[i]) {
+          if (Sudokizer.config.kateilevel === '0') {
             this.kouho[i] = false;
+            this.kklevel[i] = '0';
+          } else if (Sudokizer.config.kateilevel === this.kklevel[i]) {
             this.kklevel[i] = '0';
           }
         }
@@ -147,25 +148,44 @@ class Board {
     }
   }
   // 候補ON
-  kouhoOnAtomic(cpos, num, klevel) {
+  kouhoOnAtomic(cpos, num) {
     if (!this.board[cpos].ishint &&
         !this.board[cpos].kouho[num - 1]) {
       this.board[cpos].kouho[num - 1] = true;
-      this.board[cpos].kklevel[num - 1] = klevel;
+      this.board[cpos].kklevel[num - 1] = '0';
     } else {
       throw 'kouhoOnAtomic Validation Error';
     }  
   }
   // 候補OFF
-  kouhoOffAtomic(cpos, num, klevel) {
+  kouhoOffAtomic(cpos, num) {
     if (!this.board[cpos].ishint &&
-        this.board[cpos].kouho[num - 1] &&
-        this.board[cpos].kklevel[num - 1] === klevel) {
+        this.board[cpos].kouho[num - 1]) {
       this.board[cpos].kouho[num - 1] = false;
       this.board[cpos].kklevel[num - 1] = '0';
     } else {
       throw 'kouhoOffAtomic Validation Error';
     }  
+  }
+  // 候補仮定無効化
+  kouhoDisableAtomic(cpos, num, klevel) {
+    if (!this.board[cpos].ishint &&
+        this.board[cpos].kouho[num - 1] &&
+        this.board[cpos].kklevel[num - 1] === '0') {
+      this.board[cpos].kklevel[num - 1] = klevel;
+    } else {
+      throw 'kouhoDisableAtomic Validation Error';
+    }
+  }
+  // 候補仮定無効化解除
+  kouhoEnableAtomic(cpos, num, klevel) {
+    if (!this.board[cpos].ishint &&
+      this.board[cpos].kouho[num - 1] &&
+      this.board[cpos].kklevel[num - 1] === klevel) {
+      this.board[cpos].kklevel[num - 1] = '0';
+    } else {
+      throw 'kouhoEnableAtomic Validation Error';
+    }
   }
   // 除外候補ON
   exkouhoOnAtomic(cpos, num) {
@@ -211,13 +231,15 @@ class Board {
     if (!this.board[cpos].ishint) {
       let num = this.board[cpos].num;
       let klevel = this.board[cpos].klevel;
-      // 空白マス：ヒント除去
+      // 空白マス：候補除去
       if (this.board[cpos].num === '0') {
         for (let i = 0; i < this.bsize; i++) {
-          if (this.board[cpos].kouho[i] &&
-              (Sudokizer.config.kateilevel === '0' ||
-               Sudokizer.config.kateilevel === this.board[cpos].kklevel[i])) {
-            this.kouhoOffAtomic(cpos, i+1, this.board[cpos].kklevel[i]);
+          if (this.board[cpos].kouho[i]) {
+            if (Sudokizer.config.kateilevel === '0') {
+              this.kouhoOffAtomic(cpos, i+1);
+            } else if (Sudokizer.config.kateilevel === this.board[cpos].kklevel[i]) {
+              this.kouhoEnableAtomic(cpos, i+1, Sudokizer.config.kateilevel);
+            }
           }
         }
       // 入力マス：仮定レベル条件を満たした場合のみ削除
@@ -285,10 +307,22 @@ class Board {
    * 候補設定
    */
   kouhoSet(cpos, num, klevel) {
-    if (this.board[cpos].kouho[num - 1]) {
-      this.kouhoOffAtomic(cpos, num, klevel);
+    // 仮定レベル０：単なる候補のスイッチ
+    if (klevel === '0') {
+      if (this.board[cpos].kouho[num - 1]) {
+        this.kouhoOffAtomic(cpos, num);
+      } else {
+        this.kouhoOnAtomic(cpos, num);
+      }
+    // 仮定レベル０以外：候補ありかつレベルが同じ場合のみ有効無効スイッチ
     } else {
-      this.kouhoOnAtomic(cpos, num, klevel);
+      if (this.board[cpos].kouho[num - 1]) {
+        if (this.board[cpos].kklevel[num - 1] === '0') {
+          this.kouhoDisableAtomic(cpos, num, klevel);
+        } else if (this.board[cpos].kklevel[num - 1] === klevel) {
+          this.kouhoEnableAtomic(cpos, num, klevel);
+        }
+      }
     }
   }
 
@@ -830,10 +864,15 @@ class Board {
         for (let kj = 0; kj < csqrt; kj++) {
           let k = ki * csqrt + kj;
           if (this.board[cid].kouho[k]) {
-            ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].kklevel[k]];
+            ctx.fillStyle = Sudokizer.config.colorset['l0'];
             let posx = ofsx + (csize / csqrt) * (kj + 0.5);    // フォントx座標
             let posy = ofsy + (csize / csqrt) * (ki + 0.5);   // フォントy座標
             ctx.fillText(k + 1, posx, posy);
+            // 候補レベルに応じて斜線を引く
+            if (this.board[cid].kklevel[k] > 0) {
+              ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].kklevel[k]];
+              ctx.fillText('＼', posx, posy);
+            }
           }
         }
       }

@@ -107,40 +107,86 @@ class Board {
 
   // ============================ 基本盤面操作 ===============================
 
-  // =============== アトミックアクション ================
-  // これらはバリデーション処理を一切しないので注意
+  // マス解答入力
   ansInsAtomic(cpos, num, klevel) {
-    this.board[cpos].num = num;
-    this.board[cpos].klevel = klevel;
+    if (!this.board[cpos].ishint) {
+      this.board[cpos].num = num;
+      this.board[cpos].klevel = klevel;
+    } else {
+      throw 'ansInsAtomic Validation Error';
+    }
   }
+  // マス解答削除
   ansDelAtomic(cpos, num, klevel) {
-    this.board[cpos].num = '0';
-    this.board[cpos].klevel = '0';
+    if (!this.board[cpos].ishint &&
+        this.board[cpos].num === num &&
+        this.board[cpos].klevel === klevel) {
+      this.board[cpos].num = '0';
+      this.board[cpos].klevel = '0';
+    } else {
+      throw 'ansDelAtomic Validation Error';
+    }
   }
+  // マスヒント入力
   hintInsAtomic(cpos, num) {
-    this.board[cpos].num = num;
-    this.board[cpos].ishint = true;
+    if (true) {
+      this.board[cpos].num = num;
+      this.board[cpos].ishint = true;
+    } else {
+      throw 'hintInsAtomic Validation Error';
+    }
   }
+  // マスヒント削除
   hintDelAtomic(cpos, num) {
-    this.board[cpos].num = '0';
-    this.board[cpos].ishint = false;
+    if (this.board[cpos].ishint &&
+        this.board[cpos].num === num) {
+      this.board[cpos].num = '0';
+      this.board[cpos].ishint = false;
+    } else {
+      throw 'hintDelAtomic Validation Error';
+    }
   }
+  // 候補ON
   kouhoOnAtomic(cpos, num, klevel) {
-    this.board[cpos].kouho[num - 1] = true;
-    this.board[cpos].kklevel[num - 1] = klevel;
+    if (!this.board[cpos].ishint &&
+        !this.board[cpos].kouho[num - 1]) {
+      this.board[cpos].kouho[num - 1] = true;
+      this.board[cpos].kklevel[num - 1] = klevel;
+    } else {
+      throw 'kouhoOnAtomic Validation Error';
+    }  
   }
+  // 候補OFF
   kouhoOffAtomic(cpos, num, klevel) {
-    this.board[cpos].kouho[num - 1] = false;
-    this.board[cpos].kklevel[num - 1] = '0';
+    if (!this.board[cpos].ishint &&
+        this.board[cpos].kouho[num - 1] &&
+        this.board[cpos].kklevel[num - 1] === klevel) {
+      this.board[cpos].kouho[num - 1] = false;
+      this.board[cpos].kklevel[num - 1] = '0';
+    } else {
+      throw 'kouhoOnAtomic Validation Error';
+    }  
   }
+  // 除外候補ON
   exkouhoOnAtomic(cpos, num) {
-    this.board[cpos].exkouho[num - 1] = true;
+    if (this.board[cpos].ishint &&
+        this.board[cpos].num === '?' &&
+        !this.board[cpos].exkouho[num - 1]) {
+      this.board[cpos].exkouho[num - 1] = true;
+    } else {
+      throw 'exkouhoOnAtomic Validation Error';
+    }
   }
+  // 除外候補OFF
   exkouhoOffAtomic(cpos, num) {
-    this.board[cpos].exkouho[num - 1] = false;
+    if (this.board[cpos].ishint &&
+        this.board[cpos].num === '?' &&
+        this.board[cpos].exkouho[num - 1]) {
+      this.board[cpos].exkouho[num - 1] = false;
+    } else {
+      throw 'exkouhoOffAtomic Validation Error';
+    }
   }
-
-
 
 
   // ================ 初期化系 =================

@@ -380,7 +380,7 @@ function clickBoard(evt) {
  * 盤面へのキーボード押下
  */
 function keyDownBoard(evt) {
-  let cursorKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  let cursorKeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   let numKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
   let cpos = Sudokizer.config.cursorpos;
 
@@ -397,11 +397,9 @@ function keyDownBoard(evt) {
   if (evt.key === '-') {
     if (Sudokizer.config.qamode === 'question') {
       if (Sudokizer.board.board[cpos].num === '?') {
-        Sudokizer.board.board[cpos].num = '0';
-        Sudokizer.board.board[cpos].ishint = false;
+        Sudokizer.board.hintDel(cpos);
       } else {
-        Sudokizer.board.board[cpos].num = '?';
-        Sudokizer.board.board[cpos].ishint = true;
+        Sudokizer.board.hintIns(cpos, '?');
       }
     }
   }
@@ -409,9 +407,9 @@ function keyDownBoard(evt) {
   if (evt.key === ' ') {
     evt.preventDefault();   // 画面移動無効化
     if (Sudokizer.config.qamode === 'question') {
-      Sudokizer.board.board[cpos].clear('question');
+      Sudokizer.board.hintDel(cpos);
     } else {
-      Sudokizer.board.board[cpos].clear('answer');
+      Sudokizer.board.ansDel(cpos);
     }
   }
   // 問題解答スイッチ
@@ -484,29 +482,27 @@ function keyDownNumInput(cpos, keycode) {
   if (!Sudokizer.config.kouhomode) {
     // 問題モード：ヒントON
     if (Sudokizer.config.qamode === 'question') {
-      Sudokizer.board.board[cpos].num = keycode;
-      Sudokizer.board.board[cpos].ishint = true;
+      Sudokizer.board.hintIns(cpos, keycode);
     // 解答モード：ヒントじゃない場合に入力、仮定レベル設定
     } else {
       if (!Sudokizer.board.board[cpos].ishint) {
-        Sudokizer.board.board[cpos].num = keycode;
-        Sudokizer.board.board[cpos].klevel = Sudokizer.config.kateilevel;
+        Sudokizer.board.ansIns(cpos, keycode, Sudokizer.config.kateilevel);
       }
     }
   // 候補数字入力
   } else {
     // 問題モード：？ヒントの場合、除外候補を設定
     if (Sudokizer.config.qamode === 'question') {
-      if (Sudokizer.board.board[cpos].ishint && Sudokizer.board.board[cpos].num === '?') {
-        Sudokizer.board.board[cpos].exkouho[keycode - 1] = 
-          !Sudokizer.board.board[cpos].exkouho[keycode - 1];
+      if (Sudokizer.board.board[cpos].ishint && 
+          Sudokizer.board.board[cpos].num === '?') {
+        Sudokizer.board.exkouhoSet(cpos, keycode);
       }
     // 解答モード：候補数字を設定
     } else {
-      if (!Sudokizer.board.board[cpos].ishint && Sudokizer.board.board[cpos].num === '0')
-      Sudokizer.board.board[cpos].kouho[keycode - 1] = 
-        !Sudokizer.board.board[cpos].kouho[keycode - 1];
-      Sudokizer.board.board[cpos].kklevel[keycode - 1] = Sudokizer.config.kateilevel;
+      if (!Sudokizer.board.board[cpos].ishint && 
+          Sudokizer.board.board[cpos].num === '0') {
+        Sudokizer.board.kouhoSet(cpos, keycode, Sudokizer.config.kateilevel);
+      }
     }
   }
 }

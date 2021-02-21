@@ -148,8 +148,9 @@ function setEventHandlers() {
 
   // -------------- Canvas --------------
   $('#main_board').click(clickBoard);
-  // $('body').keydown(keyDownBoard);
   $('#main_board').keydown(keyDownBoard);
+  $('#main_board').blur(redraw); 
+
 
   // -------- ページ離脱時の警告 ----------
   window.addEventListener('beforeunload', function(evt) {

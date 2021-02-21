@@ -106,106 +106,55 @@ class Board {
     }
   }
 
-  // ============================ 基本盤面操作 ===============================
+  // ============================ AcomicActions ===============================
 
-  // マス解答入力
-  ansInsAtomic(cpos, num, klevel) {
-    if (!this.board[cpos].ishint) {
-      this.board[cpos].num = num;
-      this.board[cpos].klevel = klevel;
+  // 数字セット
+  numSetAtomic(cpos, num) {
+    this.board[cpos].num = num;
+  }
+  // 数字アンセット
+  numUnsetAtomic(cpos, num) {
+    if (this.board[cpos].num === num) {
+      this.board[cpos].num = '0';
     } else {
-      throw 'ansInsAtomic Validation Error';
+      throw 'numUnsetAtomic Validation Error!';
     }
   }
-  // マス解答削除
-  ansDelAtomic(cpos, num, klevel) {
-    if (!this.board[cpos].ishint &&
-        this.board[cpos].num === num &&
-        this.board[cpos].klevel === klevel) {
-      this.board[cpos].num = '0';
+  // 仮定レベルセット
+  klevelSetAtomic(cpos, klevel) {
+    this.board[cpos].klevel = klevel;
+  }
+  // 仮定レベルアンセット
+  klevelUnsetAtomic(cpos, klevel) {
+    if (this.board[cpos].klevel === klevel) {
       this.board[cpos].klevel = 0;
     } else {
-      throw 'ansDelAtomic Validation Error';
+      throw 'klevelUnsetAtomic Validation Error!';
     }
   }
-  // マスヒント入力
-  hintInsAtomic(cpos, num) {
-    if (true) {
-      this.board[cpos].num = num;
-      this.board[cpos].ishint = true;
-    } else {
-      throw 'hintInsAtomic Validation Error';
-    }
+  // 候補仮定レベルセット
+  kklevelSetAtomic(cpos, num, kklevel) {
+    this.board[cpos].kklevel[num - 1] = kklevel;
   }
-  // マスヒント削除
-  hintDelAtomic(cpos, num) {
-    if (this.board[cpos].ishint &&
-        this.board[cpos].num === num) {
-      this.board[cpos].num = '0';
-      this.board[cpos].ishint = false;
-    } else {
-      throw 'hintDelAtomic Validation Error';
-    }
-  }
-  // 候補ON
-  kouhoOnAtomic(cpos, num) {
-    if (!this.board[cpos].ishint &&
-        !this.board[cpos].kouho[num - 1]) {
-      this.board[cpos].kouho[num - 1] = true;
+  // 候補仮定レベルアンセット
+  kklevelUnsetAtomic(cpos, num, kklevel) {
+    if (this.board[cpos].kklevel[num - 1] === kklevel) {
       this.board[cpos].kklevel[num - 1] = 0;
     } else {
-      throw 'kouhoOnAtomic Validation Error';
-    }  
-  }
-  // 候補OFF
-  kouhoOffAtomic(cpos, num) {
-    if (!this.board[cpos].ishint &&
-        this.board[cpos].kouho[num - 1]) {
-      this.board[cpos].kouho[num - 1] = false;
-      this.board[cpos].kklevel[num - 1] = 0;
-    } else {
-      throw 'kouhoOffAtomic Validation Error';
-    }  
-  }
-  // 候補仮定無効化
-  kouhoDisableAtomic(cpos, num, klevel) {
-    if (!this.board[cpos].ishint &&
-        this.board[cpos].kouho[num - 1] &&
-        this.board[cpos].kklevel[num - 1] === 0) {
-      this.board[cpos].kklevel[num - 1] = klevel;
-    } else {
-      throw 'kouhoDisableAtomic Validation Error';
+      throw 'kklevelUnsetAtomic Validation Error!';
     }
   }
-  // 候補仮定無効化解除
-  kouhoEnableAtomic(cpos, num, klevel) {
-    if (!this.board[cpos].ishint &&
-      this.board[cpos].kouho[num - 1] &&
-      this.board[cpos].kklevel[num - 1] === klevel) {
-      this.board[cpos].kklevel[num - 1] = 0;
-    } else {
-      throw 'kouhoEnableAtomic Validation Error';
-    }
+  // ヒントフラグスイッチ
+  ishintSwitchAtomic(cpos) {
+    this.board[cpos].ishint = !this.board[cpos].ishint;
   }
-  // 除外候補ON
-  exkouhoOnAtomic(cpos, num) {
-    if (this.board[cpos].ishint &&
-        this.board[cpos].num === '?' &&
-        !this.board[cpos].exkouho[num - 1]) {
-      this.board[cpos].exkouho[num - 1] = true;
-    } else {
-      throw 'exkouhoOnAtomic Validation Error';
-    }
+  // 候補フラグスイッチ
+  kouhoSwitchAtomic(cpos, num) {
+    this.board[cpos].kouho[num-1] = !this.board[cpos].kouho[num-1];
   }
-  // 除外候補OFF
-  exkouhoOffAtomic(cpos, num) {
-    if (this.board[cpos].ishint &&
-        this.board[cpos].num === '?' &&
-        this.board[cpos].exkouho[num - 1]) {
-      this.board[cpos].exkouho[num - 1] = false;
-    } else {
-      throw 'exkouhoOffAtomic Validation Error';
-    }
+  // 除外候補フラグスイッチ
+  exkouhoSwitchAtomic(cpos, num) {
+    this.board[cpos].exkouho[num-1] = !this.board[cpos].exkouho[num-1];
   }
 
 

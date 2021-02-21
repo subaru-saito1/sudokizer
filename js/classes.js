@@ -49,6 +49,7 @@ class Cell {
             Sudokizer.config.kateilevel === this.klevel) {
           if (mode === 'answer') {
             this.num = '0';
+            this.klevel = 0;
           }
           for (let i = 0; i < Sudokizer.board.bsize; i++) {
             this.exkouho[i] = false;
@@ -398,12 +399,54 @@ class Board {
    * @param array: AからBに至るまでのアクションのリスト
    */
   diff(newboard) {
+    let actions = []
     for (let c = 0; c < this.numcells; c++) {
       let ca = this.board[c];
       let cb = newboard.board[c];
-      
+      // 入力数字
+      if (ca.num !== cb.num) {
+        if (ca.num !== '0') {
+          actions.push({cmd: 'numUnset', cpos: c, num: ca.num});
+        }
+        if (cb.num !== '0') {
+          actions.push({cmd: 'numSet', cpos: c, num: cb.num});
+        }
+      }
+      // ヒントフラグ
+      if (ca.ishint !== cb.ishint) {
+        actions.push({cmd: 'ishintSwitch', cpos: c});
+      }
+      // 仮定レベル
+      if (ca.klevel !== cb.klevel) {
+        if (ca.klevel !== 0) {
+          actions.push({cmd: 'klevelUnset', cpos: c, klevel: ca.klevel});
+        }
+        if (cb.klevel !== 0) {
+          actions.push({cmd: 'klevelSet', cpos: c, klevel: cb.klevel});
+        }
+      }
+      for (let k = 0; k < this.bsize; k++) {
+        // 候補フラグ
+        if (ca.kouho[k] !== cb.kouho[k]) {
+          actions.push({cmd: 'kouhoSwitch', cpos: c, num: k+1});
+        }
+        // 除外候補フラグ
+        if (ca.exkouho[k] !== cb.exkouho[k]) {
+          actions.push({cmd: 'exkouhoSwitch', cpos: c, num: k+1});
+        }
+        // 候補仮定レベル
+        if (ca.kklevel[k] !== cb.kklevel[k]) {
+          if (ca.kklevel[k] !== 0) {
+            actions.push({cmd: 'kklevelUnset', cpos: c, num: k+1, klevel: ca.kklevel[k]});
+          }
+          if (cb.kklevel[k] !== 0) {
+            actions.push({cmd: 'kklevelSet', cpos: c, num: k+1, klevel: cb.kklevel[k]});
+          }
+        }
+      }
     }
-    return [{'op': 'placeholder'}];
+    console.log(actions);
+    return actions;
   }
 
 
@@ -940,14 +983,18 @@ class ActionStack {
    * アクションをプッシュ
    */
   push(newaction) {
-    this.sp++;
-    this.spmax = this.sp;  // 現在以降のアクションを無効化
-    if (this.spmax > this.stack.length) {
-      this.stack.push(newaction)
-    } else {
-      this.stack[this.sp] = newaction;
+    if (newaction.oplist.length !== 0) {
+      this.sp++;
+      this.spmax = this.sp;  // 現在以降のアクションを無効化
+      if (this.spmax > this.stack.length) {
+        this.stack.push(newaction)
+      } else {
+        this.stack[this.sp] = newaction;
+      }
+      if (Sudokizer.config.debugmode) {
+        console.log(this.stack, this.sp, this.spmax);
+      }
     }
-    console.log(this.stack, this.sp, this.spmax);
   }
   /**
    * 操作を一つ元に戻す
@@ -957,7 +1004,9 @@ class ActionStack {
       this.stack[this.sp].revert();
       this.sp--;
     }
-    console.log(this.stack, this.sp, this.spmax);
+    if (Sudokizer.config.debugmode) {
+      console.log(this.stack, this.sp, this.spmax);
+    }
   }
   /**
    * 操作を一つ進める
@@ -967,7 +1016,9 @@ class ActionStack {
       this.sp++;
       this.stack[this.sp].commit();
     }
-    console.log(this.stack, this.sp, this.spmax);
+    if (Sudokizer.config.debugmode) {
+      console.log(this.stack, this.sp, this.spmax);
+    }
   }
   /**
    * スタックを空にする

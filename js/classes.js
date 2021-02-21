@@ -434,8 +434,17 @@ class Board {
 
 
   // ============================== 操作差分獲得 ==================================
+  /**
+   * 現在の盤面Aから新規盤面Bに至る差分を取得（B - Aに相当）
+   * @param Board newboard: 差分をとる用の盤面B
+   * @param array: AからBに至るまでのアクションのリスト
+   */
   diff(newboard) {
-    // this.board -> newboard.board の差分をActionList形式で取得
+    for (let c = 0; c < this.numcells; c++) {
+      let ca = this.board[c];
+      let cb = newboard.board[c];
+      
+    }
     return [{'op': 'placeholder'}];
   }
 

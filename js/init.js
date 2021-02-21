@@ -66,7 +66,7 @@ function initConfig() {
     // 候補入力モード フラグ
     'kouhomode': $('#opform_kmode').prop('checked'),
     // 仮定レベル スイッチ
-    'kateilevel': $('#opform_kateilevel').val(),
+    'kateilevel': Number($('#opform_kateilevel').val()),
     'drawmedia': 'canvas',      // 描画する要素 Canvas or svg or console?
     'drawpadding': 13,          // 描画時のパディング
     'debugmode': false,         // デバッグモード

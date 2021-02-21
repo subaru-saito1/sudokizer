@@ -315,7 +315,11 @@ fieldset {
   clear: left;
   margin: 10px 0px 5px;
 }
-fieldset#support_form input {
+fieldset button {
+  padding: 3px 1em;
+}
+fieldset#support_form input,
+fieldset#support_form button {
   margin: 5px 0px;
 }
 

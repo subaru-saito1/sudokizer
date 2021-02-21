@@ -10,6 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- fonts-->
   <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
   <!-- static assets -->
   <link rel="stylesheet" href="css/sudokizer.css">
@@ -219,24 +220,6 @@
                     title="候補入力モードに移行します。Shiftで切り替え可能です">
               <label for="opform_kmode">候補入力</label>
             </div>
-          </fieldset>
-
-          <fieldset id="edit_form">
-            <legend>編集</legend>
-            <div id="edit_form_undoredo">
-              <input type="button" name="undo" id="opform_undo" value="戻る"
-                    title="操作を一つ戻します">
-              <br>
-              <input type="button" name="redo" id="opform_redo" value="進む"
-                    title="操作を一つ進めます">
-            </div>
-            <div id="edit_form_clear">
-              <input type="button" name="ansclear" id="opform_ansclear" value="解答消去"
-                    title="解答と候補を消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
-              <br>
-              <input type="button" name="kouhoclear" id="opform_kouhoclear" value="候補消去"
-                    title="候補のみ消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
-            </div>
             <div id="edit_form_kateilevel">
               <select name="kateilevel" id="opform_kateilevel"
                       title="仮置きの深さを設定します。">
@@ -247,6 +230,26 @@
                 <option value="4"> 4 </option>
               </select>
               <label for="opform_kateilevel">仮定レベル</label>
+            </div>
+          </fieldset>
+
+          <fieldset id="edit_form">
+            <legend>編集</legend>
+            <div id="edit_form_undoredo">
+              <button type="button" name="undo" id="opform_undo" title="操作を一つ戻します">
+                <i class="fas fa-undo"></i>
+              </button>
+              <br>
+              <button type="button" name="redo" id="opform_redo" title="操作を一つ進めます">
+                <i class="fas fa-redo"></i>
+              </button>
+            </div>
+            <div id="edit_form_clear">
+              <input type="button" name="ansclear" id="opform_ansclear" value="解答消去"
+                    title="解答と候補を消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
+              <br>
+              <input type="button" name="kouhoclear" id="opform_kouhoclear" value="候補消去"
+                    title="候補のみ消去します。仮定レベルを設定している場合、そのレベルの入力のみ消去します。">
             </div>
           </fieldset>
           
@@ -260,10 +263,13 @@
             <input type="button" name="autogen" id="opform_autogen" value="自動生成"
                     title="？ヒントを埋めて一意解のパズルを生成します（?ヒントが6個以下の場合のみ）">
             <br>
-            <input type="button" name="stepsolve" id="opform_stepsolve" value="&nbsp;&gt;&nbsp;"
-                    title="1ステップ解答">
-            <input type="button" name="autosolve" id="opform_autosolve" value="&gt;&gt;"
+            <button type="button" name="stepsolve" id="opform_stepsolve" title="1ステップ解答">
+              <i class="fas fa-angle-right"></i>
+            </button>
+            <button type="button" name="autosolve" id="opform_autosolve" 
                     title="全回答。解の個数も一緒に調べます。">
+              <i class="fas fa-angle-double-right"></i>
+            </button>
           </fieldset>
         </div>
       </div>

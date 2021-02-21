@@ -164,12 +164,22 @@ class Board {
    * マス解答入力
    */
   ansIns(cpos, num, klevel) {
-    this.ansInsAtomic(cpos, num, klevel);
-    for (let i = 0; i < this.bsize; i++) {
-      // 候補消去
-      if (this.board[cpos].kouho[i]) {
-        this.kouhoOffAtomic(cpos, i+1, this.board[cpos].kklevel[i]);
-      }
+    if (!this.board[cpos].ishint) {
+      // 状態リセット
+      if (this.board.num !== '0') {
+        this.numUnsetAtomic(cpos, this.board[cpos].num);
+        this.klevelUnsetAtomic(cpos, this.board[cpos].klevel);
+      } else {
+        for (let k = 0; k < this.bsize; k++) {
+          if (this.board[cpos].kouho[k]) {
+            this.kouhoSwitchAtomic(cpos, k+1);
+            this.kklevelUnsetAtomic(cpos, k+1, this.board[cpos].kklevel[k]);
+          }
+        }
+      }   
+      // 状態セット
+      this.numSetAtomic(cpos, num);
+      this.klevelSetAtomic(cpos, klevel);
     }
   }
 
@@ -181,13 +191,14 @@ class Board {
       let num = this.board[cpos].num;
       let klevel = this.board[cpos].klevel;
       // 空白マス：候補除去
-      if (this.board[cpos].num === '0') {
-        for (let i = 0; i < this.bsize; i++) {
-          if (this.board[cpos].kouho[i]) {
+      if (num === '0') {
+        for (let k = 0; k < this.bsize; k++) {
+          if (this.board[cpos].kouho[k]) {
             if (Sudokizer.config.kateilevel === 0) {
-              this.kouhoOffAtomic(cpos, i+1);
-            } else if (Sudokizer.config.kateilevel === this.board[cpos].kklevel[i]) {
-              this.kouhoEnableAtomic(cpos, i+1, Sudokizer.config.kateilevel);
+              this.kouhoSwitchAtomic(cpos, k+1);
+              this.kklevelUnsetAtomic(cpos, k+1, this.board[cpos].kklevel[k]);
+            } else if (Sudokizer.config.kateilevel === this.board[cpos].kklevel[k]) {
+              this.kklevelUnsetAtomic(cpos, k+1, this.board[cpos].kklevel[k]);
             }
           }
         }
@@ -195,7 +206,8 @@ class Board {
       } else {
         if (Sudokizer.config.kateilevel === 0 ||
             Sudokizer.config.kateilevel === klevel) {
-          this.ansDelAtomic(cpos, num, klevel);
+          this.numUnsetAtomic(cpos, num);
+          this.klevelUnsetAtomic(cpos, klevel);
         }
       }
     }
@@ -207,20 +219,23 @@ class Board {
   hintIns(cpos, num) {
     // 新規ヒント追加の場合：候補消去
     if (!this.board[cpos].ishint) {
-      for (let i = 0; i < this.bsize; i++) {
-        if (this.board[cpos].kouho[i]) {
-          this.kouhoOffAtomic(cpos, i+1, this.board[cpos].kklevel[i]);
+      this.ishintSwitchAtomic(cpos);
+      for (let k = 0; k < this.bsize; k++) {
+        if (this.board[cpos].kouho[k]) {
+          this.kouhoSwitchAtomic(cpos, k+1);
+          this.kklevelUnsetAtomic(cpos, k+1, this.board[cpos].kklevel[k]);
         }
       }
-    // ヒント塗り替えの場合：除外候補消去
+    // ヒント塗り替えの場合：既入力済み記号と除外候補消去
     } else {
-      for (let i = 0; i < this.bsize; i++) {
-        if (this.board[cpos].exkouho[i]) {
-          this.exkouhoOffAtomic(cpos, i+1);
+      this.numUnsetAtomic(cpos, this.board[cpos].num);
+      for (let k = 0; k < this.bsize; k++) {
+        if (this.board[cpos].exkouho[k]) {
+          this.exkouhoSwitchAtomic(cpos, k+1);
         }
       }
     }
-    this.hintInsAtomic(cpos, num);
+    this.numSetAtomic(cpos, num);
   }
 
   /**
@@ -231,24 +246,26 @@ class Board {
     let klevel = this.board[cpos].klevel;
     // ヒントマスの場合(ヒント＋除外候補消去)
     if (this.board[cpos].ishint) {
-      for (let i = 0; i < this.bsize; i++) {
-        if (this.board[cpos].exkouho[i]) {
-          this.exkouhoOffAtomic(cpos, i+1);
+      this.numUnsetAtomic(cpos, num);
+      this.ishintSwitchAtomic(cpos);
+      for (let k = 0; k < this.bsize; k++) {
+        if (this.board[cpos].exkouho[k]) {
+          this.exkouhoSwitchAtomic(cpos, k+1);
         }
       }
-      this.hintDelAtomic(cpos, num);
     } else {
-      // 空白の場合（候補除去）
-      if (this.board[cpos].num === '0') {
-        for (let i = 0; i < this.bsize; i++) {
-          if (this.board[pos].kouho[i]) {
-            this.kouhoOffAtomic(cpos, i+1, klevel);
+      // 状態リセット
+      if (this.board.num !== '0') {
+        this.numUnsetAtomic(cpos, num);
+        this.klevelUnsetAtomic(cpos, klevel);
+      } else {
+        for (let k = 0; k < this.bsize; k++) {
+          if (this.board[cpos].kouho[k]) {
+            this.kouhoSwitchAtomic(cpos, k+1);
+            this.kklevelUnsetAtomic(cpos, k+1, this.board[cpos].kklevel[k]);
           }
         }
-      // 入力済みマスの場合
-      } else {
-        this.ansDelAtomic(cpos, num, klevel);
-      }
+      }  
     }
   }
 
@@ -258,18 +275,14 @@ class Board {
   kouhoSet(cpos, num, klevel) {
     // 仮定レベル０：単なる候補のスイッチ
     if (klevel === 0) {
-      if (this.board[cpos].kouho[num - 1]) {
-        this.kouhoOffAtomic(cpos, num);
-      } else {
-        this.kouhoOnAtomic(cpos, num);
-      }
+      this.kouhoSwitchAtomic(cpos, num);
     // 仮定レベル０以外：候補ありかつレベルが同じ場合のみ有効無効スイッチ
     } else {
       if (this.board[cpos].kouho[num - 1]) {
         if (this.board[cpos].kklevel[num - 1] === 0) {
-          this.kouhoDisableAtomic(cpos, num, klevel);
+          this.kklevelSetAtomic(cpos, num, klevel);
         } else if (this.board[cpos].kklevel[num - 1] === klevel) {
-          this.kouhoEnableAtomic(cpos, num, klevel);
+          this.kklevelUnsetAtomic(cpos, num, klevel);
         }
       }
     }
@@ -279,11 +292,7 @@ class Board {
    * 除外候補設定
    */
   exkouhoSet(cpos, num) {
-    if (this.board[cpos].exkouho[num - 1]) {
-      this.exkouhoOffAtomic(cpos, num);
-    } else {
-      this.exkouhoOnAtomic(cpos, num);
-    }
+    this.exkouhoSwitchAtomic(cpos, num);
   }
 
 

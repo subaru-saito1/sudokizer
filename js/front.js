@@ -83,16 +83,19 @@ function pencilBoxRead(evt) {
   reader.readAsText(file, 'Shift-JIS');
   reader.onload = function() {
     let lines = reader.result.split('\r\n');
-    let authorinfo;
+    let ret;
     if (lines[0] === '--') {
-      authorinfo = Sudokizer.board.pbReadNikolicom(lines)
+      ret = Sudokizer.board.pbReadNikolicom(lines)
     } else {
-      authorinfo = Sudokizer.board.pbReadNormal(lines)
+      ret = Sudokizer.board.pbReadNormal(lines)
     } 
+    // 盤面設定とアクションスタック操作
+    Sudokizer.board = ret.newboard;
+    Sudokizer.astack.push(new Action(ret.actionlist));
     // 著者情報の設定
-    $('#menu_pbwrite_authorja').val(authorinfo[0]);
-    $('#menu_pbwrite_authoren').val(authorinfo[1]);
-    // Sudokizer.astack.push(action);
+    $('#menu_pbwrite_authorja').val(ret.authorinfo[0]);
+    $('#menu_pbwrite_authoren').val(ret.authorinfo[1]);
+    redraw();
   }
 }
 

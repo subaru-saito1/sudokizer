@@ -445,7 +445,9 @@ class Board {
         }
       }
     }
-    console.log(actions);
+    if (Sudokizer.config.debugmode) {
+      console.log(actions);
+    }
     return actions;
   }
 
@@ -590,35 +592,35 @@ class Board {
    * @return array 著者情報の配列（nikolicom側とインタフェースを合わせたいので）
    */
   pbReadNormal(lines) {
+    let newboard = new Board();
     try {
-      this.clear();     // 盤面初期化
       // サイズバリデーション
-      if (Number(lines[0]) !== this.bsize) {
+      if (Number(lines[0]) !== newboard.bsize) {
         throw 'BoardSizeError';
       }
       // ヒント読み込み
-      for (let l = 1; l < 1 + this.bsize; l++) {
+      for (let l = 1; l < 1 + newboard.bsize; l++) {
         let tokens = lines[l].split(' ');
-        for (let j = 0; j < this.bsize; j++) {
+        for (let j = 0; j < newboard.bsize; j++) {
           if (tokens[j] !== '.') {
-            let c = (l - 1) * this.bsize + j;
-            this.board[c].num = tokens[j];
+            let c = (l - 1) * newboard.bsize + j;
+            newboard.board[c].num = tokens[j];
           }
         }
       } 
       // 解答読み込み
-      for (let l = 10; l < 10 + this.bsize; l++) {
+      for (let l = 10; l < 10 + newboard.bsize; l++) {
         let tokens = lines[l].split(' ');
-        for (let j = 0; j < this.bsize; j++) {
-          let c = (l - 10) * this.bsize + j;
+        for (let j = 0; j < newboard.bsize; j++) {
+          let c = (l - 10) * newboard.bsize + j;
           if (tokens[j] === '.') {
             // ?ヒント
-            if (this.board[c].num === '0') {
-              this.board[c].num = '?';
+            if (newboard.board[c].num === '0') {
+              newboard.board[c].num = '?';
             }
-            this.board[c].ishint = true;
+            newboard.board[c].ishint = true;
           } else {
-            this.board[c].num = tokens[j];
+            newboard.board[c].num = tokens[j];
           }
         }
       }
@@ -628,10 +630,14 @@ class Board {
     }
     // デバッグモード
     if (Sudokizer.config.debugmode) {
-      console.log(this);
+      console.log(newboard);
     }
-    redraw();
-    return ['', ''];    // 著者情報（空）
+    
+    return {
+      'newboard': newboard,
+      'actionlist': this.diff(newboard),
+      'authorinfo': ['', '']
+    };
   }
 
   /**
@@ -640,31 +646,31 @@ class Board {
    * @return array 著者情報の配列
    */
   pbReadNikolicom(lines) {
+    let newboard = new Board();
     try {
-      this.author_ja = lines[1].split(':')[1];
-      this.author_en = lines[1].split(':')[2];
-      this.clear();     // 盤面初期化
+      newboard.author_ja = lines[1].split(':')[1];
+      newboard.author_en = lines[1].split(':')[2];
       // サイズバリデーション
-      if (!(Number(lines[2][1]) === this.bsize && 
-            Number(lines[2][3]) === this.bsize)) {
+      if (!(Number(lines[2][1]) === newboard.bsize && 
+            Number(lines[2][3]) === newboard.bsize)) {
         console.log(lines[2][1], lines[2][3])
         throw 'BoardSizeError';
       }
       // ヒント盤面
-      for (let l = 3; l < 3 + this.bsize; l++) {
-        for (let j = 0; j < this.bsize; j++) {
+      for (let l = 3; l < 3 + newboard.bsize; l++) {
+        for (let j = 0; j < newboard.bsize; j++) {
           if (lines[l][j] !== '0') {
-            let c = (l - 3) * this.bsize + j;
-            this.board[c].ishint = true;
+            let c = (l - 3) * newboard.bsize + j;
+            newboard.board[c].ishint = true;
           }
         }
       }
       let lines2 = lines[12].split('\n');  // なんか後半だけ\n区切りだった
       // 解答盤面
-      for (let l = 0; l < this.bsize; l++) {
-        for (let j = 0; j < this.bsize; j++) {
-          let c = l * this.bsize + j;
-          this.board[c].num = lines2[l][j];
+      for (let l = 0; l < newboard.bsize; l++) {
+        for (let j = 0; j < newboard.bsize; j++) {
+          let c = l * newboard.bsize + j;
+          newboard.board[c].num = lines2[l][j];
         }
       }
     } catch(err) {
@@ -673,10 +679,13 @@ class Board {
     }
     // デバッグモード
     if (Sudokizer.config.debugmode) {
-      console.log(this);
+      console.log(newboard);
     }
-    redraw();
-    return [this.author_ja, this.author_en];
+    return {
+      'newboard': newboard,
+      'actionlist': this.diff(newboard),
+      'authorinfo': [newboard.author_ja, newboard.author_en]
+    };
   }
 
   /**

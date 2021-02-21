@@ -17,14 +17,14 @@ class Cell {
   constructor(bsize) {
     this.num = '0';        // 0で空白、1~9で数字、?でヒント
     this.ishint = false;   // ヒントフラグ
-    this.klevel = '0';     // 仮定レベル
+    this.klevel = 0;     // 仮定レベル
     this.kouho = [];       // 候補リスト
     this.exkouho = [];     // 除外候補リスト
     this.kklevel = [];     // 候補の仮定レベルリスト
     for (let i = 0; i < bsize; i++) {
       this.kouho.push(false);
       this.exkouho.push(false);
-      this.kklevel.push('0');
+      this.kklevel.push(0);
     }
   }
 
@@ -36,16 +36,16 @@ class Cell {
     if (mode === 'question') {
       this.num = '0';
       this.ishint = false;
-      this.klevel = '0';
+      this.klevel = 0;
       for (let i = 0; i < Sudokizer.board.bsize; i++) {
         this.exkouho[i] = false;
         this.kouho[i] = false;
-        this.kklevel[i] = '0';
+        this.kklevel[i] = 0;
       }
     } else {
       if (!this.ishint) {
         // 仮定レベル0なら全消し、それ以外ならそのレベルのものだけ削除
-        if (Sudokizer.config.kateilevel === '0' ||
+        if (Sudokizer.config.kateilevel === 0 ||
             Sudokizer.config.kateilevel === this.klevel) {
           if (mode === 'answer') {
             this.num = '0';
@@ -56,11 +56,11 @@ class Cell {
         }
         // 候補数字消去
         for (let i = 0; i < Sudokizer.board.bsize; i++) {
-          if (Sudokizer.config.kateilevel === '0') {
+          if (Sudokizer.config.kateilevel === 0) {
             this.kouho[i] = false;
-            this.kklevel[i] = '0';
+            this.kklevel[i] = 0;
           } else if (Sudokizer.config.kateilevel === this.kklevel[i]) {
-            this.kklevel[i] = '0';
+            this.kklevel[i] = 0;
           }
         }
         
@@ -123,7 +123,7 @@ class Board {
         this.board[cpos].num === num &&
         this.board[cpos].klevel === klevel) {
       this.board[cpos].num = '0';
-      this.board[cpos].klevel = '0';
+      this.board[cpos].klevel = 0;
     } else {
       throw 'ansDelAtomic Validation Error';
     }
@@ -152,7 +152,7 @@ class Board {
     if (!this.board[cpos].ishint &&
         !this.board[cpos].kouho[num - 1]) {
       this.board[cpos].kouho[num - 1] = true;
-      this.board[cpos].kklevel[num - 1] = '0';
+      this.board[cpos].kklevel[num - 1] = 0;
     } else {
       throw 'kouhoOnAtomic Validation Error';
     }  
@@ -162,7 +162,7 @@ class Board {
     if (!this.board[cpos].ishint &&
         this.board[cpos].kouho[num - 1]) {
       this.board[cpos].kouho[num - 1] = false;
-      this.board[cpos].kklevel[num - 1] = '0';
+      this.board[cpos].kklevel[num - 1] = 0;
     } else {
       throw 'kouhoOffAtomic Validation Error';
     }  
@@ -171,7 +171,7 @@ class Board {
   kouhoDisableAtomic(cpos, num, klevel) {
     if (!this.board[cpos].ishint &&
         this.board[cpos].kouho[num - 1] &&
-        this.board[cpos].kklevel[num - 1] === '0') {
+        this.board[cpos].kklevel[num - 1] === 0) {
       this.board[cpos].kklevel[num - 1] = klevel;
     } else {
       throw 'kouhoDisableAtomic Validation Error';
@@ -182,7 +182,7 @@ class Board {
     if (!this.board[cpos].ishint &&
       this.board[cpos].kouho[num - 1] &&
       this.board[cpos].kklevel[num - 1] === klevel) {
-      this.board[cpos].kklevel[num - 1] = '0';
+      this.board[cpos].kklevel[num - 1] = 0;
     } else {
       throw 'kouhoEnableAtomic Validation Error';
     }
@@ -235,7 +235,7 @@ class Board {
       if (this.board[cpos].num === '0') {
         for (let i = 0; i < this.bsize; i++) {
           if (this.board[cpos].kouho[i]) {
-            if (Sudokizer.config.kateilevel === '0') {
+            if (Sudokizer.config.kateilevel === 0) {
               this.kouhoOffAtomic(cpos, i+1);
             } else if (Sudokizer.config.kateilevel === this.board[cpos].kklevel[i]) {
               this.kouhoEnableAtomic(cpos, i+1, Sudokizer.config.kateilevel);
@@ -244,7 +244,7 @@ class Board {
         }
       // 入力マス：仮定レベル条件を満たした場合のみ削除
       } else {
-        if (Sudokizer.config.kateilevel === '0' ||
+        if (Sudokizer.config.kateilevel === 0 ||
             Sudokizer.config.kateilevel === klevel) {
           this.ansDelAtomic(cpos, num, klevel);
         }
@@ -308,7 +308,7 @@ class Board {
    */
   kouhoSet(cpos, num, klevel) {
     // 仮定レベル０：単なる候補のスイッチ
-    if (klevel === '0') {
+    if (klevel === 0) {
       if (this.board[cpos].kouho[num - 1]) {
         this.kouhoOffAtomic(cpos, num);
       } else {
@@ -317,7 +317,7 @@ class Board {
     // 仮定レベル０以外：候補ありかつレベルが同じ場合のみ有効無効スイッチ
     } else {
       if (this.board[cpos].kouho[num - 1]) {
-        if (this.board[cpos].kklevel[num - 1] === '0') {
+        if (this.board[cpos].kklevel[num - 1] === 0) {
           this.kouhoDisableAtomic(cpos, num, klevel);
         } else if (this.board[cpos].kklevel[num - 1] === klevel) {
           this.kouhoEnableAtomic(cpos, num, klevel);

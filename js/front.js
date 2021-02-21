@@ -305,7 +305,7 @@ function kouhoClear(evt) {
  * 仮定レベル変更 ＜完成＞
  */
 function setKateiLevel(evt) {
-  Sudokizer.config.kateilevel = $('#opform_kateilevel').val();
+  Sudokizer.config.kateilevel = Number($('#opform_kateilevel').val());
   if (Sudokizer.config.debugmode) {
     console.log(Sudokizer.config);
   }
@@ -517,15 +517,15 @@ function keyDownNumInput(cpos, keycode) {
  */
 function keyDownKateiSwitch(keycode) {
   if (keycode === 'z') {
-    Sudokizer.config.kateilevel = '0';
+    Sudokizer.config.kateilevel = 0;
   } else if (keycode === 'x') {
-    Sudokizer.config.kateilevel = '1';
+    Sudokizer.config.kateilevel = 1;
   } else if (keycode === 'c') {
-    Sudokizer.config.kateilevel = '2';
+    Sudokizer.config.kateilevel = 2;
   } else if (keycode === 'v') {
-    Sudokizer.config.kateilevel = '3';
+    Sudokizer.config.kateilevel = 3;
   } else if (keycode === 'b') {
-    Sudokizer.config.kateilevel = '4';
+    Sudokizer.config.kateilevel = 4;
   } else {
     throw 'keyDownKateiSwitch Invalid KeyCode';
   }

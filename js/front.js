@@ -545,9 +545,14 @@ function keyDownKateiSwitch(keycode) {
  */
 function redraw() {
   let drawconfig = {
-    'cursor': true,
+    'cursor': false,
     'dispsize': Sudokizer.config.dispsize,
   }
+  // canvasフォーカス時のみカーソルを表示
+  if (document.activeElement.getAttribute('id') === 'main_board') {
+    drawconfig.cursor = true;
+  }
+  
   if (Sudokizer.config.drawmedia === 'canvas') {
     Sudokizer.board.drawBoardCanvas(drawconfig);
   } else if (Sudokizer.config.drawmedia === 'svg') {

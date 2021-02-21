@@ -385,7 +385,8 @@ function clickBoard(evt) {
 function keyDownBoard(evt) {
   let cursorkeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   let numkeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  let kateikeys = ['z', 'x', 'c', 'v', 'b'];
+  // let kateikeys = ['z', 'x', 'c', 'v', 'b'];
+  let kateikeys = ['q', 'w', 'e', 'r', 't'];
   let cpos = Sudokizer.config.cursorpos;
 
   // カーソル移動
@@ -443,8 +444,14 @@ function keyDownBoard(evt) {
   if (kateikeys.includes(evt.key)) {
     keyDownKateiSwitch(evt.key);
   }
+  // undoとredo
+  if (evt.key === 'z' && evt.ctrlKey) {
+    Sudokizer.astack.undo();
+  }
+  if (evt.key === 'y' && evt.ctrlKey) {
+    Sudokizer.astack.redo();
+  }
   redraw();
-  // Sudokizer.astack.push(action);
 }
 
 /**
@@ -519,15 +526,15 @@ function keyDownNumInput(cpos, keycode) {
  * キーボードにより仮定レベルの切り替え
  */
 function keyDownKateiSwitch(keycode) {
-  if (keycode === 'z') {
+  if (keycode === 'q') {
     Sudokizer.config.kateilevel = 0;
-  } else if (keycode === 'x') {
+  } else if (keycode === 'w') {
     Sudokizer.config.kateilevel = 1;
-  } else if (keycode === 'c') {
+  } else if (keycode === 'e') {
     Sudokizer.config.kateilevel = 2;
-  } else if (keycode === 'v') {
+  } else if (keycode === 'r') {
     Sudokizer.config.kateilevel = 3;
-  } else if (keycode === 'b') {
+  } else if (keycode === 't') {
     Sudokizer.config.kateilevel = 4;
   } else {
     throw 'keyDownKateiSwitch Invalid KeyCode';

@@ -988,25 +988,31 @@ class Action {
 
   /**
    * アクションリストをグローバル盤面に適用する
+   * op.cmd : コマンド名
+   * op.cpos: マス番号
+   * op.num : 対象数字および記号
+   * op.klevel: 仮定レベル 
    */
   commit() {
     for (let op of this.oplist) {
-      // マスに入力する
-      if (op.cmd === 'ansins') {
-      // マスから削除する
-      } else if (op.cmd === 'ansdel') {
-      // ヒントマスを入力する
-      } else if (op.cmd === 'hintins') {
-      // ヒントマスから削除する
-      } else if (op.cmd === 'hintdel') {
-      // 候補をONにする
-      } else if (op.cmd === 'kouhoon') {
-      // 候補をOFFにする
-      } else if (op.cmd === 'kouhooff') {
-      // 除外候補をONにする
-      } else if (op.cmd === 'exkouhoon') {
-      // 除外候補をOFFにする
-      } else if (op.cmd === 'exkouhooff') {
+      if (op.cmd === 'numSet') {
+        Sudokizer.board.numSetAtomic(op.cpos, op.num);
+      } else if (op.cmd === 'numUnset') {
+        Sudokizer.board.numUnsetAtomic(op.cpos, op.num);
+      } else if (op.cmd === 'klevelSet') {
+        Sudokizer.board.klevelSetAtomic(op.cpos, op.klevel);
+      } else if (op.cmd === 'klevelUnset') {
+        Sudokizer.board.klevelUnsetAtomic(op.cpos, op.klevel);
+      } else if (op.cmd === 'kklevelSet') {
+        Sudokizer.board.kklevelSetAtomic(op.cpos, op.num, op.klevel);
+      } else if (op.cmd === 'kklevelUnset') {
+        Sudokizer.board.kklevelUnsetAtomic(op.cpos, op.num, op.klevel);
+      } else if (op.cmd === 'ishintSwitch') {
+        Sudokizer.board.ishintSwitchAtomic(op.cpos);
+      } else if (op.cmd === 'kouhoSwitch') {
+        Sudokizer.board.kouhoSwitchAtomic(op.cpos, op.num);
+      } else if (op.cmd === 'exkouhoSwitch') {
+        Sudokizer.board.exkouhoSwitchAtomic(op.cpos, op.num);
       }
     }
   }
@@ -1017,22 +1023,24 @@ class Action {
   revert() {
     let revlist = this.oplist.slice().reverse();   // 非破壊リバース
     for (let op of revlist) {
-      // マスに入力する
-      if (op.cmd === 'ansins') {
-      // マスから削除する
-      } else if (op.cmd === 'ansdel') {
-      // ヒントマスを入力する
-      } else if (op.cmd === 'hintins') {
-      // ヒントマスから削除する
-      } else if (op.cmd === 'hintdel') {
-      // 候補をONにする
-      } else if (op.cmd === 'kouhoon') {
-      // 候補をOFFにする
-      } else if (op.cmd === 'kouhooff') {
-      // 除外候補をONにする
-      } else if (op.cmd === 'exkouhoon') {
-      // 除外候補をOFFにする
-      } else if (op.cmd === 'exkouhooff') {
+      if (op.cmd === 'numSet') {
+        Sudokizer.board.numUnsetAtomic(op.cpos, op.num);
+      } else if (op.cmd === 'numUnset') {
+        Sudokizer.board.numSetAtomic(op.cpos, op.num);
+      } else if (op.cmd === 'klevelSet') {
+        Sudokizer.board.klevelUnsetAtomic(op.cpos, op.klevel);
+      } else if (op.cmd === 'klevelUnset') {
+        Sudokizer.board.klevelSetAtomic(op.cpos, op.klevel);
+      } else if (op.cmd === 'kklevelSet') {
+        Sudokizer.board.kklevelUnsetAtomic(op.cpos, op.num, op.klevel);
+      } else if (op.cmd === 'kklevelUnset') {
+        Sudokizer.board.kklevelSetAtomic(op.cpos, op.num, op.klevel);
+      } else if (op.cmd === 'ishintSwitch') {
+        Sudokizer.board.ishintSwitchAtomic(op.cpos);
+      } else if (op.cmd === 'kouhoSwitch') {
+        Sudokizer.board.kouhoSwitchAtomic(op.cpos, op.num);
+      } else if (op.cmd === 'exkouhoSwitch') {
+        Sudokizer.board.exkouhoSwitchAtomic(op.cpos, op.num);
       }
     }
   }

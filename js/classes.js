@@ -236,16 +236,21 @@ class Board {
    */
   hintIns(cpos, num) {
     let actionlist = []
-    // 新規ヒント追加の場合：候補消去
     if (!this.board[cpos].ishint) {
-      actionlist.push({cmd:'ishintSwitch', cpos:cpos});
-      for (let k = 0; k < this.bsize; k++) {
-        if (this.board[cpos].kouho[k]) {
-          actionlist.push({cmd:'kouhoSwitch', cpos:cpos, num:k+1});
-          actionlist.push({cmd:'kklevelUnset',
-            cpos:cpos, num:k+1, klevel:this.board[cpos].kklevel[k]});
+      // 空白マスに新規ヒント追加の場合：候補消去
+      if (this.board[cpos].num === '0') {
+        for (let k = 0; k < this.bsize; k++) {
+          if (this.board[cpos].kouho[k]) {
+            actionlist.push({cmd:'kouhoSwitch', cpos:cpos, num:k+1});
+            actionlist.push({cmd:'kklevelUnset',
+              cpos:cpos, num:k+1, klevel:this.board[cpos].kklevel[k]});
+          }
         }
+      // 既入力済み記号の塗り替え
+      } else {
+        actionlist.push({cmd: 'numUnset', cpos:cpos, num:this.board[cpos].num});
       }
+      actionlist.push({cmd:'ishintSwitch', cpos:cpos});
     // ヒント塗り替えの場合：既入力済み記号と除外候補消去
     } else {
       actionlist.push({cmd:'numUnset', cpos:cpos, num:this.board[cpos].num});
@@ -277,7 +282,7 @@ class Board {
       }
     } else {
       // 状態リセット
-      if (this.board.num !== '0') {
+      if (this.board[cpos].num !== '0') {
         actionlist.push({cmd:'numUnset', cpos:cpos, num:num});
         actionlist.push({cmd:'klevelUnset', cpos:cpos, klevel:klevel});
       } else {

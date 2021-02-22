@@ -75,11 +75,77 @@ class Unit {
   }
 }
 
-class SdkEngine {
+
+/**
+ * ピア：特定のセルと結びつく20マスのペア
+ */
+class Peer {
+  /**
+   * コンストラクタ
+   * @param int cid; 中心となるセル番号
+   * @param int bsize: 盤面サイズ (9)
+   */
+  constructor(cid, bsize) {
+    this.cid = cid;
+    this.bsize = bsize;
+    this.cellidx = this.createCellIndex(cid, bsize);
+  }
 
   /**
-   * Unitオブジェクトのリストを生成。9x9番目の場合は27個分
+   * ピアに含まれるセルのインデックスリストを作成
    */
+  createCellIndex(cid, bsize) {
+    let rowid = Math.floor(cid / bsize);
+    let colid = cid % bsize;
+    let sqrtsize = Math.sqrt(bsize);
+    let cellidx = []
+    // 同じ行
+    for (let j = 0; j < bsize; j++) {
+      cellidx.push(rowid * bsize + j);
+    }
+    // 同じ列
+    for (let i = 0; i < bsize; i++) {
+      cellidx.push(i * bsize + colid);
+    }
+    // 同じブロック
+    for (let i = 0; i < sqrtsize; i++) {
+      for (let j = 0; j < sqrtsize; j++) {
+        let ofsx = Math.floor(colid / sqrtsize) * sqrtsize;
+        let ofsy = Math.floor(rowid / sqrtsize) * sqrtsize * bsize;
+        cellidx.push(ofsx + ofsy + i * bsize + j);
+      }
+    }
+    // 重複排除と自身のマス排除
+    cellidx = cellidx.filter((x, i, arr) => (arr.indexOf(x) === i && x !== cid));
+    return cellidx;
+  }
+
+  /**
+   * 中心マスの候補数字洗いだし
+   */
+  identifyKouho(board) {
+    // 中心が空白マスの場合のみ適用
+    if (board.board[this.cid].num === '0') {
+      for (let k = 0; k < this.bsize; k++) {
+        board.board[this.cid].kouho[k] = true;
+        board.board[this.cid].kklevel[k] = 0;
+      }
+      for (let c of this.cellidx) {
+        let cnum = board.board[c].num;
+        if (cnum !== '0' && cnum !== '?') {
+          board.board[this.cid].kouho[cnum - 1] = false;
+        }
+      }
+    }
+  }
+}
+
+
+
+/**
+ * 数独エンジンクラス
+ */
+class SdkEngine {
 
    // 横行
   static createRows(board) {
@@ -114,6 +180,9 @@ class SdkEngine {
     return units;
   }
 
+
+  // =========================== フロント基本機能 =============================
+
   /**
    * 解答チェック機能（簡易実装版）
    * @param Board board: チェック対象の盤面オブジェクト
@@ -128,6 +197,22 @@ class SdkEngine {
       }
     }
     alert(okflg ? '正解です' : '不正解です');
+  }
+
+  /**
+   * 自動候補埋め機能（簡易実装版）
+   */
+  static autoIdentifyKouho(board) {
+    let newboard = board.transCreate();
+    for (let c = 0; c < newboard.numcells; c++) {
+      if (board.board[c].num === '0') {
+        let peer = new Peer(c, newboard.bsize);
+        peer.identifyKouho(newboard);
+      }
+    }
+    // アクション追加
+    let actionlist = board.diff(newboard);
+    return [newboard, actionlist];
   }
 
 }

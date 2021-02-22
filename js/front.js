@@ -330,8 +330,10 @@ function answerCheck(evt) {
  * 候補自動洗い出し
  */
 function autoKouho(evt) {
-  alert('auto kouho calculate');
-  // Sudokizer.astack.push(action);
+  let ret = SdkEngine.autoIdentifyKouho(Sudokizer.board);
+  Sudokizer.board = ret[0];              // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
+  redraw();
 }
 
 /**

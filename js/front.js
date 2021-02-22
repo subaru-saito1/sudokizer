@@ -323,7 +323,7 @@ function setKateiLevel(evt) {
  * 解答チェック
  */
 function answerCheck(evt) {
-  console.log('answerCheck');
+  SdkEngine.ansCheck(Sudokizer.board);
 }
 
 /**

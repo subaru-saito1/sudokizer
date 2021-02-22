@@ -1013,7 +1013,6 @@ class ActionStack {
     ];
     this.sp = 0;      // スタックポインタ
     this.spmax = 0;   // 現在の最新位置
-    console.log(this.stack, this.sp, this.spmax);
   }
   /**
    * アクションをプッシュ

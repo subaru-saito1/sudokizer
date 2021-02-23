@@ -101,11 +101,8 @@ class Board {
     this.numcells = this.bsize ** 2;
     this.author_ja = '';      // 作者情報
     this.author_en = '';      // 作者情報
-    this.board = [];
-    for (let i = 0; i < this.numcells; i++) {
-      this.board.push(new Cell(this.bsize));
-    }
-    // 解答エンジン側で使う情報（セルグループのインデックスリスト）
+    // 盤面の構成単位
+    this.board = this.createCells();
     this.blocks = this.createUnits('block');
     this.rows = this.createUnits('row');
     this.cols = this.createUnits('col');
@@ -116,6 +113,16 @@ class Board {
   }
 
   // ======================== セルグループのリスト生成　========================
+  /**
+   * セル x 81の生成
+   */
+  createCells() {
+    let cells = []
+    for (let c = 0; c < this.numcells; c++) {
+      cells.push(new Cell(this.bsize));
+    }
+    return cells;
+  }
   /**
    * ユニット（9マス単位） x 27グループの生成
    * @param string unittype: block, row, col
@@ -159,9 +166,6 @@ class Board {
     }
     return crosses;
   }
-
-
-
 
   // ============================ AcomicActions ===============================
 

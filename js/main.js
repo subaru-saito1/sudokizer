@@ -46,34 +46,6 @@ class Unit {
     }
     return cellidx;
   }
-
-  /**
-   * ユニットに正しく１～９まで入っているか調べる
-   * @param Board board: チェック対象の盤面
-   */
-  validCheck(board) {
-    // UnitとBoardの紐づけがないのでちゃんと確認しておく
-    if (this.unitsize !== board.bsize) {
-      throw 'Unit.validCheck: invalid board size' + 
-            '(' + this.unitsize + ', ' + board.bsize + ')';
-    }
-    let flgfield = 0x00000000;
-    for (let c of this.cellidx) {
-      // 空白 or ?ヒントがあったら即死
-      if (board.board[c].num === '0' || board.board[c].num === '?') {
-        return false;
-      }
-      // 数字が入っていたら対応するビット部分を1に変更
-      flgfield |= (0x00000001 << Number(board.board[c].num) - 1);
-    }
-    // チェック
-    for (let i = 0; i < this.unitsize; i++) {
-      if ((flgfield & 0x00000001 << i) === 0) {
-        return false;
-      }
-    }
-    return true;
-  }
 }
 
 
@@ -119,39 +91,6 @@ class Peer {
     // 重複排除と自身のマス排除
     cellidx = cellidx.filter((x, i, arr) => (arr.indexOf(x) === i && x !== this.cid));
     return cellidx;
-  }
-
-  /**
-   * 中心マスの候補数字洗いだし
-   */
-  identifyKouho(board) {
-    // 中心が空白マスの場合のみ適用
-    if (board.board[this.cid].num === '0') {
-      for (let k = 0; k < this.bsize; k++) {
-        board.board[this.cid].kouho[k] = true;
-        board.board[this.cid].kklevel[k] = 0;
-      }
-      for (let c of this.cellidx) {
-        let cnum = board.board[c].num;
-        if (cnum !== '0' && cnum !== '?') {
-          board.board[this.cid].kouho[cnum - 1] = false;
-        }
-      }
-    }
-  }
-
-  /**
-   * 中心マスの数字をピアの各マスの候補から除外
-   */
-  removeKouho(board) {
-    let centernum = board.board[this.cid].num;
-    if (centernum !== '0') {
-      for (let c of this.cellidx) {
-        if (board.board[c].num === '0') {
-          board.board[c].kouho[centernum-1] = false;
-        }
-      }
-    }
   }
 }
 
@@ -272,14 +211,15 @@ class SdkEngine {
     ];
   }
 
+  // ============================== フロントラッパー ==============================
   /**
    * 解答チェック機能（簡易実装版）
    * @param Board board: チェック対象の盤面オブジェクト
    */
   ansCheck(board) {
     let okflg = true;
-    for (let unit of board.units) {
-      if (!unit.validCheck(board)) {
+    for (let u in board.units) {
+      if (!this.validCheck(board, u)) {
         okflg = false;
         break;
       }
@@ -288,7 +228,7 @@ class SdkEngine {
   }
 
   /**
-   * 自動候補埋め機能（フロントラッパー）。
+   * 自動候補埋め機能。
    */
   autoIdentifyKouhoWrapper(board) {
     let newboard = board.transCreate();
@@ -296,16 +236,6 @@ class SdkEngine {
     // アクション追加
     let actionlist = board.diff(newboard);
     return [newboard, actionlist];
-  }
-  /**
-   * 自動候補埋め機能（本体）
-   */
-  autoIdentifyKouho(board) {
-    for (let c = 0; c < board.numcells; c++) {
-      if (board.board[c].num === '0') {
-        board.peers[c].identifyKouho(board);
-      }
-    }
   }
 
   /**
@@ -319,7 +249,6 @@ class SdkEngine {
     } else {
       newboard = board.transCreate();
     }
-    console.log(newboard);
     let retobj = this.strategySelector(newboard);
     let actionlist = board.diff(newboard);
     return [newboard, actionlist];
@@ -369,9 +298,7 @@ class SdkEngine {
 
   /**
    * ストラテジーセレクタ
-   * - ストラテジーを選択して一ステップだけ解く
-   * - マスが埋まった場合、そのピアの候補の削除処理を実行
-   * - 破綻判定もする
+   * - ストラテジーを選択して一ステップだけ解く。候補の同期や破綻判定もやる。
    * @param Board board: 解く盤面 
    * @param Object ret: 色々な情報を返す
    *   - bool ok    : 正常に進めばtrue, 失敗（破綻とお手上げ）ならfalse
@@ -385,8 +312,8 @@ class SdkEngine {
       if (ret.ok) {
         // 新たに数字が入った場合、候補情報を同期
         if (ret.status === 'newcell') {
-          let peer = new Peer(ret.cellinfo[0], board.bsize);
-          peer.removeKouho(board);
+          this.peerRemoveKouho(board, ret.cellinfo[0]);
+          // board.peers[ret.cellinfo[0]].removeKouho(board);
         }
       }
     }
@@ -396,6 +323,8 @@ class SdkEngine {
     }
   }
 
+
+  // ============================= ユーティリティ ==============================
   /**
    * 破綻していないか（候補が0個の空白マスがないか）チェック
    * @return ok: 破綻していなければtrue
@@ -412,6 +341,67 @@ class SdkEngine {
     }
     // 候補が全部trueだった場合
     return {ok: true};
+  }
+
+  /**
+   * ユニットに正しく１～９まで入っているか調べる
+   * @param Board board: チェック対象の盤面
+   * @param int unitid: ユニット番号
+   */
+  validCheck(board, unitid) {
+    let flgfield = 0x00000000;
+    for (let c of board.units[unitid].cellidx) {
+      // 空白 or ?ヒントがあったら即死
+      let num = board.board[c].num;
+      if (num === '0' || num === '?') {
+        return false;
+      }
+      // 数字が入っていたら対応するビット部分を1に変更
+      flgfield |= (0x00000001 << Number(num) - 1);
+    }
+    // チェック
+    for (let i = 0; i < board.bsize; i++) {
+      if ((flgfield & 0x00000001 << i) === 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * 自動候補埋め機能（本体）
+   */
+  autoIdentifyKouho(board) {
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '0') {
+        // 空白マスの候補状態を初期化
+        for (let k = 0; k < board.bsize; k++) {
+          board.board[c].kouho[k] = true;
+          board.board[c].kklevel[k] = 0;
+        }
+        // ピアを見て候補を削っていく
+        for (let c2 of board.peers[c].cellidx) {
+          let c2num = board.board[c2].num;
+          if (c2num !== '0' && c2num !== '?') {
+            board.board[c].kouho[c2num - 1] = false;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 指定ピアの各マスから中心マスの数字に相当する候補を削除
+   */
+  peerRemoveKouho(board, cid) {
+    let centernum = board.board[cid].num;
+    if (centernum !== '0') {
+      for (let c of board.peers[cid].cellidx) {
+        if (board.board[c].num === '0') {
+          board.board[c].kouho[centernum-1] = false;
+        }
+      }
+    }
   }
 
 

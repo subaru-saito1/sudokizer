@@ -357,7 +357,27 @@ class SdkEngine {
    * テスト用の暫定クラス
    */
   hiddenSingle(board) {
-    return {ok: true, status: 'newcell', cellinfo: [0]};
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '0') {
+        // trueのkouhoが一つかどうか調べて唯一の候補を割り出し
+        let onlykouho = '0';
+        let kouhocnt = 0;
+        for (let k in board.board[c].kouho) {
+          if (board.board[c].kouho[k]) {
+            onlykouho = String(k + 1);
+            kouhocnt++;
+          }
+        }
+        // 確定（盤面操作あり）
+        if (kouhocnt === 1) {
+          board.board[c].num = onlykouho;
+          board.board[c].kouho[onlykouho-1] = false;
+          board.board[c].kklevel[onlykouho-1] = 0;
+          return {ok:true, status:'newcell', cellinfo:[c]};
+        }
+      }
+    }
+    return {ok:false, status:'notfound'};
   }
 
   /**

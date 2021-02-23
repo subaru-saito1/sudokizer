@@ -441,6 +441,25 @@ class SdkEngine {
     }
   }
 
+  /**
+   * Board.ansInsのアクションを追加しないバージョン。候補入り空白マスへの入力
+   * @param Board board: 変更する盤面オブジェクト
+   * @param int cnum: 変更マス
+   * @param string num: 入れる値
+   */
+  answerInsert(board, cpos, num) {
+    // 前提条件
+    if (!board.board[cpos].ishint && board.board[cpos].num === '0') {
+      // 内容：マス入力、仮定レベルリセット、候補リセット、候補仮定レベルリセット
+      board.board[cpos].num = num;
+      board.board[cpos].klevel = 0;
+      for (let k = 0; k < board.bsize; k++) {
+        board.board[cpos].kouho[k] = false;
+        board.board[cpos].kklevel[k] = 0;
+      }
+    }
+  }
+
 
   // =========================== ストラテジー本体 ============================
 
@@ -465,7 +484,8 @@ class SdkEngine {
         }
         // 確定（盤面操作あり）
         if (kouhocnt === 1) {
-          board.ansIns(c, onlykouho, 0);
+          // board.ansIns(c, onlykouho, 0);   // アクションの二重コミットバグ
+          this.answerInsert(board, c, onlykouho);
           return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single'};
         }
       }
@@ -486,7 +506,8 @@ class SdkEngine {
         let ret = this.hiddenSingleCheck(board, u, n+1)
         // 確定（盤面操作あり）
         if (ret.ok) {
-          board.ansIns(ret.cid, String(n+1), 0);
+          // board.ansIns(ret.cid, String(n+1), 0);  // アクションの二重コミットバグ
+          this.answerInsert(board, ret.cid, String(n+1));
           return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Hidden Single'};
         }
       }

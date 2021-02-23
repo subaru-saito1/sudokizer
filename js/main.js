@@ -245,11 +245,14 @@ class SdkEngine {
     let newboard;
     // 候補が空の空白マスがあったら自動候補埋めから
     if (!this.noKouhoCheck(board).ok) {
-      newboard = this.autoIdentifyKouho(board, false);
+      newboard = board.transCreate();
+      this.autoIdentifyKouho(newboard);
     } else {
       newboard = board.transCreate();
     }
     let retobj = this.strategySelector(newboard);
+    // ステータスを見る
+    console.log(retobj);
     let actionlist = board.diff(newboard);
     return [newboard, actionlist];
   }
@@ -258,7 +261,7 @@ class SdkEngine {
    * 全解答
    */
   allStepSolve(board) {
-    let newboard = this.autoIdentifyKouho(board, false)
+    let newboard = this.autoIdentifyKouho(board)
     // 本体部分は再帰関数で回す
     let anscnt = this.allStepSolveRecursive(newboard);
     if (anscnt === 0) {
@@ -300,7 +303,7 @@ class SdkEngine {
    * ストラテジーセレクタ
    * - ストラテジーを選択して一ステップだけ解く。候補の同期や破綻判定もやる。
    * @param Board board: 解く盤面 
-   * @param Object ret: 色々な情報を返す
+   * @return Object ret: 色々な情報を返す
    *   - bool ok    : 正常に進めばtrue, 失敗（破綻とお手上げ）ならfalse
    *   - bool status: 'newcell', 'newkouho', 'noanswer', 'giveup'
    *   - bool cellinfo: 影響があったマス/破綻したマス のリスト
@@ -308,19 +311,23 @@ class SdkEngine {
   strategySelector(board) {
     for (let i in this.strategylist) {
       // ストラテジー呼び出し
-      let ret = this.strategylist[i](board);
+      // メモ：callじゃないと呼び出し先のthisがSdkEngineじゃなく配列で渡されてしまう
+      let ret = this.strategylist[i].call(this, board);
       if (ret.ok) {
-        // 新たに数字が入った場合、候補情報を同期
+        // 新たに数字が入った場合、候補情報を同期して返す
         if (ret.status === 'newcell') {
           this.peerRemoveKouho(board, ret.cellinfo[0]);
-          // board.peers[ret.cellinfo[0]].removeKouho(board);
         }
+        // 破綻していないかチェック
+        if (!this.noKouhoCheck(board).ok) {
+          return {ok: false, status: 'noanswer'};
+        }
+        // 正常成功
+        return ret;
       }
     }
-    // 破綻していた場合
-    if (this.noKouhoCheck(board).ok) {
-      return {ok: false, status: 'noanswer'};
-    }
+    // お手上げ
+    return {ok:false, status:'giveup'};
   }
 
 
@@ -404,12 +411,45 @@ class SdkEngine {
     }
   }
 
+  /**
+   * ユニットIDと数字を指定して、そのユニットに唯一入れられる場所があるか探す
+   * 非破壊検査
+   * @param Board board: 盤面全体
+   * @param int unitid: 検査対象ユニット
+   * @param int num: 検査対象数字 1-origin
+   * @return bool ok: OKかどうか
+   * @return int cid: OKの場合、埋めるべきマスを返す
+   */
+  hiddenSingleCheck(board, unitid, num) {
+    let cnt = 0;
+    let lastcid;
+    for (let cid of board.units[unitid].cellidx) {
+      // 既に入っている
+      if (board.board[cid].num === String(num)) {
+        return {ok:false};
+      }
+      // 候補が見つかった場合
+      if (board.board[cid].kouho[num-1]) {
+        cnt++;
+        lastcid = cid;
+      }
+    }
+    if (cnt === 1) {
+      return {ok:true, cid:lastcid};
+    } else {
+      return {ok:false};
+    }
+  }
+
 
   // =========================== ストラテジー本体 ============================
 
   /**
    * naked singleストラテジー
-   * テスト用の暫定クラス
+   * @param Board board
+   * @return bool ok
+   * @return string status: newcell or notfound
+   * @return array(int) cellinfo
    */
   nakedSingleStrategy(board) {
     for (let c = 0; c < board.numcells; c++) {
@@ -425,24 +465,32 @@ class SdkEngine {
         }
         // 確定（盤面操作あり）
         if (kouhocnt === 1) {
-          board.board[c].num = onlykouho;
-          board.board[c].kouho[onlykouho-1] = false;
-          board.board[c].kklevel[onlykouho-1] = 0;
-          return {ok:true, status:'newcell', cellinfo:[c]};
+          board.ansIns(c, onlykouho, 0);
+          return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single'};
         }
       }
     }
-    return {ok:false, status:'notfound'};
+    return {ok:false, status:'notfound', strategy:'Naked Single'};
   }
 
   /**
    * hidden single
-   * テスト用の暫定クラス
+   * @param Board board
+   * @return bool ok
+   * @return string status: newcell or notfound
+   * @return array(int) cellinfo
    */
   hiddenSingleStrategy(board) {
-    return {ok:true, status: 'newcell', cellinfo: [0]}
+    for (let u in board.units) {
+      for (let n = 0; n < board.bsize; n++) {
+        let ret = this.hiddenSingleCheck(board, u, n+1)
+        // 確定（盤面操作あり）
+        if (ret.ok) {
+          board.ansIns(ret.cid, String(n+1), 0);
+          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Hidden Single'};
+        }
+      }
+    }
+    return {ok:false, status:'notfound', strategy:'Hidden Single'};
   }
-
-
-
 }

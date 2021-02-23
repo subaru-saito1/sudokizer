@@ -1,3 +1,4 @@
+"use strict";
 
 /**
  * ユニット：9マスの論理ペアのクラス
@@ -146,9 +147,20 @@ class Peer {
  * 数独エンジンクラス
  */
 class SdkEngine {
+  constructor() {
+    // 解答エンジンに関する諸設定
+    this.config = {
+      multians_thres: 2,  // 別解発生時に探索を打ち切る解の個数
+    }
+    // 適用するストラテジー関数のリスト
+    this.strategylist = [
+      this.hiddenSingle,
+      this.nakedSingle,
+    ];
+  }
 
-   // 横行
-  static createRows(board) {
+  // 横行
+  createRows(board) {
     let units = []
     for (let i = 0; i < board.bsize; i++) {
       units.push(new Unit('row', i, board.bsize));
@@ -156,7 +168,7 @@ class SdkEngine {
     return units;
   }
   // 縦列
-  static createCols(board) {
+  createCols(board) {
     let units = []
     for (let i = 0; i < board.bsize; i++) {
       units.push(new Unit('col', i, board.bsize));
@@ -164,7 +176,7 @@ class SdkEngine {
     return units;
   }
   // ブロック
-  static createBlocks(board) {
+  createBlocks(board) {
     let units = []
     for (let i = 0; i < board.bsize; i++) {
       units.push(new Unit('block', i, board.bsize));
@@ -172,11 +184,11 @@ class SdkEngine {
     return units;
   }
   // 全て
-  static createUnits(board) {
+  createUnits(board) {
     let units = []
-    units = units.concat(SdkEngine.createRows(board));
-    units = units.concat(SdkEngine.createCols(board));
-    units = units.concat(SdkEngine.createBlocks(board));
+    units = units.concat(this.createRows(board));
+    units = units.concat(this.createCols(board));
+    units = units.concat(this.createBlocks(board));
     return units;
   }
 
@@ -187,8 +199,8 @@ class SdkEngine {
    * 解答チェック機能（簡易実装版）
    * @param Board board: チェック対象の盤面オブジェクト
    */
-  static ansCheck(board) {
-    let units = SdkEngine.createUnits(board);
+  ansCheck(board) {
+    let units = this.createUnits(board);
     let okflg = true;
     for (let unit of units) {
       if (!unit.validCheck(board)) {
@@ -202,7 +214,7 @@ class SdkEngine {
   /**
    * 自動候補埋め機能（簡易実装版）
    */
-  static autoIdentifyKouho(board) {
+  autoIdentifyKouho(board) {
     let newboard = board.transCreate();
     for (let c = 0; c < newboard.numcells; c++) {
       if (board.board[c].num === '0') {
@@ -214,5 +226,90 @@ class SdkEngine {
     let actionlist = board.diff(newboard);
     return [newboard, actionlist];
   }
+
+  /**
+   * 一ステップ解答
+   */
+  oneStepSolve(board) {
+    let newboard = board.transCreate();
+    let retobj = this.strategySelector(newboard);
+    let actionlist = board.diff(newboard);
+    return [newboard, actionlist];
+  }
+
+  /**
+   * 全解答
+   */
+  allStepSolve(board) {
+    let newboard = board.transCreate();
+    // 本体部分は再帰関数で回す
+    let anscnt = this.allStepSolveRecursive(newboard);
+    if (anscnt === 0) {
+      alert('解なし');
+    } else if (anscnt === 1) {
+      alert('一意解が存在します');
+    } else {
+      alert('複数解が存在します');
+    }
+    let actionlist = board.diff(newboard);
+    return [newboard, actionlist];
+  }
+
+  /**
+   * 全解答再帰アルゴリズム
+   * @param Board board コピー後の盤面
+   * @return int 解の個数
+   */
+  allStepSolveRecursive(board) {
+    while (true) {
+      // ストラテジーセレクタ1回分
+      // 全マス埋まったら return 1
+      // 破綻したら即 return 0
+      return 1;
+
+      // 先に進まなくなったら再帰
+      let newboard = board.transCreate();
+      // 候補数が最も少ないマスを選んでランダムに埋める
+      // 埋めた後の盤面を再帰で渡す
+      // 返り値（解の個数）を現在の解の個数に加算
+      // 解の個数が2以上だった時点で即 return 2;
+    }
+  }
+
+
+  // ============================== ストラテジー本体　===============================
+
+  /**
+   * ストラテジーセレクタ
+   * - ストラテジーを選択して一ステップだけ解く
+   * - マスが埋まった場合、そのピアの候補の削除処理を実行
+   * - 破綻判定もする
+   * @param Board board: 解く盤面 
+   * @param Object ret: 色々な情報を返す
+   *   - bool ok    : 正常に進めばtrue, 失敗（破綻とお手上げ）ならfalse
+   *   - bool status: 'newcell', 'newkouho', 'noanswer', 'giveup'
+   *   - bool cellinfo: 影響があったマス/破綻したマス のリスト
+   */
+  strategySelector(board) {
+
+  }
+
+  /**
+   * hiddenSingle
+   * テスト用の暫定クラス
+   */
+  hiddenSingle(board) {
+
+  }
+
+  /**
+   * nakedSingle
+   * テスト用の暫定クラス
+   */
+  nakedSingle(board) {
+
+  }
+
+
 
 }

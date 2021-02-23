@@ -323,14 +323,14 @@ function setKateiLevel(evt) {
  * 解答チェック
  */
 function answerCheck(evt) {
-  SdkEngine.ansCheck(Sudokizer.board);
+  Sudokizer.engine.ansCheck(Sudokizer.board);
 }
 
 /**
  * 候補自動洗い出し
  */
 function autoKouho(evt) {
-  let ret = SdkEngine.autoIdentifyKouho(Sudokizer.board);
+  let ret = Sudokizer.engine.autoIdentifyKouho(Sudokizer.board);
   Sudokizer.board = ret[0];              // 盤面更新
   Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();
@@ -348,16 +348,20 @@ function autoGenerate(evt) {
  * 1ステップ解答
  */
 function stepSolve(evt) {
-  alert('stepsolve');
-  // Sudokizer.astack.push(action);
+  let ret = Sudokizer.engine.oneStepSolve(Sudokizer.board);
+  Sudokizer.board = ret[0]
+  Sudokizer.astack.push(new Action(ret[1]));
+  redraw();
 }
 
 /**
  * 全ステップ解答
  */
 function allSolve(evt) {
-  alert('allSolve');
-  // Sudokizer.astack.push(action);
+  let ret = Sudokizer.engine.allStepSolve(Sudokizer.board);
+  Sudokizer.board = ret[0]
+  Sudokizer.astack.push(new Action(ret[1]));
+  redraw();
 }
 
 

@@ -17,8 +17,7 @@ let Sudokizer = {};
 Sudokizer.astack = new ActionStack();   // アクションスタック作成
 Sudokizer.board  = initBoard();         // 初期盤面の作成
 Sudokizer.config = initConfig();        // フォーム設定類
-console.log(Sudokizer.board);
-console.log(Sudokizer.config);
+Sudokizer.engine = new SdkEngine();     // 解答エンジン
 
 setEventHandlers();   // イベントハンドラを仕掛ける
 redraw();             // 初回同期

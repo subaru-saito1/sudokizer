@@ -330,7 +330,7 @@ function answerCheck(evt) {
  * 候補自動洗い出し
  */
 function autoKouho(evt) {
-  let ret = Sudokizer.engine.autoIdentifyKouho(Sudokizer.board);
+  let ret = Sudokizer.engine.autoIdentifyKouhoWrapper(Sudokizer.board);
   Sudokizer.board = ret[0];              // 盤面更新
   Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
   redraw();

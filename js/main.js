@@ -276,9 +276,8 @@ class SdkEngine {
    * @param Board board: チェック対象の盤面オブジェクト
    */
   ansCheck(board) {
-    let units = this.createUnits(board);
     let okflg = true;
-    for (let unit of units) {
+    for (let unit of board.units) {
       if (!unit.validCheck(board)) {
         okflg = false;
         break;
@@ -288,23 +287,23 @@ class SdkEngine {
   }
 
   /**
-   * 自動候補埋め機能（簡易実装版）
-   * @param takediff: 差分をとるかどうか。ストラテジーで内部的に使う場合はfalse指定。
+   * 自動候補埋め機能（フロントラッパー）。
    */
-  autoIdentifyKouho(board, takediff=true) {
+  autoIdentifyKouhoWrapper(board) {
     let newboard = board.transCreate();
-    for (let c = 0; c < newboard.numcells; c++) {
-      if (board.board[c].num === '0') {
-        let peer = new Peer(c, newboard.bsize);
-        peer.identifyKouho(newboard);
-      }
-    }
+    this.autoIdentifyKouho(newboard);
     // アクション追加
-    if (takediff) {
-      let actionlist = board.diff(newboard);
-      return [newboard, actionlist];
-    } else {
-      return newboard;
+    let actionlist = board.diff(newboard);
+    return [newboard, actionlist];
+  }
+  /**
+   * 自動候補埋め機能（本体）
+   */
+  autoIdentifyKouho(board) {
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '0') {
+        board.peers[c].identifyKouho(board);
+      }
     }
   }
 

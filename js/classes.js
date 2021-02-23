@@ -538,7 +538,7 @@ class Board {
       }
     }
     if (Sudokizer.config.debugmode) {
-      console.log(actions);
+      console.log('Diff: ', actions);
     }
     return actions;
   }

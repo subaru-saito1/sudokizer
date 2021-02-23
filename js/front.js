@@ -351,7 +351,6 @@ function stepSolve(evt) {
   let ret = Sudokizer.engine.oneStepSolve(Sudokizer.board);
   Sudokizer.board = ret[0]
   Sudokizer.astack.push(new Action(ret[1]));
-  console.log(Sudokizer.board);
   redraw();
 }
 

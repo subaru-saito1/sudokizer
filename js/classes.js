@@ -237,7 +237,7 @@ class Board {
     let actionlist = []
     if (!this.board[cpos].ishint) {
       // 状態リセット
-      if (this.board.num !== '0') {
+      if (this.board[cpos].num !== '0') {
         actionlist.push({cmd:'numUnset', cpos:cpos, num: this.board[cpos].num});
         actionlist.push({cmd:'klevelUnset', cpos:cpos, klevel: this.board[cpos].klevel});
       } else {

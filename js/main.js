@@ -13,32 +13,32 @@ class Unit {
   constructor(unittype, id, unitsize=9) {
     this.unittype = unittype;
     this.id = id;
-    this.cellidx = this.createCellIndex(unittype, id, unitsize);
-    this.unitsize = this.cellidx.length;
+    this.unitsize = unitsize;
+    this.cellidx = this.createCellIndex();
   }
   /**
    * ユニットに含まれるマスの番号を配列で返す
    */
-  createCellIndex(unittype, id, unitsize) {
+  createCellIndex() {
     let cellidx = []
     // 横行ユニット
-    if (unittype === 'row') {
-      for (let j = 0; j < unitsize; j++) {
-        cellidx.push(id * unitsize + j);
+    if (this.unittype === 'row') {
+      for (let j = 0; j < this.unitsize; j++) {
+        cellidx.push(this.id * this.unitsize + j);
       }
     // 楯列ユニット
-    } else if (unittype === 'col') {
-      for (let i = 0; i < unitsize; i++) {
-        cellidx.push(i * unitsize + id);
+    } else if (this.unittype === 'col') {
+      for (let i = 0; i < this.unitsize; i++) {
+        cellidx.push(i * this.unitsize + this.id);
       }
     // ブロックユニット
-    } else if (unittype === 'block') {
-      let sqrtsize = Math.sqrt(unitsize); // 3
+    } else if (this.unittype === 'block') {
+      let sqrtsize = Math.sqrt(this.unitsize); // 3
       for (let i = 0; i < sqrtsize; i++) {
         for (let j = 0; j < sqrtsize; j++) {
-          let ofsx = (id % sqrtsize) * sqrtsize;
-          let ofsy = Math.floor(id / sqrtsize) * sqrtsize * unitsize;
-          cellidx.push(ofsx + ofsy + i * unitsize + j);
+          let ofsx = (this.id % sqrtsize) * sqrtsize;
+          let ofsy = Math.floor(this.id / sqrtsize) * sqrtsize * this.unitsize;
+          cellidx.push(ofsx + ofsy + i * this.unitsize + j);
         }
       }
     } else {
@@ -89,35 +89,35 @@ class Peer {
   constructor(cid, bsize) {
     this.cid = cid;
     this.bsize = bsize;
-    this.cellidx = this.createCellIndex(cid, bsize);
+    this.cellidx = this.createCellIndex();
   }
 
   /**
    * ピアに含まれるセルのインデックスリストを作成
    */
-  createCellIndex(cid, bsize) {
-    let rowid = Math.floor(cid / bsize);
-    let colid = cid % bsize;
-    let sqrtsize = Math.sqrt(bsize);
+  createCellIndex() {
+    let rowid = Math.floor(this.cid / this.bsize);
+    let colid = this.cid % this.bsize;
+    let sqrtsize = Math.sqrt(this.bsize);
     let cellidx = []
     // 同じ行
-    for (let j = 0; j < bsize; j++) {
-      cellidx.push(rowid * bsize + j);
+    for (let j = 0; j < this.bsize; j++) {
+      cellidx.push(rowid * this.bsize + j);
     }
     // 同じ列
-    for (let i = 0; i < bsize; i++) {
-      cellidx.push(i * bsize + colid);
+    for (let i = 0; i < this.bsize; i++) {
+      cellidx.push(i * this.bsize + colid);
     }
     // 同じブロック
     for (let i = 0; i < sqrtsize; i++) {
       for (let j = 0; j < sqrtsize; j++) {
         let ofsx = Math.floor(colid / sqrtsize) * sqrtsize;
-        let ofsy = Math.floor(rowid / sqrtsize) * sqrtsize * bsize;
-        cellidx.push(ofsx + ofsy + i * bsize + j);
+        let ofsy = Math.floor(rowid / sqrtsize) * sqrtsize * this.bsize;
+        cellidx.push(ofsx + ofsy + i * this.bsize + j);
       }
     }
     // 重複排除と自身のマス排除
-    cellidx = cellidx.filter((x, i, arr) => (arr.indexOf(x) === i && x !== cid));
+    cellidx = cellidx.filter((x, i, arr) => (arr.indexOf(x) === i && x !== this.cid));
     return cellidx;
   }
 
@@ -152,6 +152,103 @@ class Peer {
         }
       }
     }
+  }
+}
+
+/**
+ * 列とブロックの交差部分3マスの集合
+ */
+class Cross {
+  /**
+   * コンストラクタ
+   * @param string linetype: 'row' or 'col'
+   * @param int blockid: ブロックの番号
+   * @param int lineid: 行/列の番号
+   * @param bsize 盤面サイズ(9)
+   */
+  constructor(linetype, blockid, lineid, bsize) {
+    this.linetype = linetype;
+    this.blockid = blockid;
+    this.lineid = lineid;
+    this.bsize = bsize;
+    this.cellidx = this.createCellIndex();
+    this.blockidx = this.craeteBlockIndex();
+    this.lineidx = this.createLineIndex();
+    console.log(this.blockid, this.lineid, this.linetype);
+    console.log(this.cellidx, this.blockidx, this.lineidx);
+  }
+  /**
+   * クロスに含まれる3マスの座標を取得
+   */
+  createCellIndex() {
+    let sqrtsize = Math.sqrt(this.bsize);
+    let cellidx = []
+    if (this.linetype === 'row') {
+      // 行とブロックが重なるかどうか判定
+      if (Math.floor(this.blockid / sqrtsize) === Math.floor(this.lineid / sqrtsize)) {
+        for (let j = 0; j < sqrtsize; j++) {
+          let ofsx = (this.blockid % sqrtsize) * sqrtsize;
+          cellidx.push(this.lineid * this.bsize + ofsx + j)
+        }
+      } else {
+        throw 'Cross.createCellIndex: Non-overlap block and lines';
+      }
+    } else if (this.linetype === 'col') {
+      // 列とブロックが重なるかどうか判定
+      if ((this.blockid % sqrtsize) === Math.floor(this.lineid / sqrtsize)) {
+        for (let i = 0; i < sqrtsize; i++) {
+          let ofsy = Math.floor(this.blockid / sqrtsize) * sqrtsize * this.bsize;
+          cellidx.push(ofsy + i * this.bsize + this.lineid);
+        }
+      } else {
+        throw 'Cross.createCellIndex: Non-overlap block and lines';
+      }
+    } else {
+      throw 'Cross.createCellIndex: Invalid linetype';
+    }
+    return cellidx;
+  }
+  /**
+   * クロスに含まれない同じブロックの座標リスト
+   */
+  createBlockIndex() {
+    let sqrtsize = Math.sqrt(this.bsize);   // 3
+    let cellidx = []
+    for (let i = 0; i < sqrtsize; i++) {
+      if (this.linetype === 'row' && this.lineid % sqrtsize === i) {
+        continue;
+      }
+      for (let j = 0; j < sqrtsize; j++) {
+        if (this.linetype === 'col' && this.lineid % sqrtsize === j) {
+          continue;
+        }
+        let ofsx = (this.blockid % sqrtsize) * sqrtsize;
+        let ofsy = Math.floor(this.blockid / sqrtsize) * sqrtsize * this.bsize;
+        cellidx.push(ofsx + ofsy + i * this.bsize + j);
+      }
+    }
+    return cellidx;
+  }
+  /**
+   * クロスに含まれない同じラインの座標リスト
+   */
+  createLineIndex() {
+    let sqrtsize = Math.sqrt(this.bsize);   // 3
+    let cellidx = []
+    if (this.linetype === 'row') {
+      for (let j = 0; j < this.bsize; j++) {
+        if (Math.floor(j / sqrtsize) !== (this.blockid % sqrtsize)) {
+          cellidx.push(this.lineid * this.bsize + j);
+        }
+      }
+    } else {            // col
+      for (let i = 0; i < this.bsize; i++) {
+        if (Math.floor(i / sqrtsize) !== Math.floor(this.blockid / sqrtsize)) {
+          cellidx.push(i * this.bsize + this.lineid);
+        }
+      }
+    }
+    return cellidx;
   }
 }
 

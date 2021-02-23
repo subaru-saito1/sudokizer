@@ -172,10 +172,8 @@ class Cross {
     this.lineid = lineid;
     this.bsize = bsize;
     this.cellidx = this.createCellIndex();
-    this.blockidx = this.craeteBlockIndex();
+    this.blockidx = this.createBlockIndex();
     this.lineidx = this.createLineIndex();
-    console.log(this.blockid, this.lineid, this.linetype);
-    console.log(this.cellidx, this.blockidx, this.lineidx);
   }
   /**
    * クロスに含まれる3マスの座標を取得
@@ -258,6 +256,9 @@ class Cross {
  * 数独エンジンクラス
  */
 class SdkEngine {
+  /**
+   * コンストラクタ：解答エンジンに関する設定とストラテジーリストの設定
+   */
   constructor() {
     // 解答エンジンに関する諸設定
     this.config = {
@@ -269,42 +270,6 @@ class SdkEngine {
       this.nakedSingle,
     ];
   }
-
-  // 横行
-  createRows(board) {
-    let units = []
-    for (let i = 0; i < board.bsize; i++) {
-      units.push(new Unit('row', i, board.bsize));
-    }
-    return units;
-  }
-  // 縦列
-  createCols(board) {
-    let units = []
-    for (let i = 0; i < board.bsize; i++) {
-      units.push(new Unit('col', i, board.bsize));
-    }
-    return units;
-  }
-  // ブロック
-  createBlocks(board) {
-    let units = []
-    for (let i = 0; i < board.bsize; i++) {
-      units.push(new Unit('block', i, board.bsize));
-    }
-    return units;
-  }
-  // 全て
-  createUnits(board) {
-    let units = []
-    units = units.concat(this.createRows(board));
-    units = units.concat(this.createCols(board));
-    units = units.concat(this.createBlocks(board));
-    return units;
-  }
-
-
-  // =========================== フロント基本機能 =============================
 
   /**
    * 解答チェック機能（簡易実装版）
@@ -400,7 +365,7 @@ class SdkEngine {
   }
 
 
-  // ============================== ストラテジー本体　===============================
+  // ============================== ストラテジーセレクタ　===============================
 
   /**
    * ストラテジーセレクタ
@@ -448,6 +413,9 @@ class SdkEngine {
     // 候補が全部trueだった場合
     return {ok: true};
   }
+
+
+  // =========================== ストラテジー本体 ============================
 
   /**
    * hiddenSingle

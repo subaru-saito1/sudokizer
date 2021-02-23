@@ -105,7 +105,63 @@ class Board {
     for (let i = 0; i < this.numcells; i++) {
       this.board.push(new Cell(this.bsize));
     }
+    // 解答エンジン側で使う情報（セルグループのインデックスリスト）
+    this.blocks = this.createUnits('block');
+    this.rows = this.createUnits('row');
+    this.cols = this.createUnits('col');
+    this.lines = Array.prototype.concat(this.rows, this.cols);
+    this.units = Array.prototype.concat(this.blocks, this.rows, this.cols);
+    this.peers = this.createPeers();
+    this.crosses = this.createCrosses();
   }
+
+  // ======================== セルグループのリスト生成　========================
+  /**
+   * ユニット（9マス単位） x 27グループの生成
+   * @param string unittype: block, row, col
+   */
+  createUnits(unittype) {
+    let units = []
+    for (let i = 0; i < this.bsize; i++) {
+      units.push(new Unit(unittype, i, this.bsize));
+    }
+    return units;
+  }
+  /**
+   * ピア（20マス単位） x 81グループの生成
+   */
+  createPeers() {
+    let peers = []
+    for (let c = 0; c < this.numcells; c++) {
+      peers.push(new Peer(c, this.bsize));
+    }
+    return peers;
+  }
+  /**
+   * クロス (3 + 6x2マス単位) x 54グループの生成
+   */
+  createCrosses() {
+    let crosses = []
+    let sqrtsize = Math.sqrt(this.bsize);
+    // 行クロス
+    for (let b = 0; b < this.bsize; b++) {
+      for (let i = 0; i < sqrtsize; i++) {
+        let ofsy = Math.floor(b / sqrtsize) * sqrtsize;
+        crosses.push(new Cross('row', b, ofsy + i, this.bsize));
+      }
+    }
+    // 列クロス
+    for (let b = 0; b < this.bsize; b++) {
+      for (let j = 0; j < sqrtsize; j++) {
+        let ofsx = (b % sqrtsize) * sqrtsize;
+        crosses.push(new Cross('col', b, ofsx + j, this.bsize));
+      }
+    }
+    return crosses;
+  }
+
+
+
 
   // ============================ AcomicActions ===============================
 

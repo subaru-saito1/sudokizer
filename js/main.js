@@ -139,6 +139,20 @@ class Peer {
       }
     }
   }
+
+  /**
+   * 中心マスの数字をピアの各マスの候補から除外
+   */
+  removeKouho(board) {
+    let centernum = board.board[this.cid].num;
+    if (centernum !== '0') {
+      for (let c of this.cellidx) {
+        if (board.board[c].num === '0') {
+          board.board[c].kouho[centernum-1] = false;
+        }
+      }
+    }
+  }
 }
 
 
@@ -213,8 +227,9 @@ class SdkEngine {
 
   /**
    * 自動候補埋め機能（簡易実装版）
+   * @param takediff: 差分をとるかどうか。ストラテジーで内部的に使う場合はfalse指定。
    */
-  autoIdentifyKouho(board) {
+  autoIdentifyKouho(board, takediff=true) {
     let newboard = board.transCreate();
     for (let c = 0; c < newboard.numcells; c++) {
       if (board.board[c].num === '0') {
@@ -223,15 +238,26 @@ class SdkEngine {
       }
     }
     // アクション追加
-    let actionlist = board.diff(newboard);
-    return [newboard, actionlist];
+    if (takediff) {
+      let actionlist = board.diff(newboard);
+      return [newboard, actionlist];
+    } else {
+      return newboard;
+    }
   }
 
   /**
    * 一ステップ解答
    */
   oneStepSolve(board) {
-    let newboard = board.transCreate();
+    let newboard;
+    // 候補が空の空白マスがあったら自動候補埋めから
+    if (!this.noKouhoCheck(board).ok) {
+      newboard = this.autoIdentifyKouho(board, false);
+    } else {
+      newboard = board.transCreate();
+    }
+    console.log(newboard);
     let retobj = this.strategySelector(newboard);
     let actionlist = board.diff(newboard);
     return [newboard, actionlist];
@@ -241,7 +267,7 @@ class SdkEngine {
    * 全解答
    */
   allStepSolve(board) {
-    let newboard = board.transCreate();
+    let newboard = this.autoIdentifyKouho(board, false)
     // 本体部分は再帰関数で回す
     let anscnt = this.allStepSolveRecursive(newboard);
     if (anscnt === 0) {
@@ -291,7 +317,39 @@ class SdkEngine {
    *   - bool cellinfo: 影響があったマス/破綻したマス のリスト
    */
   strategySelector(board) {
+    for (let i in this.strategylist) {
+      // ストラテジー呼び出し
+      let ret = this.strategylist[i](board);
+      if (ret.ok) {
+        // 新たに数字が入った場合、候補情報を同期
+        if (ret.status === 'newcell') {
+          let peer = new Peer(ret.cellinfo[0], board.bsize);
+          peer.removeKouho(board);
+        }
+      }
+    }
+    // 破綻していた場合
+    if (this.noKouhoCheck(board).ok) {
+      return {ok: false, status: 'noanswer'};
+    }
+  }
 
+  /**
+   * 破綻していないか（候補が0個の空白マスがないか）チェック
+   * @return ok: 破綻していなければtrue
+   * @return cell: 破綻していた場合、そのセル番号
+   */
+  noKouhoCheck(board) {
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '0') {
+        // 候補が全部falseだった場合
+        if (!board.board[c].kouho.reduce((acc, cur) => (acc || cur), false)) {
+          return {ok: false, cell: c};
+        }
+      } 
+    }
+    // 候補が全部trueだった場合
+    return {ok: true};
   }
 
   /**
@@ -299,7 +357,7 @@ class SdkEngine {
    * テスト用の暫定クラス
    */
   hiddenSingle(board) {
-
+    return {ok: true, status: 'newcell', cellinfo: [0]};
   }
 
   /**
@@ -307,7 +365,7 @@ class SdkEngine {
    * テスト用の暫定クラス
    */
   nakedSingle(board) {
-
+    return {ok:true, status: 'newcell', cellinfo: [0]}
   }
 
 

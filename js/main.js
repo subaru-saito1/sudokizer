@@ -251,8 +251,9 @@ class Cross {
 }
 
 
+// =================================================================================
 
-/**
+/** 
  * 数独エンジンクラス
  */
 class SdkEngine {
@@ -266,8 +267,8 @@ class SdkEngine {
     }
     // 適用するストラテジー関数のリスト
     this.strategylist = [
-      this.hiddenSingle,
-      this.nakedSingle,
+      this.hiddenSingleStrategy,
+      this.nakedSingleStrategy,
     ];
   }
 
@@ -417,10 +418,10 @@ class SdkEngine {
   // =========================== ストラテジー本体 ============================
 
   /**
-   * hiddenSingle
+   * naked singleストラテジー
    * テスト用の暫定クラス
    */
-  hiddenSingle(board) {
+  nakedSingleStrategy(board) {
     for (let c = 0; c < board.numcells; c++) {
       if (board.board[c].num === '0') {
         // trueのkouhoが一つかどうか調べて唯一の候補を割り出し
@@ -445,10 +446,10 @@ class SdkEngine {
   }
 
   /**
-   * nakedSingle
+   * hidden single
    * テスト用の暫定クラス
    */
-  nakedSingle(board) {
+  hiddenSingleStrategy(board) {
     return {ok:true, status: 'newcell', cellinfo: [0]}
   }
 

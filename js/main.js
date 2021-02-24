@@ -215,16 +215,15 @@ class SdkEngine {
   /**
    * 解答チェック機能（簡易実装版）
    * @param Board board: チェック対象の盤面オブジェクト
+   * @return bool : 完成しているかどうか
    */
   ansCheck(board) {
-    let okflg = true;
     for (let u in board.units) {
       if (!this.validCheck(board, u)) {
-        okflg = false;
-        break;
+        return false;
       }
     }
-    alert(okflg ? '正解です' : '不正解です');
+    return true;
   }
 
   /**
@@ -251,8 +250,6 @@ class SdkEngine {
       newboard = board.transCreate();
     }
     let retobj = this.strategySelector(newboard);
-    // ステータスを見る
-    console.log(retobj);
     let actionlist = board.diff(newboard);
     return [newboard, actionlist];
   }
@@ -323,11 +320,18 @@ class SdkEngine {
           return {ok: false, status: 'noanswer'};
         }
         // 正常成功
+        addSolveLog(ret.msg);
         return ret;
       }
     }
-    // お手上げ
-    return {ok:false, status:'giveup'};
+    // 既に完成している
+    if (this.ansCheck(board)) {
+      addSolveLog('Conglaturations!')
+      return {ok:true, status:'done'};
+    } else {
+      addSolveLog('Give Up...')
+      return {ok:false, status:'giveup'};
+    }
   }
 
 
@@ -484,9 +488,12 @@ class SdkEngine {
         }
         // 確定（盤面操作あり）
         if (kouhocnt === 1) {
-          // board.ansIns(c, onlykouho, 0);   // アクションの二重コミットバグ
-          this.answerInsert(board, c, onlykouho);
-          return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single'};
+          this.answerInsert(board, c, onlykouho);   // 盤面操作
+          // メッセージ生成
+          let x = c % board.bsize + 1;
+          let y = Math.floor(c / board.bsize) + 1;
+          return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single',
+                  msg: 'Naked Single: Cell(' + x + ', ' + y + ') to ' + onlykouho};
         }
       }
     }
@@ -506,9 +513,12 @@ class SdkEngine {
         let ret = this.hiddenSingleCheck(board, u, n+1)
         // 確定（盤面操作あり）
         if (ret.ok) {
-          // board.ansIns(ret.cid, String(n+1), 0);  // アクションの二重コミットバグ
-          this.answerInsert(board, ret.cid, String(n+1));
-          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Hidden Single'};
+          this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
+          // メッセージ生成
+          let x = ret.cid % board.bsize + 1;
+          let y = Math.floor(ret.cid / board.bsize) + 1;
+          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Hidden Single',
+                  msg: 'Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
         }
       }
     }

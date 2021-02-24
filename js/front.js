@@ -323,7 +323,8 @@ function setKateiLevel(evt) {
  * 解答チェック
  */
 function answerCheck(evt) {
-  Sudokizer.engine.ansCheck(Sudokizer.board);
+  let okflg = Sudokizer.engine.ansCheck(Sudokizer.board);
+  alert(okflg ? '正解です' : '不正解です');
 }
 
 /**
@@ -362,6 +363,17 @@ function allSolve(evt) {
   Sudokizer.board = ret[0]
   Sudokizer.astack.push(new Action(ret[1]));
   redraw();
+}
+
+/**
+ * 手筋ログ追加
+ */
+function addSolveLog(msg) {
+  let former = $('#solvelog_form').val();
+  let lines = former.split('\n').length;
+  lines = ('000' + lines).slice(-3);   // 行番号を3桁の数字で表示
+  let showmsg = lines + ': ' + msg;
+  $('#solvelog_form').val(former + showmsg + '\n');
 }
 
 

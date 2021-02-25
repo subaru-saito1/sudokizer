@@ -363,6 +363,15 @@ function allSolve(evt) {
   Sudokizer.board = ret[0]
   Sudokizer.astack.push(new Action(ret[1]));
   redraw();
+  console.log(ret[2]);
+  // 状況提示
+  if (ret[2] === 0) {
+    alert('解なし');
+  } else if (ret[2] === 1) {
+    alert('一意解が存在します');
+  } else {
+    alert('複数解が存在します');
+  }
 }
 
 /**

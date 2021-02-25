@@ -241,14 +241,11 @@ class SdkEngine {
    * 一ステップ解答
    */
   oneStepSolve(board) {
-    let newboard;
-    // 候補が空の空白マスがあったら自動候補埋めから
+    let newboard = board.transCreate();
+    // 候補のない空白マスがあったら自動候補埋めから再開
     if (!this.noKouhoCheck(board).ok) {
-      newboard = board.transCreate();
       this.autoIdentifyKouho(newboard);
-    } else {
-      newboard = board.transCreate();
-    }
+    } 
     let retobj = this.strategySelector(newboard);
     let actionlist = board.diff(newboard);
     return [newboard, actionlist];
@@ -258,18 +255,12 @@ class SdkEngine {
    * 全解答
    */
   allStepSolve(board) {
-    let newboard = this.autoIdentifyKouho(board)
+    let newboard = board.transCreate();
+    this.autoIdentifyKouho(newboard)
     // 本体部分は再帰関数で回す
     let anscnt = this.allStepSolveRecursive(newboard);
-    if (anscnt === 0) {
-      alert('解なし');
-    } else if (anscnt === 1) {
-      alert('一意解が存在します');
-    } else {
-      alert('複数解が存在します');
-    }
     let actionlist = board.diff(newboard);
-    return [newboard, actionlist];
+    return [newboard, actionlist, anscnt];
   }
 
   /**
@@ -278,18 +269,28 @@ class SdkEngine {
    * @return int 解の個数
    */
   allStepSolveRecursive(board) {
+    let anscnt = 0;
     while (true) {
-      // ストラテジーセレクタ1回分
-      // 全マス埋まったら return 1
-      // 破綻したら即 return 0
-      return 1;
-
-      // 先に進まなくなったら再帰
-      let newboard = board.transCreate();
-      // 候補数が最も少ないマスを選んでランダムに埋める
-      // 埋めた後の盤面を再帰で渡す
-      // 返り値（解の個数）を現在の解の個数に加算
-      // 解の個数が2以上だった時点で即 return 2;
+      let retobj = this.strategySelector(board);
+      // OKだった場合：解答チェックしてOKなら脱出
+      if (retobj.ok) {
+        if (retobj.status === 'done') {
+          return 1;
+        }
+      // NGだった場合：破綻なら即死、お手上げなら背理法
+      } else {
+        if (retobj.status === 'noanswer') {
+          return 0;
+        } else if (retobj.status === 'giveup') {
+          let newboard = board.transCreate();
+          return 2;  // 暫定
+          // todo
+          // ここにランダムに候補を一つ選んで埋めつづける
+          // まず候補数が一番少ない最も若いマスを見つける
+          // そのマスをターゲットに再帰開始
+          return anscnt + this.allStepSolveRecursive(newboard);
+        }
+      }
     }
   }
 

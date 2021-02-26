@@ -272,6 +272,7 @@ class SdkEngine {
     let anscnt = 0;
     while (true) {
       let retobj = this.strategySelector(board);
+      console.log(board.board, retobj);
       // OKだった場合：解答チェックしてOKなら脱出
       if (retobj.ok) {
         if (retobj.status === 'done') {
@@ -282,13 +283,23 @@ class SdkEngine {
         if (retobj.status === 'noanswer') {
           return 0;
         } else if (retobj.status === 'giveup') {
-          let newboard = board.transCreate();
-          return 2;  // 暫定
-          // todo
-          // ここにランダムに候補を一つ選んで埋めつづける
-          // まず候補数が一番少ない最も若いマスを見つける
-          // そのマスをターゲットに再帰開始
-          return anscnt + this.allStepSolveRecursive(newboard);
+          // 最小候補数を持つ最も若いマスを検査
+          let mincpos = this.decideMinKouhoCell(board);
+          // そのマスを対象にループ開始
+          for (let k = 0; k < board.bsize; k++) {
+            if (board.board[mincpos].kouho[k]) {
+              let newboard = board.transCreate();
+              console.log(mincpos, k);
+              this.answerInsert(newboard, mincpos, String(k+1));
+              this.peerRemoveKouho(newboard, mincpos);
+              anscnt += this.allStepSolveRecursive(newboard);
+            }
+            // 複数解が出すぎたら脱出
+            if (anscnt >= this.config.multians_thres) {
+              break;
+            }
+          }
+          return anscnt;
         }
       }
     }
@@ -465,6 +476,27 @@ class SdkEngine {
     }
   }
 
+  /**
+   * 最も候補数字の個数の少ないマスを決定する
+   * @param Board board: 盤面
+   * @return int: 最も候補数字の少ないマス
+   */
+  decideMinKouhoCell(board) {
+    let minnumkouho = board.bsize + 1;
+    let mincpos;
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '0' && !board.board[c].ishint) {
+        let numkouho = board.board[c].kouho.filter(x => x === true).length;
+        if (numkouho < minnumkouho) {
+          minnumkouho = numkouho;
+          mincpos = c;
+        }
+      }
+    }
+    return mincpos; 
+  }
+
+
 
   // =========================== ストラテジー本体 ============================
 
@@ -483,7 +515,7 @@ class SdkEngine {
         let kouhocnt = 0;
         for (let k in board.board[c].kouho) {
           if (board.board[c].kouho[k]) {
-            onlykouho = String(k + 1);
+            onlykouho = String(Number(k) + 1);
             kouhocnt++;
           }
         }

@@ -688,6 +688,7 @@ class Board {
     try {
       // サイズバリデーション
       if (Number(lines[0]) !== newboard.bsize) {
+        console.log(lines[0], newboard.bsize);
         throw 'BoardSizeError';
       }
       // ヒント読み込み

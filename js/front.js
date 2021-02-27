@@ -82,17 +82,20 @@ function pencilBoxRead(evt) {
   let reader = new FileReader();
   reader.readAsText(file, 'Shift-JIS');
   reader.onload = function() {
-    // 改行コードの違いを考慮
+    // 改行コードの違いを考慮しつつ分割
     let lines = reader.result.split('\r\n');
     if (lines.length === 1) {
       lines = lines[0].split('\n');
     }
+    // 先頭行を見てどの形式なのか自動判断
     let ret;
     if (lines[0] === '--') {
-      ret = Sudokizer.board.pbReadNikolicom(lines)
+      ret = Sudokizer.board.pbReadNikolicom(lines);
+    } else if (lines[0].length === 1) {
+      ret = Sudokizer.board.pbReadNormal(lines);
     } else {
-      ret = Sudokizer.board.pbReadNormal(lines)
-    } 
+      ret = Sudokizer.board.pbReadOriginal(lines);
+    }
     // 盤面設定とアクションスタック操作
     Sudokizer.board = ret.newboard;
     Sudokizer.astack.push(new Action(ret.actionlist));

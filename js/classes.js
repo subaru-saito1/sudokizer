@@ -1245,3 +1245,41 @@ class Action {
 }
 
 
+// =====================================================================
+
+/**
+ * SolveLogクラス
+ * 
+ * 解答履歴ログをとっておくためのクラス
+ */
+class SolveLog {
+  constructor() {
+    this.logstack = [];
+  }
+
+  /**
+   * ログをプッシュ
+   */
+  push(msg) {
+    let msgid = ('000' + this.logstack.length).slice(-3)
+    this.logstack.push(msgid + ': ' + msg);
+  }
+
+  /**
+   * ログを消去する
+   */
+  clear() {
+    this.logstack = [];
+  }
+
+  /**
+   * 手筋ログフォームに反映させる
+   */
+  flush() {
+    let formval = '';
+    for (let line of this.logstack) {
+      formval += (line + '\n');
+    }
+    $('#solvelog_form').val(formval);
+  }
+}

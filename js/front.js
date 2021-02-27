@@ -16,6 +16,7 @@ function newFile(evt) {
   if (confirm('新規作成しますか？\n（※この操作は元に戻せません）')) {
     Sudokizer.board = new Board();         // 盤面初期化
     Sudokizer.astack = new ActionStack();  // アクションスタック初期化
+    Sudokizer.solvelog.clear();
     redraw();
   }
 }
@@ -102,6 +103,8 @@ function pencilBoxRead(evt) {
     // 著者情報の設定
     $('#menu_pbwrite_authorja').val(ret.authorinfo[0]);
     $('#menu_pbwrite_authoren').val(ret.authorinfo[1]);
+    // ログのクリア
+    Sudokizer.solvelog.clear();
     redraw();
   }
 }
@@ -297,7 +300,8 @@ function actionRedo(evt) {
 function answerClear(evt) {
   let ret = Sudokizer.board.ansClear();  // [newboard, diff]
   Sudokizer.board = ret[0];              // 盤面更新
-  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
+  Sudokizer.astack.push(new Action(ret[1]));  // アクション追加
+  Sudokizer.solvelog.clear();            // ログのクリア
   redraw();
 }
 
@@ -378,17 +382,6 @@ function allSolve(evt) {
   } else {
     alert('複数解が存在します(' + ret[2] + '個' + (ret[2] >= 100 ? '以上' : '') +')' );
   }
-}
-
-/**
- * 手筋ログ追加
- */
-function addSolveLog(msg) {
-  let former = $('#solvelog_form').val();
-  let lines = former.split('\n').length;
-  lines = ('000' + lines).slice(-3);   // 行番号を3桁の数字で表示
-  let showmsg = lines + ': ' + msg;
-  $('#solvelog_form').val(former + showmsg + '\n');
 }
 
 
@@ -595,7 +588,7 @@ function redraw() {
   if (document.activeElement.getAttribute('id') === 'main_board') {
     drawconfig.cursor = true;
   }
-  
+  // 描画媒体の選択
   if (Sudokizer.config.drawmedia === 'canvas') {
     Sudokizer.board.drawBoardCanvas(drawconfig);
   } else if (Sudokizer.config.drawmedia === 'svg') {
@@ -605,9 +598,9 @@ function redraw() {
       Sudokizer.board.drawBoardConsole();
     }
   }
-
   // 再描画以外の諸々の同期処理
-  sync_undoredo();     // 戻る、進むボタンのdisabled状態制御
+  sync_undoredo();             // 戻る、進むボタンのdisabled状態制御
+  Sudokizer.solvelog.flush();  // 解答ログの反映
 }
 
 /**

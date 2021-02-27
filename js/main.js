@@ -246,8 +246,10 @@ class SdkEngine {
     if (!this.noKouhoCheck(board).ok) {
       this.autoIdentifyKouho(newboard);
     } 
+    // 1ステップ解答を実行してログをとる
     let retobj = this.strategySelector(newboard);
     let actionlist = board.diff(newboard);
+    Sudokizer.solvelog.push(retobj.msg);
     return [newboard, actionlist];
   }
 
@@ -275,6 +277,7 @@ class SdkEngine {
     // 1ステップ解かせるループ
     while (true) {
       let retobj = this.strategySelector(newboard);
+      Sudokizer.solvelog.push(retobj.msg);
       // OKだった場合：解答チェックしてOKなら脱出
       if (retobj.ok) {
         if (retobj.status === 'done') {
@@ -334,23 +337,20 @@ class SdkEngine {
         if (ret.status === 'newcell') {
           this.peerRemoveKouho(board, ret.cellinfo[0]);
         }
-        // 破綻していないかチェック
+        // 破綻していた場合
         if (!this.noKouhoCheck(board).ok) {
-          return {ok: false, status: 'noanswer'};
+          return {ok:false, status:'noanswer', msg:'No Answer!'};
         }
         // 正常成功
-        addSolveLog(ret.msg);
         return ret;
       }
     }
     // 完成チェック
     if (this.ansCheck(board)) {
-      addSolveLog('Conglaturations!')
-      return {ok:true, status:'done'};
+      return {ok:true, status:'done', msg:'Congratulations!'};
     // お手上げ（背理法）
     } else {
-      addSolveLog('Give Up...')
-      return {ok:false, status:'giveup'};
+      return {ok:false, status:'giveup', msg:'Give Up...'};
     }
   }
 

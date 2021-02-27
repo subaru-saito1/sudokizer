@@ -202,7 +202,7 @@ class SdkEngine {
   constructor() {
     // 解答エンジンに関する諸設定
     this.config = {
-      multians_thres: 2,  // 別解発生時に探索を打ち切る解の個数
+      multians_thres: 100,  // 別解発生時に探索を打ち切る解の個数
     }
     // 適用するストラテジー関数のリスト
     this.strategylist = [
@@ -257,49 +257,56 @@ class SdkEngine {
   allStepSolve(board) {
     let newboard = board.transCreate();
     this.autoIdentifyKouho(newboard)
-    // 本体部分は再帰関数で回す
-    let anscnt = this.allStepSolveRecursive(newboard);
-    let actionlist = board.diff(newboard);
-    return [newboard, actionlist, anscnt];
+    // 再帰関数：ret[0]はanscnt, ret[1]
+    let ret = this.allStepSolveRecursive(newboard, 0);
+    let actionlist = board.diff(ret[1]);
+    return [ret[1], actionlist, ret[0]];
   }
 
   /**
    * 全解答再帰アルゴリズム
-   * @param Board board コピー後の盤面
+   * @param Board board 元盤面
+   * @param int klevel  再帰の深さ（デバッグ用）
    * @return int 解の個数
+   * @return ansboard 解答盤面
    */
-  allStepSolveRecursive(board) {
-    let anscnt = 0;
+  allStepSolveRecursive(board, klevel) {
+    let newboard = board.transCreate();
+    // 1ステップ解かせるループ
     while (true) {
-      let retobj = this.strategySelector(board);
-      console.log(board.board, retobj);
+      let retobj = this.strategySelector(newboard);
       // OKだった場合：解答チェックしてOKなら脱出
       if (retobj.ok) {
         if (retobj.status === 'done') {
-          return 1;
+          return [1, newboard];
         }
       // NGだった場合：破綻なら即死、お手上げなら背理法
       } else {
         if (retobj.status === 'noanswer') {
-          return 0;
+          return [0, newboard];
         } else if (retobj.status === 'giveup') {
           // 最小候補数を持つ最も若いマスを検査
-          let mincpos = this.decideMinKouhoCell(board);
+          let mincpos = this.decideMinKouhoCell(newboard);
           // そのマスを対象にループ開始
+          let anscnt = 0;
+          let ansboard = newboard;
           for (let k = 0; k < board.bsize; k++) {
-            if (board.board[mincpos].kouho[k]) {
-              let newboard = board.transCreate();
-              console.log(mincpos, k);
-              this.answerInsert(newboard, mincpos, String(k+1));
-              this.peerRemoveKouho(newboard, mincpos);
-              anscnt += this.allStepSolveRecursive(newboard);
+            if (newboard.board[mincpos].kouho[k]) {
+              let newboard2 = newboard.transCreate();
+              this.answerInsert(newboard2, mincpos, String(k+1));
+              this.peerRemoveKouho(newboard2, mincpos);
+              let ret = this.allStepSolveRecursive(newboard2, klevel+1);
+              anscnt += ret[0];
+              if (ret[0] >= 1) {
+                ansboard = ret[1];
+              }
             }
             // 複数解が出すぎたら脱出
             if (anscnt >= this.config.multians_thres) {
               break;
             }
           }
-          return anscnt;
+          return [anscnt, ansboard];
         }
       }
     }
@@ -336,10 +343,11 @@ class SdkEngine {
         return ret;
       }
     }
-    // 既に完成している
+    // 完成チェック
     if (this.ansCheck(board)) {
       addSolveLog('Conglaturations!')
       return {ok:true, status:'done'};
+    // お手上げ（背理法）
     } else {
       addSolveLog('Give Up...')
       return {ok:false, status:'giveup'};

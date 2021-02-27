@@ -82,7 +82,11 @@ function pencilBoxRead(evt) {
   let reader = new FileReader();
   reader.readAsText(file, 'Shift-JIS');
   reader.onload = function() {
+    // 改行コードの違いを考慮
     let lines = reader.result.split('\r\n');
+    if (lines.length === 1) {
+      lines = lines[0].split('\n');
+    }
     let ret;
     if (lines[0] === '--') {
       ret = Sudokizer.board.pbReadNikolicom(lines)
@@ -363,14 +367,13 @@ function allSolve(evt) {
   Sudokizer.board = ret[0]
   Sudokizer.astack.push(new Action(ret[1]));
   redraw();
-  console.log(ret[2]);
   // 状況提示
   if (ret[2] === 0) {
     alert('解なし');
   } else if (ret[2] === 1) {
     alert('一意解が存在します');
   } else {
-    alert('複数解が存在します');
+    alert('複数解が存在します(' + ret[2] + '個' + (ret[2] >= 100 ? '以上' : '') +')' );
   }
 }
 

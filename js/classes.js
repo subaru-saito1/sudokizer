@@ -782,6 +782,47 @@ class Board {
   }
 
   /**
+   * 独自形式で盤面に読み込み
+   */
+  pbReadOriginal(lines) {
+    let newboard = new Board();
+    try {
+      let rows = lines[0].split(' ');
+      // サイズバリデーション
+      if (rows.length - 1 !== newboard.bsize) {
+        throw 'BoardSizeError';
+      }
+      for (let i = 0; i < newboard.bsize; i++) {
+        if (rows[i].length !== newboard.bsize) {
+          throw 'BoardSizeError';
+        }
+      }
+      // ヒント盤面
+      for (let i = 0; i < newboard.bsize; i++) {
+        for (let j = 0; j < newboard.bsize; j++) {
+          if (rows[i][j] !== '0') {
+            let c = i * newboard.bsize + j;
+            newboard.board[c].num = rows[i][j];
+            newboard.board[c].ishint = true;
+          }
+        }
+      }
+    } catch(err) {
+      console.log(err);
+      alert('盤面の読み込みに失敗しました');
+    }
+    // デバッグモード
+    if (Sudokizer.config.debugmode) {
+      console.log(newboard);
+    }
+    return {
+      'newboard': newboard,
+      'actionlist': this.diff(newboard),
+      'authorinfo': [newboard.author_ja, newboard.author_en]
+    };
+  }
+
+  /**
    * 通常のpencilbox形式での出力
    * @return dousimasyo
    */
@@ -826,7 +867,7 @@ class Board {
    */
   pbWriteNikolicom(authorinfo) {
     let ret = '';     // ここにファイル内容を文字列で書いていく
-    let nl = '\n';    // 改行コード
+    let nl = '\r\n';    // 改行コード
     ret += '--' + nl;                                        // 1行目
     ret += ':' + authorinfo[0] + ':' + authorinfo[1] + nl;   // 2行目（作者情報）
     ret += ';' + this.bsize + '*' + this.bsize + nl;         // 3行目（サイズ情報）
@@ -842,6 +883,7 @@ class Board {
       }
       ret += nl;
     }
+    nl = '\n';
     // 解答情報
     for (let i = 0; i < this.bsize; i++) {
       for (let j = 0; j < this.bsize; j++) {

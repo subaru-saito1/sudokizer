@@ -204,11 +204,35 @@ class SdkEngine {
     this.config = {
       multians_thres: 100,  // 別解発生時に探索を打ち切る解の個数
     }
-    // 適用するストラテジー関数のリスト
+    // 高速解答用のストラテジー関数のリスト
     this.strategylist = [
-      this.hiddenSingleStrategy,
       this.nakedSingleStrategy,
+      this.hiddenSingleStrategy,
     ];
+    // 分析用のストラテジー関数リスト
+    this.strategylist_for_analysis = [
+      this.easyNakedSingleStrategy,   // ユニットヒント数6~8個のnaked single
+      this.blockHiddenSingleStrategy, // ブロッケン
+      this.mediumNakedSingleStrategy, // ユニットヒント数5個
+      this.lineHiddenSingleStrategy,  // レッツミー
+      this.hardNakedSingleStrategy,   // ユニットヒント数3,4個
+      // ここからHard必須手筋
+      this.blockDrivenEitherwayStrategy, // ブロック始動型いずれにせよ理論
+      this.blockHiddenPairStrategy,      // ブロック型 予約
+      this.lineDrivenEitherwayStrategy,  // 列始動型いずれにせよ理論
+      this.lineHiddenPairStrategy,       // 列始動型 予約
+      this.blockNakedPairStrategy,       // ブロック始動型 逆予約
+      this.lineNakedPairStrategy,        // 列始動型 逆予約
+      this.blockHiddenTripleStrategy,    // ブロック始動型 3つ組
+      this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
+      this.lineHiddenTripleStrategy,     // 列始動型　３つ組
+      this.lineNakedTripleStrategy,      // 列始動型 逆３つ組
+      // 唖然手筋
+      this.nakedQuadrapleStrategy,      // naked 4つ組
+      this.hiddenQuadrapleStrategy,     // hidden 4つ組
+      this.xWingStrategy,               // X-wing 井桁理論
+      this.swordFishStrategy,           // swordfish
+    ]
   }
 
   // ============================== フロントラッパー ==============================
@@ -247,7 +271,7 @@ class SdkEngine {
       this.autoIdentifyKouho(newboard);
     } 
     // 1ステップ解答を実行してログをとる
-    let retobj = this.strategySelector(newboard);
+    let retobj = this.strategySelector(newboard, false);
     let actionlist = board.diff(newboard);
     Sudokizer.solvelog.push(retobj.msg);
     return [newboard, actionlist];
@@ -276,7 +300,7 @@ class SdkEngine {
     let newboard = board.transCreate();
     // 1ステップ解かせるループ
     while (true) {
-      let retobj = this.strategySelector(newboard);
+      let retobj = this.strategySelector(newboard, false);
       Sudokizer.solvelog.push(retobj.msg);
       // OKだった場合：解答チェックしてOKなら脱出
       if (retobj.ok) {
@@ -322,16 +346,21 @@ class SdkEngine {
    * ストラテジーセレクタ
    * - ストラテジーを選択して一ステップだけ解く。候補の同期や破綻判定もやる。
    * @param Board board: 解く盤面 
+   * @param analyze_mode: 分析モード
    * @return Object ret: 色々な情報を返す
    *   - bool ok    : 正常に進めばtrue, 失敗（破綻とお手上げ）ならfalse
    *   - bool status: 'newcell', 'newkouho', 'noanswer', 'giveup'
    *   - bool cellinfo: 影響があったマス/破綻したマス のリスト
    */
-  strategySelector(board) {
+  strategySelector(board, analyze_mode=false) {
     for (let i in this.strategylist) {
       // ストラテジー呼び出し
-      // メモ：callじゃないと呼び出し先のthisがSdkEngineじゃなく配列で渡されてしまう
-      let ret = this.strategylist[i].call(this, board);
+      let ret;
+      if (analyze_mode) {
+        ret = this.strategylist_for_analysis[i].call(this, board);
+      } else {
+        ret = this.strategylist[i].call(this, board);
+      }
       if (ret.ok) {
         // 新たに数字が入った場合、候補情報を同期して返す
         if (ret.status === 'newcell') {

@@ -452,6 +452,8 @@ class SdkEngine {
 
   /**
    * 指定ピアの各マスから中心マスの数字に相当する候補を削除
+   * @param Board board : 盤面 
+   * @param int cid     : マス番号
    */
   peerRemoveKouho(board, cid) {
     let centernum = board.board[cid].num;
@@ -463,6 +465,23 @@ class SdkEngine {
       }
     }
   }
+
+  /**
+   * 指定マスの候補のリストを返す
+   * @param Board board: 盤面
+   * @param int cid    : マス番号
+   * @return []int     : 候補のリストを文字列のリスト形式で返す
+   */
+  kouhoList(board, cid) {
+    let kouholist = []
+    for (let k = 0; k < board.bsize; k++) {
+      if (board.board[cid].kouho[k]) {
+        kouholist.push(k+1);
+      }
+    }
+    return kouholist;
+  }
+
 
   /**
    * ユニットIDと数字を指定して、そのユニットに唯一入れられる場所があるか探す
@@ -594,4 +613,43 @@ class SdkEngine {
     }
     return {ok:false, status:'notfound', strategy:'Hidden Single'};
   }
+  /**
+   * Block Hidden Single
+   */
+  blockHiddenSingleStrategy(board) {
+    for (let u in board.blocks) {
+      for (let n = 0; n < board.bsize; n++) {
+        let ret = this.hiddenSingleCheck(board, u, n+1)
+        if (ret.ok) {
+          this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
+          // メッセージ生成
+          let x = ret.cid % board.bsize + 1;
+          let y = Math.floor(ret.cid / board.bsize) + 1;
+          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Block Hidden Single',
+                  msg: 'Block Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
+        }
+      }
+    }
+  }
+  /**
+   * Line Hidden Single
+   */
+  blockHiddenSingleStrategy(board) {
+    for (let u in board.lines) {
+      for (let n = 0; n < board.bsize; n++) {
+        let ret = this.hiddenSingleCheck(board, u, n+1)
+        if (ret.ok) {
+          this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
+          // メッセージ生成
+          let x = ret.cid % board.bsize + 1;
+          let y = Math.floor(ret.cid / board.bsize) + 1;
+          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Line Hidden Single',
+                  msg: 'Line Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
+        }
+      }
+    }
+  }
+
+
+
 }

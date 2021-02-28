@@ -93,8 +93,7 @@ class Peer {
     }
     // 重複排除と自身のマス排除
     this.cellidx = this.cellidx.concat(this.rowidx, this.colidx, this.blockidx)
-    this.cellidx = this.cellidx.filter(
-      (x, i, arr) => (arr.indexOf(x) === i && x !== this.cid));
+    this.cellidx = Array.from(new Set(this.cellidx));
   }
 }
 
@@ -222,12 +221,12 @@ class SdkEngine {
       this.hardNakedSingleStrategy,   // ユニットヒント数3,4個
       // ここからHard必須手筋
       this.blockDrivenEitherwayStrategy, // ブロック始動型いずれにせよ理論
-      // this.blockHiddenPairStrategy,      // ブロック型 予約
-      // this.lineDrivenEitherwayStrategy,  // 列始動型いずれにせよ理論
-      /*
+      this.blockHiddenPairStrategy,      // ブロック型 予約
+      this.lineDrivenEitherwayStrategy,  // 列始動型いずれにせよ理論
       this.lineHiddenPairStrategy,       // 列始動型 予約
       this.blockNakedPairStrategy,       // ブロック始動型 逆予約
       this.lineNakedPairStrategy,        // 列始動型 逆予約
+      /*
       this.blockHiddenTripleStrategy,    // ブロック始動型 3つ組
       this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
       this.lineHiddenTripleStrategy,     // 列始動型　３つ組
@@ -518,6 +517,19 @@ class SdkEngine {
   }
 
   /**
+   * 指定マスの候補のUnionを返す
+   * @param Board board: 盤面
+   * @param array clist: セルのリスト
+   */
+  kouhoUnion(board, clist) {
+    let kunion = [];
+    for (let c of clist) {
+      kunion = kunion.concat(this.kouhoList(board, c));
+    }
+    return Array.from(new Set(kunion));
+  }
+
+  /**
    * 指定マスリストの中のヒント数を返す
    * @param Board board: 盤面
    * @param array clist: セルインデックスのリスト
@@ -659,7 +671,6 @@ class SdkEngine {
 
   /**
    * hidden single
-   * @param array units: ユニットオブジェクトの配列
    * @param string prefix: メッセージなどのプレフィックス
    * @return 以下の仕様を持つ関数
    *   @param Board board
@@ -746,6 +757,52 @@ class SdkEngine {
     return {ok:false, status:'notfound', strategy:'Block-driven Eitherway'};
   }
 
+  /**
+   * naked piar
+   * @param string prefix: メッセージなどのプレフィックス
+   * @return 以下の仕様を持つ関数
+   *   @param Board board
+   *   @return bool ok
+   *   @return string status: newcell or notfound
+   *   @return array(int) cellinfo
+   */
+  nakedPairFactory(prefix) {
+    return function(board) {
+      // ファクトリー用条件分岐
+      let units;
+      if (prefix === '') {
+        units = board.units;
+      } else if (prefix === 'Block ') {
+        units = board.blocks;
+      } else if (prefix === 'Line ') {
+        units = board.lines;
+      } else {
+        throw 'nakedPairFactory: Invalid prefix Error';
+      }
+      // 本処理
+      for (let u of units) {
+        let ret = this.searchNakedPair(board, u.cellidx);
+        if (ret.ok) {
+          return {ok:true, status:'newcell', cellinfo:[ret.cid], 
+                  strategy: prefix + 'Naked Pair',
+                  msg: prefix + 'Naked Pair'};
+        }
+      }
+      return {ok:false, status:'notfound', strategy:prefix+'Hidden Single'};
+    }
+  }
+  nakedPairStrategy = this.nakedPairFactory('');
+  blockNakedPairStrategy = this.nakedPairFactory('Block ');
+  lineNakedPairStrategy  = this.nakedPairFactory('Line ');
+
+  /**
+   * naked pairの本体
+   * @param Board board : 盤面
+   * @param array clist : 探索対象のマスのリスト
+   */
+  searchNakedPair(board, clist) {
+    let kunion = this.kouhoUnion(clist);
+  }
 
 
 }

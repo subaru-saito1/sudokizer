@@ -61,7 +61,11 @@ class Peer {
   constructor(cid, bsize) {
     this.cid = cid;
     this.bsize = bsize;
-    this.cellidx = this.createCellIndex();
+    this.rowidx = []
+    this.colidx = []
+    this.blockidx = []
+    this.cellidx = []
+    this.createCellIndex();
   }
 
   /**
@@ -71,26 +75,26 @@ class Peer {
     let rowid = Math.floor(this.cid / this.bsize);
     let colid = this.cid % this.bsize;
     let sqrtsize = Math.sqrt(this.bsize);
-    let cellidx = []
     // 同じ行
     for (let j = 0; j < this.bsize; j++) {
-      cellidx.push(rowid * this.bsize + j);
+      this.rowidx.push(rowid * this.bsize + j);
     }
     // 同じ列
     for (let i = 0; i < this.bsize; i++) {
-      cellidx.push(i * this.bsize + colid);
+      this.colidx.push(i * this.bsize + colid);
     }
     // 同じブロック
     for (let i = 0; i < sqrtsize; i++) {
       for (let j = 0; j < sqrtsize; j++) {
         let ofsx = Math.floor(colid / sqrtsize) * sqrtsize;
         let ofsy = Math.floor(rowid / sqrtsize) * sqrtsize * this.bsize;
-        cellidx.push(ofsx + ofsy + i * this.bsize + j);
+        this.blockidx.push(ofsx + ofsy + i * this.bsize + j);
       }
     }
     // 重複排除と自身のマス排除
-    cellidx = cellidx.filter((x, i, arr) => (arr.indexOf(x) === i && x !== this.cid));
-    return cellidx;
+    this.cellidx = this.cellidx.concat(this.rowidx, this.colidx, this.blockidx)
+    this.cellidx = this.cellidx.filter(
+      (x, i, arr) => (arr.indexOf(x) === i && x !== this.cid));
   }
 }
 
@@ -482,10 +486,39 @@ class SdkEngine {
     return kouholist;
   }
 
+  /**
+   * 指定マスリストの中のヒント数を返す
+   * @param Board board: 盤面
+   * @param array clist: セルインデックスのリスト
+   * @return int: 上のリストで指定されたマスのうちヒントが埋まっている個数
+   */
+  countHints(board, clist) {
+    let cnt = 0;
+    for (let c of clist) {
+      if (board.board[c].num !== '0') {
+        cnt++;
+      }
+    }
+    return cnt;
+  }
 
   /**
-   * ユニットIDと数字を指定して、そのユニットに唯一入れられる場所があるか探す
-   * 非破壊検査
+   * (Naked Single用)
+   */
+  maxCountHints(board, cpos) {
+    let maxhints = 0;
+    let h1 = this.countHints(board, board.peers[cpos].blockidx);
+    let h2 = this.countHints(board, board.peers[cpos].rowidx);
+    let h3 = this.countHints(board, board.peers[cpos].colidx);
+    maxhints = (h1 > maxhints) ? h1 : maxhints;
+    maxhints = (h2 > maxhints) ? h2 : maxhints;
+    maxhints = (h3 > maxhints) ? h3 : maxhints;
+    return maxhints
+  }
+
+  /**
+   * (Hidden Single用)
+   * ユニットIDと数字を指定して、そのユニットに唯一入れられる場所があるか非破壊的に探す
    * @param Board board: 盤面全体
    * @param int unitid: 検査対象ユニット
    * @param int num: 検査対象数字 1-origin
@@ -563,31 +596,61 @@ class SdkEngine {
    * @return string status: newcell or notfound
    * @return array(int) cellinfo
    */
+  /*
   nakedSingleStrategy(board) {
     for (let c = 0; c < board.numcells; c++) {
       if (board.board[c].num === '0') {
-        // trueのkouhoが一つかどうか調べて唯一の候補を割り出し
-        let onlykouho = '0';
-        let kouhocnt = 0;
-        for (let k in board.board[c].kouho) {
-          if (board.board[c].kouho[k]) {
-            onlykouho = String(Number(k) + 1);
-            kouhocnt++;
-          }
-        }
-        // 確定（盤面操作あり）
-        if (kouhocnt === 1) {
-          this.answerInsert(board, c, onlykouho);   // 盤面操作
+        let kouholist = this.kouhoList(board, c);
+        if (kouholist.length === 1) {
+          this.answerInsert(board, c, kouholist[0]);   // 盤面操作
           // メッセージ生成
           let x = c % board.bsize + 1;
           let y = Math.floor(c / board.bsize) + 1;
           return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single',
-                  msg: 'Naked Single: Cell(' + x + ', ' + y + ') to ' + onlykouho};
+                  msg: 'Naked Single: Cell(' + x + ', ' + y + ') to ' + kouholist[0]};
         }
       }
     }
     return {ok:false, status:'notfound', strategy:'Naked Single'};
   }
+  */
+ 
+  /**
+   * ヒント個数限定版のnaked singleのファクトリー関数
+   * @param int minh, maxh: 最小ヒント数と最大ヒント数
+   * @return 以下の仕様を持つ関数
+   *   @param Board board
+   *   @return bool ok
+   *   @return string status: newcell or notfound
+   *   @return array(int) cellinfo
+   */
+  nakedSingleStrategyFactory(minh, maxh) {
+    return function(board) {
+      for (let c = 0; c < board.numcells; c++) {
+        if (board.board[c].num === '0') {
+          let kouholist = this.kouhoList(board, c);
+          if (kouholist.length === 1) {
+            let maxhints = this.maxCountHints(board, c);
+            if (maxhints >= minh && maxhints <= maxh) {
+              this.answerInsert(board, c, kouholist[0]);   // 盤面操作
+              // メッセージ生成
+              let x = c % board.bsize + 1;
+              let y = Math.floor(c / board.bsize) + 1;
+              return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single',
+                      msg: 'Naked Single (' + maxhints + 'hints):' + 
+                            'Cell(' + x + ', ' + y + ') to ' + kouholist[0]};
+            }
+          }
+        }
+      }
+      return {ok:false, status:'notfound', strategy:'Naked Single'};
+    }
+  }
+  nakedSingleStrategy = this.nakedSingleStrategyFactory(1, 9);
+  easyNakedSingleStrategy = this.nakedSingleStrategyFactory(6, 8);
+  mediumNakedSingleStrategy = this.nakedSingleStrategyFactory(5, 5);
+  hardNakedSingleStrategy = this.nakedSingleStrategyFactory(3, 4);
+
 
   /**
    * hidden single
@@ -600,7 +663,6 @@ class SdkEngine {
     for (let u in board.units) {
       for (let n = 0; n < board.bsize; n++) {
         let ret = this.hiddenSingleCheck(board, u, n+1)
-        // 確定（盤面操作あり）
         if (ret.ok) {
           this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
           // メッセージ生成

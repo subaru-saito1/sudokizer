@@ -520,15 +520,15 @@ class SdkEngine {
    * (Hidden Single用)
    * ユニットIDと数字を指定して、そのユニットに唯一入れられる場所があるか非破壊的に探す
    * @param Board board: 盤面全体
-   * @param int unitid: 検査対象ユニット
+   * @param obj unitid: 検査対象ユニット
    * @param int num: 検査対象数字 1-origin
    * @return bool ok: OKかどうか
    * @return int cid: OKの場合、埋めるべきマスを返す
    */
-  hiddenSingleCheck(board, unitid, num) {
+  hiddenSingleCheck(board, unit, num) {
     let cnt = 0;
     let lastcid;
-    for (let cid of board.units[unitid].cellidx) {
+    for (let cid of unit.cellidx) {
       // 既に入っている
       if (board.board[cid].num === String(num)) {
         return {ok:false};
@@ -588,32 +588,6 @@ class SdkEngine {
 
 
   // =========================== ストラテジー本体 ============================
-
-  /**
-   * naked singleストラテジー
-   * @param Board board
-   * @return bool ok
-   * @return string status: newcell or notfound
-   * @return array(int) cellinfo
-   */
-  /*
-  nakedSingleStrategy(board) {
-    for (let c = 0; c < board.numcells; c++) {
-      if (board.board[c].num === '0') {
-        let kouholist = this.kouhoList(board, c);
-        if (kouholist.length === 1) {
-          this.answerInsert(board, c, kouholist[0]);   // 盤面操作
-          // メッセージ生成
-          let x = c % board.bsize + 1;
-          let y = Math.floor(c / board.bsize) + 1;
-          return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single',
-                  msg: 'Naked Single: Cell(' + x + ', ' + y + ') to ' + kouholist[0]};
-        }
-      }
-    }
-    return {ok:false, status:'notfound', strategy:'Naked Single'};
-  }
-  */
  
   /**
    * ヒント個数限定版のnaked singleのファクトリー関数
@@ -637,7 +611,7 @@ class SdkEngine {
               let x = c % board.bsize + 1;
               let y = Math.floor(c / board.bsize) + 1;
               return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single',
-                      msg: 'Naked Single (' + maxhints + 'hints):' + 
+                      msg: 'Naked Single (' + maxhints + ' hints):' + 
                             'Cell(' + x + ', ' + y + ') to ' + kouholist[0]};
             }
           }
@@ -660,7 +634,7 @@ class SdkEngine {
    * @return array(int) cellinfo
    */
   hiddenSingleStrategy(board) {
-    for (let u in board.units) {
+    for (let u of board.units) {
       for (let n = 0; n < board.bsize; n++) {
         let ret = this.hiddenSingleCheck(board, u, n+1)
         if (ret.ok) {
@@ -679,7 +653,7 @@ class SdkEngine {
    * Block Hidden Single
    */
   blockHiddenSingleStrategy(board) {
-    for (let u in board.blocks) {
+    for (let u of board.blocks) {
       for (let n = 0; n < board.bsize; n++) {
         let ret = this.hiddenSingleCheck(board, u, n+1)
         if (ret.ok) {
@@ -696,8 +670,8 @@ class SdkEngine {
   /**
    * Line Hidden Single
    */
-  blockHiddenSingleStrategy(board) {
-    for (let u in board.lines) {
+  lineHiddenSingleStrategy(board) {
+    for (let u of board.lines) {
       for (let n = 0; n < board.bsize; n++) {
         let ret = this.hiddenSingleCheck(board, u, n+1)
         if (ret.ok) {
@@ -709,6 +683,14 @@ class SdkEngine {
                   msg: 'Line Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
         }
       }
+    }
+  }
+
+  /**
+   * ブロック駆動型いずれにせよ理論
+   */
+  blockDrivenEitherwayStrategy(board) {
+    for (let cr in board.cross) {
     }
   }
 

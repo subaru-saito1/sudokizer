@@ -932,6 +932,7 @@ class Board {
     ctx.fillRect(0, 0, allsize, allsize);
     ctx.strokeStyle = "black";
     // セルの描画
+    ctx.lineWidth = 1;
     for (let i = 0; i < this.bsize; i++) {
       for (let j = 0; j < this.bsize; j++) {
         ctx.strokeRect(ofs + csize * j, ofs + csize * i, csize, csize);

@@ -391,6 +391,7 @@ function allSolve(evt) {
  * 盤面へのクリック
  */
 function clickBoard(evt) {
+  evt.preventDefault();   // 右クリックでメニューが開かないようにする
   let csize = Sudokizer.config.dispsize;
   let bsize = Sudokizer.board.bsize;
   let mx = evt.offsetX - Sudokizer.config.drawpadding;  // 盤面座標系のx座標
@@ -400,10 +401,78 @@ function clickBoard(evt) {
     let cx = Math.floor(mx / Sudokizer.config.dispsize);  // 盤面の横座標
     let cy = Math.floor(my / Sudokizer.config.dispsize);  // 盤面の縦座標
     let ci = cy * Sudokizer.board.bsize + cx;
-    Sudokizer.config.cursorpos = ci;
+    clickCell(ci, evt.button);
   }
   redraw();
 }
+
+/**
+ * セルへのクリック処理 
+ * @param int cpos: クリックしたセルの位置
+ * @param int button: クリックされたボタン
+ */
+function clickCell(cpos, button) {
+  // 未カーソル時はカーソルを合わせるだけ
+  if (cpos !== Sudokizer.config.cursorpos) {
+    Sudokizer.config.cursorpos = cpos;
+  } else {
+    let nextnum = getNextClickNum(cpos, button);   // 入力予定の数字取得
+    if (Sudokizer.config.qamode === 'answer') {
+      if (nextnum === '0') {
+        Sudokizer.board.ansDel(cpos);
+      } else {
+        Sudokizer.board.ansIns(cpos, nextnum, Sudokizer.config.kateilevel);
+      }
+    } else {
+      if (nextnum === '0') {
+        Sudokizer.board.hintDel(cpos);
+      } else {
+        Sudokizer.board.hintIns(cpos, nextnum);
+      }
+    }
+
+  }
+}
+
+/**
+ * クリック時に、次に入れるべき数字を取得
+ * 
+ * @param int cpos    セル番号
+ * @param int button  0で左、2で右 
+ */
+function getNextClickNum(cpos, button) {
+  let num = Sudokizer.board.board[cpos].num;
+  let bsize = Sudokizer.board.bsize;
+  let nextnum;
+  if (button === 0) {
+    if (Sudokizer.config.qamode === 'answer') {
+      nextnum = String((Number(num) + 1) % (bsize + 1));
+    } else {
+      if (num === '0') {
+        nextnum = '?';
+      } else if (num === '?') {
+        nextnum = '1';
+      } else {
+        nextnum = String((Number(num) + 1) % (bsize + 1));
+      }
+    }
+  } else if (button === 2) {
+    if (Sudokizer.config.qamode === 'answer') {
+      nextnum = String((Number(num) + bsize) % (bsize + 1));
+    } else {
+      if (num === '0') {
+        nextnum = '?';
+      } else if (num === '?') {
+        nextnum = '9';
+      } else {
+        nextnum = String((Number(num) + bsize) % (bsize + 1));
+      }
+    }
+  } else {
+    throw 'getNextClickNum: Invalid button id';
+  }
+  return nextnum;
+} 
 
 /**
  * 盤面へのキーボード押下

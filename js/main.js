@@ -621,7 +621,7 @@ class SdkEngine {
   // =========================== ストラテジー本体 ============================
  
   /**
-   * ヒント個数限定版のnaked singleのファクトリー関数
+   * NNaked single
    * @param int minh, maxh: 最小ヒント数と最大ヒント数
    * @return 以下の仕様を持つ関数
    *   @param Board board
@@ -629,7 +629,7 @@ class SdkEngine {
    *   @return string status: newcell or notfound
    *   @return array(int) cellinfo
    */
-  nakedSingleStrategyFactory(minh, maxh) {
+  nakedSingleFactory(minh, maxh) {
     return function(board) {
       for (let c = 0; c < board.numcells; c++) {
         if (board.board[c].num === '0') {
@@ -651,73 +651,57 @@ class SdkEngine {
       return {ok:false, status:'notfound', strategy:'Naked Single'};
     }
   }
-  nakedSingleStrategy = this.nakedSingleStrategyFactory(1, 9);
-  easyNakedSingleStrategy = this.nakedSingleStrategyFactory(6, 8);
-  mediumNakedSingleStrategy = this.nakedSingleStrategyFactory(5, 5);
-  hardNakedSingleStrategy = this.nakedSingleStrategyFactory(3, 4);
+  nakedSingleStrategy = this.nakedSingleFactory(1, 9);
+  easyNakedSingleStrategy = this.nakedSingleFactory(6, 8);
+  mediumNakedSingleStrategy = this.nakedSingleFactory(5, 5);
+  hardNakedSingleStrategy = this.nakedSingleFactory(3, 4);
 
 
   /**
    * hidden single
-   * @param Board board
-   * @return bool ok
-   * @return string status: newcell or notfound
-   * @return array(int) cellinfo
+   * @param array units: ユニットオブジェクトの配列
+   * @param string prefix: メッセージなどのプレフィックス
+   * @return 以下の仕様を持つ関数
+   *   @param Board board
+   *   @return bool ok
+   *   @return string status: newcell or notfound
+   *   @return array(int) cellinfo
    */
-  hiddenSingleStrategy(board) {
-    for (let u of board.units) {
-      for (let n = 0; n < board.bsize; n++) {
-        let ret = this.hiddenSingleCheck(board, u, n+1)
-        if (ret.ok) {
-          this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
-          // メッセージ生成
-          let x = ret.cid % board.bsize + 1;
-          let y = Math.floor(ret.cid / board.bsize) + 1;
-          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Hidden Single',
-                  msg: 'Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
+  hiddenSingleFactory(prefix) {
+    return function(board) {
+      // ファクトリー用条件分岐
+      let units;
+      if (prefix === '') {
+        units = board.units;
+      } else if (prefix === 'Block ') {
+        units = board.blocks;
+      } else if (prefix === 'Line ') {
+        units = board.lines;
+      } else {
+        throw 'hiddenSingleStrategyFactory: Invalid prefix Error';
+      }
+      // 本処理
+      for (let u of units) {
+        for (let n = 0; n < board.bsize; n++) {
+          let ret = this.hiddenSingleCheck(board, u, n+1)
+          if (ret.ok) {
+            this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
+            // メッセージ生成
+            let x = ret.cid % board.bsize + 1;
+            let y = Math.floor(ret.cid / board.bsize) + 1;
+            return {ok:true, status:'newcell', cellinfo:[ret.cid], 
+                    strategy: prefix + 'Hidden Single',
+                    msg: prefix + 'Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
+          }
         }
       }
+      return {ok:false, status:'notfound', strategy:prefix+'Hidden Single'};
     }
-    return {ok:false, status:'notfound', strategy:'Hidden Single'};
   }
-  /**
-   * Block Hidden Single
-   */
-  blockHiddenSingleStrategy(board) {
-    for (let u of board.blocks) {
-      for (let n = 0; n < board.bsize; n++) {
-        let ret = this.hiddenSingleCheck(board, u, n+1)
-        if (ret.ok) {
-          this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
-          // メッセージ生成
-          let x = ret.cid % board.bsize + 1;
-          let y = Math.floor(ret.cid / board.bsize) + 1;
-          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Block Hidden Single',
-                  msg: 'Block Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
-        }
-      }
-    }
-    return {ok:false, status:'notfound', strategy:'Block Hidden Single'};
-  }
-  /**
-   * Line Hidden Single
-   */
-  lineHiddenSingleStrategy(board) {
-    for (let u of board.lines) {
-      for (let n = 0; n < board.bsize; n++) {
-        let ret = this.hiddenSingleCheck(board, u, n+1)
-        if (ret.ok) {
-          this.answerInsert(board, ret.cid, String(n+1));   // 盤面操作
-          // メッセージ生成
-          let x = ret.cid % board.bsize + 1;
-          let y = Math.floor(ret.cid / board.bsize) + 1;
-          return {ok:true, status:'newcell', cellinfo:[ret.cid], strategy:'Line Hidden Single',
-                  msg: 'Line Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
-        }
-      }
-    }
-    return {ok:false, status:'notfound', strategy:'Line Hidden Single'};
-  }
+  hiddenSingleStrategy = this.hiddenSingleFactory('');
+  blockHiddenSingleStrategy = this.hiddenSingleFactory('Block ');
+  lineHiddenSingleStrategy  = this.hiddenSingleFactory('Line ');
+
 
   /**
    * ブロック駆動型いずれにせよ理論

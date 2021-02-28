@@ -222,8 +222,9 @@ class SdkEngine {
       this.hardNakedSingleStrategy,   // ユニットヒント数3,4個
       // ここからHard必須手筋
       this.blockDrivenEitherwayStrategy, // ブロック始動型いずれにせよ理論
-      this.blockHiddenPairStrategy,      // ブロック型 予約
-      this.lineDrivenEitherwayStrategy,  // 列始動型いずれにせよ理論
+      // this.blockHiddenPairStrategy,      // ブロック型 予約
+      // this.lineDrivenEitherwayStrategy,  // 列始動型いずれにせよ理論
+      /*
       this.lineHiddenPairStrategy,       // 列始動型 予約
       this.blockNakedPairStrategy,       // ブロック始動型 逆予約
       this.lineNakedPairStrategy,        // 列始動型 逆予約
@@ -236,6 +237,7 @@ class SdkEngine {
       this.hiddenQuadrapleStrategy,     // hidden 4つ組
       this.xWingStrategy,               // X-wing 井桁理論
       this.swordFishStrategy,           // swordfish
+      */
     ]
   }
 
@@ -275,7 +277,7 @@ class SdkEngine {
       this.autoIdentifyKouho(newboard);
     } 
     // 1ステップ解答を実行してログをとる
-    let retobj = this.strategySelector(newboard, false);
+    let retobj = this.strategySelector(newboard, true);
     let actionlist = board.diff(newboard);
     Sudokizer.solvelog.push(retobj.msg);
     return [newboard, actionlist];
@@ -357,14 +359,15 @@ class SdkEngine {
    *   - bool cellinfo: 影響があったマス/破綻したマス のリスト
    */
   strategySelector(board, analyze_mode=false) {
-    for (let i in this.strategylist) {
+    let strategies
+    if (analyze_mode) {
+      strategies = this.strategylist_for_analysis;
+    } else {
+      strategies = this.strategylist;
+    }
+    for (let i in strategies) {
       // ストラテジー呼び出し
-      let ret;
-      if (analyze_mode) {
-        ret = this.strategylist_for_analysis[i].call(this, board);
-      } else {
-        ret = this.strategylist[i].call(this, board);
-      }
+      let ret = strategies[i].call(this, board);
       if (ret.ok) {
         // 新たに数字が入った場合、候補情報を同期して返す
         if (ret.status === 'newcell') {
@@ -462,12 +465,40 @@ class SdkEngine {
   peerRemoveKouho(board, cid) {
     let centernum = board.board[cid].num;
     if (centernum !== '0') {
-      for (let c of board.peers[cid].cellidx) {
-        if (board.board[c].num === '0') {
-          board.board[c].kouho[centernum-1] = false;
-        }
+      this.removeKouho(board, board.peers[cid].cellidx, centernum);
+    }
+  }
+
+  /**
+   * 指定したマスリストから指定したnumの候補を削除する
+   * @param Board board: 盤面
+   * @param array clist: マスの番号リスト
+   * @param string num: 数字
+   * @return 削除したマスと候補をまとめたオブジェクト
+   */
+  removeKouho(board, clist, num) {
+    let retobj = {'num':num, 'cellinfo':[]}
+    for (let c of clist) {
+      if (board.board[c].num === '0' && board.board[c].kouho[num-1]) {
+        board.board[c].kouho[num-1] = false;
+        board.board[c].kklevel[num-1] = 0;
+        retobj.cellinfo.push(c);
       }
     }
+    return retobj;
+  }
+
+  /**
+   * 指定したマスリストの中にnuｍの候補がどれだけあるか調べる
+   */
+  countKouhoWithin(board, clist, num) {
+    let cnt = 0;
+    for (let c of clist) {
+      if (board.board[c].kouho[num-1]) {
+        cnt++;
+      }
+    }
+    return cnt;
   }
 
   /**
@@ -666,6 +697,7 @@ class SdkEngine {
         }
       }
     }
+    return {ok:false, status:'notfound', strategy:'Block Hidden Single'};
   }
   /**
    * Line Hidden Single
@@ -684,14 +716,50 @@ class SdkEngine {
         }
       }
     }
+    return {ok:false, status:'notfound', strategy:'Line Hidden Single'};
   }
 
   /**
    * ブロック駆動型いずれにせよ理論
    */
   blockDrivenEitherwayStrategy(board) {
-    for (let cr in board.cross) {
+    for (let cr of board.crosses) {
+      for (let n = 0; n < board.bsize; n++) {
+        let retobj;
+        if (this.countKouhoWithin(board, cr.cellidx, String(n+1)) >= 1 &&
+            this.countKouhoWithin(board, cr.blockidx, String(n+1)) === 0) {
+          retobj = this.removeKouho(board, cr.lineidx, String(n+1));
+          // 削除確定、メッセージ設定
+          if (retobj.cellinfo.length > 0) {
+            return {ok:true, status:'newkouho', strategy:'Block-driven Eitherway',
+                    cellinfo: retobj.cellinfo,
+                    msg: 'Block-driven Eitherway (Number: ' + retobj.num + ')'}
+          }
+        }
+      }
     }
+    return {ok:false, status:'notfound', strategy:'Block-driven Eitherway'};
+  }
+  /**
+   * ライン駆動型いずれにせよ理論
+   */
+  lineDrivenEitherwayStrategy(board) {
+    for (let cr of board.crosses) {
+      for (let n = 0; n < board.bsize; n++) {
+        let retobj;
+        if (this.countKouhoWithin(board, cr.cellidx, String(n+1)) >= 1 &&
+            this.countKouhoWithin(board, cr.lineidx, String(n+1)) === 0) {
+          retobj = this.removeKouho(board, cr.blockidx, String(n+1));
+          // 削除確定、メッセージ設定
+          if (retobj.cellinfo.length > 0) {
+            return {ok:true, status:'newkouho', strategy:'Block-driven Eitherway',
+                    cellinfo: retobj.cellinfo,
+                    msg: 'Block-driven Eitherway (Number: ' + retobj.num + ')'}
+          }
+        }
+      }
+    }
+    return {ok:false, status:'notfound', strategy:'Block-driven Eitherway'};
   }
 
 

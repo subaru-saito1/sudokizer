@@ -488,6 +488,81 @@ class SdkEngine {
   }
 
   /**
+   * Board.ansInsのアクションを追加しないバージョン。候補入り空白マスへの入力
+   * @param Board board: 変更する盤面オブジェクト
+   * @param int cnum: 変更マス
+   * @param string num: 入れる値
+   */
+  answerInsert(board, cpos, num) {
+    // 前提条件
+    if (!board.board[cpos].ishint && board.board[cpos].num === '0') {
+      // 内容：マス入力、仮定レベルリセット、候補リセット、候補仮定レベルリセット
+      board.board[cpos].num = num;
+      board.board[cpos].klevel = 0;
+      for (let k = 0; k < board.bsize; k++) {
+        board.board[cpos].kouho[k] = false;
+        board.board[cpos].kklevel[k] = 0;
+      }
+    }
+  }
+
+  /**
+   * （再帰探索用）最も候補数字の個数の少ないマスを決定する
+   * @param Board board: 盤面
+   * @return int: 最も候補数字の少ないマス
+   */
+  decideMinKouhoCell(board) {
+    let minnumkouho = board.bsize + 1;
+    let mincpos;
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '0' && !board.board[c].ishint) {
+        let numkouho = board.board[c].kouho.filter(x => x === true).length;
+        if (numkouho < minnumkouho) {
+          minnumkouho = numkouho;
+          mincpos = c;
+        }
+      }
+    }
+    return mincpos; 
+  }
+
+  /**
+   * 組み合わせ。nlistの中からk個取り出す全パターンをリスト形式で返す
+   * 例：combination([1,2,3], 2) => [[1,2], [1,3], [2,3]]
+   * @param array nlist: 元となるリスト 
+   * @param int k: 何個分取り出すか
+   * @return list 長さkのリストをnCk個分まとめたリスト
+   */
+  combination(nlist, k) {
+    // kの条件
+    if (k < 0 || k > nlist.length) {
+      throw 'Combination Argument Error!: ' + nlist.length + 'C' + k;
+    }
+    let outer = []
+    // 原始条件 k = 0
+    if (k === 0) {
+      outer.push([]);
+    // 原始条件 k = n
+    } else if (k === nlist.length) {
+      outer.push(nlist);
+    // 原始条件 k = 1
+    } else if (k === 1) {
+      for (let n of nlist) {
+        outer.push([n]);
+      }
+    // 再帰条件 k > 2
+    } else {
+      for (let i = 0; i <= nlist.length - k; i++) {
+        let inner = this.combination(nlist.slice(i+1), k-1);
+        for (let il of inner) {
+          outer.push([nlist[i]].concat(il))
+        }
+      }
+    }
+    return outer;
+  }
+
+  /**
    * 指定したマスリストの中にnuｍの候補がどれだけあるか調べる
    */
   countKouhoWithin(board, clist, num) {
@@ -547,6 +622,11 @@ class SdkEngine {
 
   /**
    * (Naked Single用)
+   * 対象マスを含む3ユニット（行、列、ブロック）のうち
+   * 最も多く数字が埋まっているユニットの埋まっている数字の個数を返す
+   * @param Board board: 盤面
+   * @param int cpos: 対象となるマスの番号
+   * @param return cposの所属ユニットにどれだけ数字が埋まっているか
    */
   maxCountHints(board, cpos) {
     let maxhints = 0;
@@ -589,44 +669,7 @@ class SdkEngine {
     }
   }
 
-  /**
-   * Board.ansInsのアクションを追加しないバージョン。候補入り空白マスへの入力
-   * @param Board board: 変更する盤面オブジェクト
-   * @param int cnum: 変更マス
-   * @param string num: 入れる値
-   */
-  answerInsert(board, cpos, num) {
-    // 前提条件
-    if (!board.board[cpos].ishint && board.board[cpos].num === '0') {
-      // 内容：マス入力、仮定レベルリセット、候補リセット、候補仮定レベルリセット
-      board.board[cpos].num = num;
-      board.board[cpos].klevel = 0;
-      for (let k = 0; k < board.bsize; k++) {
-        board.board[cpos].kouho[k] = false;
-        board.board[cpos].kklevel[k] = 0;
-      }
-    }
-  }
-
-  /**
-   * 最も候補数字の個数の少ないマスを決定する
-   * @param Board board: 盤面
-   * @return int: 最も候補数字の少ないマス
-   */
-  decideMinKouhoCell(board) {
-    let minnumkouho = board.bsize + 1;
-    let mincpos;
-    for (let c = 0; c < board.numcells; c++) {
-      if (board.board[c].num === '0' && !board.board[c].ishint) {
-        let numkouho = board.board[c].kouho.filter(x => x === true).length;
-        if (numkouho < minnumkouho) {
-          minnumkouho = numkouho;
-          mincpos = c;
-        }
-      }
-    }
-    return mincpos; 
-  }
+ 
 
 
 

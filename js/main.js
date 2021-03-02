@@ -211,6 +211,14 @@ class SdkEngine {
     this.strategylist = [
       this.nakedSingleStrategy,
       this.hiddenSingleStrategy,
+      this.blockDrivenEitherwayStrategy,
+      this.lineDrivenEitherwayStrategy,
+      this.nakedPairStrategy,
+      this.nakedTripleStrategy,
+      this.nakedQuardrapleStrategy,
+      this.hiddenPairStrategy,
+      this.hiddenTripleStrategy,
+      this.hiddenQuardrapleStrategy,
     ];
     // 分析用のストラテジー関数リスト
     this.strategylist_for_analysis = [
@@ -226,7 +234,6 @@ class SdkEngine {
       this.lineHiddenPairStrategy,       // 列始動型 予約
       this.blockNakedPairStrategy,       // ブロック始動型 逆予約
       this.lineNakedPairStrategy,        // 列始動型 逆予約
-      /*
       this.blockHiddenTripleStrategy,    // ブロック始動型 3つ組
       this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
       this.lineHiddenTripleStrategy,     // 列始動型　３つ組
@@ -234,9 +241,8 @@ class SdkEngine {
       // 唖然手筋
       this.nakedQuadrapleStrategy,      // naked 4つ組
       this.hiddenQuadrapleStrategy,     // hidden 4つ組
-      this.xWingStrategy,               // X-wing 井桁理論
-      this.swordFishStrategy,           // swordfish
-      */
+      // this.xWingStrategy,               // X-wing 井桁理論
+      // this.swordFishStrategy,           // swordfish
     ]
   }
 
@@ -476,7 +482,7 @@ class SdkEngine {
    * @return 削除したマスと候補をまとめたオブジェクト
    */
   removeKouho(board, clist, num) {
-    let retobj = {'num':num, 'cellinfo':[]}
+    let retobj = {'num':num, 'cellinfo':[]};
     for (let c of clist) {
       if (board.board[c].num === '0' && board.board[c].kouho[num-1]) {
         board.board[c].kouho[num-1] = false;
@@ -484,6 +490,23 @@ class SdkEngine {
         retobj.cellinfo.push(c);
       }
     }
+    return retobj;
+  }
+
+  /**
+   * 指定したマスリストから指定した候補リストの候補を削除する
+   * @param Board board: 
+   * @param array clist: マスの番号リスト
+   * @param array klist: 候補のリスト
+   * @return object: 削除した候補リストとマスのリスト
+   */
+  removeMultipleKouho(board, clist, klist) {
+    let retobj = {'num':klist, 'cellinfo':[]};
+    for (let num of klist) {
+      let ret = this.removeKouho(board, clist, num);
+      retobj.cellinfo = retobj.cellinfo.concat(ret.cellinfo);
+    }
+    retobj.cellinfo = Array.from(new Set(retobj.cellinfo));
     return retobj;
   }
 
@@ -637,6 +660,27 @@ class SdkEngine {
     maxhints = (h2 > maxhints) ? h2 : maxhints;
     maxhints = (h3 > maxhints) ? h3 : maxhints;
     return maxhints
+  }
+
+  /**
+   * セルcの候補が全てklist（数字展開済み）に含まれているか判定
+   * @param Board board : 盤面
+   * @param array klist ：候補リスト
+   * @param int c       ：セル
+   * @return bool：cの候補が全てklistに含まれているか
+   */
+  kouhoInclusion(board, klist, c) {
+    if (board.board[c].num !== '0') {
+      return false;
+    }
+    for (let k in board.board[c].kouho) {
+      if (board.board[c].kouho[k]) {
+        if (!klist.includes(Number(k)+1)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**
@@ -800,16 +844,18 @@ class SdkEngine {
     return {ok:false, status:'notfound', strategy:'Block-driven Eitherway'};
   }
 
+
   /**
-   * naked piar
+   * naked系手筋ファクトリー
    * @param string prefix: メッセージなどのプレフィックス
+   * @param int k        : pair, triple, quadraple
    * @return 以下の仕様を持つ関数
    *   @param Board board
    *   @return bool ok
    *   @return string status: newcell or notfound
    *   @return array(int) cellinfo
    */
-  nakedPairFactory(prefix) {
+  nakedPairFactory(prefix, k) {
     return function(board) {
       // ファクトリー用条件分岐
       let units;
@@ -822,30 +868,130 @@ class SdkEngine {
       } else {
         throw 'nakedPairFactory: Invalid prefix Error';
       }
+
+      let suffix = ''
+      if (k === 2) {
+        suffix = 'Pair';
+      } else if (k === 3) {
+        suffix = 'Triple'; 
+      } else if (k === 4) {
+        suffix = 'Quad';
+      } else {
+        throw 'nakedPairFactory: Invalid suffix Error';
+      }
       // 本処理
       for (let u of units) {
-        let ret = this.searchNakedPair(board, u.cellidx);
-        if (ret.ok) {
-          return {ok:true, status:'newcell', cellinfo:[ret.cid], 
-                  strategy: prefix + 'Naked Pair',
-                  msg: prefix + 'Naked Pair'};
+        let blankidx = u.cellidx.filter(x => board.board[x].num === '0');
+        if (blankidx.length >= k) {
+          let ret = this.searchNakedPair(board, blankidx, k);
+          if (ret.ok) {
+            return {ok:true, status:'newkouho', cellinfo:ret.cellinfo, 
+                    strategy: prefix + 'Naked ' + suffix,
+                    msg: prefix + 'Naked ' + suffix};
+          }
         }
       }
-      return {ok:false, status:'notfound', strategy:prefix+'Hidden Single'};
+      return {ok: false, status: 'notfound', strategy: prefix+'Naked '+suffix};
     }
   }
-  nakedPairStrategy = this.nakedPairFactory('');
-  blockNakedPairStrategy = this.nakedPairFactory('Block ');
-  lineNakedPairStrategy  = this.nakedPairFactory('Line ');
+  nakedPairStrategy = this.nakedPairFactory('', 2);
+  blockNakedPairStrategy = this.nakedPairFactory('Block ', 2);
+  lineNakedPairStrategy  = this.nakedPairFactory('Line ', 2);
+  nakedTripleStrategy = this.nakedPairFactory('', 3);
+  blockNakedTripleStrategy = this.nakedPairFactory('Block ', 3);
+  lineNakedTripleStrategy  = this.nakedPairFactory('Line ', 3);
+  nakedQuadrapleStrategy = this.nakedPairFactory('', 4);
 
   /**
    * naked pairの本体
    * @param Board board : 盤面
    * @param array clist : 探索対象のマスのリスト
+   * @param int k       : 何つ組をさがすか
    */
-  searchNakedPair(board, clist) {
-    let kunion = this.kouhoUnion(clist);
+  searchNakedPair(board, clist, k) {
+    let kunion = this.kouhoUnion(board, clist);
+    let kcomblist = this.combination(kunion, k);  // 予約候補集合の全リスト
+    for (let kcomb of kcomblist) {
+      let cnt = 0;
+      let excells = []    // 予約発見時、候補除去の対象となるマス群
+      for (let c of clist) {
+        if (this.kouhoInclusion(board, kcomb, c)) {   // cのtrue候補が全てkcombに含まれるか
+          cnt++;
+        } else {
+          if (board.board[c].num === '0') {
+            excells.push(c);
+          }
+        }
+      }
+      // naked予約の発見：excellsから該当候補を全削除
+      if (cnt === k) {
+        let retobj = this.removeMultipleKouho(board, excells, kcomb);
+        if (retobj.cellinfo.length > 0) {
+          return {ok: true, status: 'newkouho', cellinfo: excells}
+        }
+      }
+    }
+    return {ok: false}
   }
 
+
+  /**
+   * hidden pairの本体
+   * @param Board board : 盤面
+   * @param array clist : 探索対象のマスのリスト
+   * @param int k       : 何つ組をさがすか
+   */
+  hiddenPairFactory(prefix, k) {
+    return function(board) {
+      // ファクトリー用条件分岐
+      let units;
+      if (prefix === '') {
+        units = board.units;
+      } else if (prefix === 'Block ') {
+        units = board.blocks;
+      } else if (prefix === 'Line ') {
+        units = board.lines;
+      } else {
+        throw 'nakedPairFactory: Invalid prefix Error';
+      }
+      let suffix = ''
+      if (k === 2) {
+        suffix = 'Pair';
+      } else if (k === 3) {
+        suffix = 'Triple'; 
+      } else if (k === 4) {
+        suffix = 'Quad';
+      } else {
+        throw 'nakedPairFactory: Invalid suffix Error';
+      }
+      // 本処理
+      for (let u of units) {
+        let ret = this.searchHiddenPair(board, u.cellidx, k);
+        if (ret.ok) {
+          return {ok:true, status:'newcell', cellinfo:[ret.cid], 
+                  strategy: prefix + 'Naked ' + suffix,
+                  msg: prefix + 'Naked ' + suffix};
+        }
+      }
+      return {ok: false, status: 'notfound', strategy: prefix+'Naked '+suffix};
+    }
+  }
+  hiddenPairStrategy = this.hiddenPairFactory('', 2);
+  blockHiddenPairStrategy = this.hiddenPairFactory('Block ', 2);
+  lineHiddenPairStrategy  = this.hiddenPairFactory('Line ', 2);
+  hiddenTripleStrategy = this.hiddenPairFactory('', 3);
+  blockHiddenTripleStrategy = this.hiddenPairFactory('Block ', 3);
+  lineHiddenTripleStrategy  = this.hiddenPairFactory('Line ', 3);
+  hiddenQuadrapleStrategy = this.hiddenPairFactory('', 4);
+
+  /**
+   * hidden pairの本体
+   * @param Board board : 盤面
+   * @param array clist : 探索対象のマスのリスト
+   * @param int k       : 何つ組をさがすか
+   */
+  searchHiddenPair(board, clist, k) {
+    return {ok:false};
+  }
 
 }

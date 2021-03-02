@@ -219,6 +219,8 @@ class SdkEngine {
       this.hiddenTripleStrategy,
       this.nakedQuadrapleStrategy,
       this.hiddenQuadrapleStrategy,
+      this.XwingStrategy,
+      this.swordfighStrategy,
     ];
     // 分析用のストラテジー関数リスト
     this.strategylist_for_analysis = [
@@ -241,8 +243,9 @@ class SdkEngine {
       // 唖然手筋
       this.nakedQuadrapleStrategy,      // naked 4つ組
       this.hiddenQuadrapleStrategy,     // hidden 4つ組
-      // this.xWingStrategy,               // X-wing 井桁理論
-      // this.swordFishStrategy,           // swordfish
+      this.XwingStrategy,               // X-wing 井桁理論
+      this.swordfishStrategy,           // swordfish
+      // this.jellyfishStrategy         // 禁じ手
     ]
   }
 
@@ -713,7 +716,87 @@ class SdkEngine {
     }
   }
 
- 
+  /**
+   * numが入っていない行のリストを洗い出す
+   * @param Board board 
+   * @param int num 
+   * @return 行のリスト(0-origin)
+   */
+  emptyRowList(board, num) {
+    let rowlist = []
+    for (let i = 0; i < board.bsize; i++) {
+      let cnt = 0;
+      for (let j = 0; j < board.bsize; j++) {
+        let c = i * board.bsize + j;
+        if (board.board[c].num !== String(num)) {
+          cnt++;
+        } else {
+          break;
+        }
+      }
+      if (cnt === board.bsize) {
+        rowlist.push(i);
+      }
+    }
+    return rowlist;
+  }
+  /**
+   * numが入っていない列のリストを洗い出す
+   * @param Board board 
+   * @param int num 
+   * @return 列のリスト(0-origin)
+   */
+  emptyColList(board, num) {
+    let collist = []
+    for (let j = 0; j < board.bsize; j++) {
+      let cnt = 0;
+      for (let i = 0; i < board.bsize; i++) {
+        let c = i * board.bsize + j;
+        if (board.board[c].num !== String(num)) {
+          cnt++;
+        } else {
+          break;
+        }
+      }
+      if (cnt === board.bsize) {
+        collist.push(j);
+      }
+    }
+    return collist;
+  }
+
+  /**
+   * j列目の数字num候補がrowsにしか現れないかどうか
+   * @param board board 盤面
+   * @param array rows  行番号リスト
+   * @param int j     　列番号
+   * @param int num     数字
+   */
+  onlyRowIncludes(board, rows, j, num) {
+    for (let i = 0; i < board.bsize; i++) {
+      let c = i * board.bsize + j;
+      if (board.board[c].kouho[num-1] && !rows.includes(i)) {
+        return false;
+      }
+      return true;
+    }
+  }
+  /**
+   * i列目の数字num候補がcolsにしか現れないかどうか
+   * @param board board 盤面
+   * @param array cols  列番号リスト
+   * @param int i     　行番号
+   * @param int num     数字
+   */
+  onlyRowIncludes(board, cols, i, num) {
+    for (let j = 0; j < board.bsize; j++) {
+      let c = i * board.bsize + j;
+      if (board.board[c].kouho[num-1] && !cols.includes(j)) {
+        return false;
+      }
+      return true;
+    }
+  }
 
 
 
@@ -927,7 +1010,7 @@ class SdkEngine {
       if (cnt === k) {
         let retobj = this.removeMultipleKouho(board, excells, kcomb);
         if (retobj.cellinfo.length > 0) {
-          return {ok: true, status: 'newkouho', cellinfo: excells}
+          return {ok: true, status: 'newkouho', cellinfo: retobj.cellinfo}
         }
       }
     }
@@ -937,9 +1020,13 @@ class SdkEngine {
 
   /**
    * hidden pairの本体
-   * @param Board board : 盤面
-   * @param array clist : 探索対象のマスのリスト
-   * @param int k       : 何つ組をさがすか
+   * @param string prefix: メッセージなどのプレフィックス
+   * @param int k        : pair, triple, quadraple
+   * @return 以下の仕様を持つ関数
+   *   @param Board board
+   *   @return bool ok
+   *   @return string status: newcell or notfound
+   *   @return array(int) cellinfo
    */
   hiddenPairFactory(prefix, k) {
     return function(board) {
@@ -1016,7 +1103,105 @@ class SdkEngine {
         }
         let retobj = this.removeMultipleKouho(board, kcells, revkcomb);
         if (retobj.cellinfo.length > 0) {
-          return {ok: true, status: 'newkouho', cellinfo: kcells}
+          return {ok: true, status: 'newkouho', cellinfo: retobj.cellinfo}
+        }
+      }
+    }
+    return {ok: false}
+  }
+
+
+  /**
+   * X-wing系手筋のファクトリ
+   * @param int k        : X-wing, Swordfish, Jellyfish
+   * @return 以下の仕様を持つ関数
+   *   @param Board board
+   *   @return bool ok
+   *   @return string status: newcell or notfound
+   *   @return array(int) cellinfo
+   */
+  XwingFactory(k) {
+    return function(board) {
+      // ファクトリー用分岐
+      let suffix = ''
+      if (k === 2) {
+        suffix = 'X-Wing';
+      } else if (k === 3) {
+        suffix = 'Swordfish'; 
+      } else if (k === 4) {
+        suffix = 'Jellyfish';
+      } else {
+        throw 'XwingFactory: Invalid suffix Error';
+      }
+      // 本処理
+      for (let n = 1; n <= board.bsize; n++) {
+        let ret = this.XwingMain(board, k, n);
+        if (ret.ok) {
+          return {ok:true, status:'newkouho', cellinfo:ret.cellinfo, 
+                  strategy: suffix,  msg: suffix + ': n'};
+        }
+      }
+      return {ok: false, status: 'notfound', strategy: suffix};
+    }
+  }
+  XwingStrategy     = this.XwingFactory(2);
+  swordfishStrategy = this.XwingFactory(3);
+  jellyfishStrategy = this.XwingFactory(4);
+
+  /**
+   * Xwing系手筋のメイン
+   * @param Board board: 盤面
+   * @param int k      : 手筋のレベル
+   * @param int num    : 数字
+   */
+  XwingMain(board, k, num) {
+    // 行
+    let exrows = this.emptyRowList(board, num);
+    if (exrows.length >= k) {
+      let rowcomblist = this.combination(exrows, k);
+      for (let rowcomb of rowcomblist) {
+        let cnt = 0;
+        let excells = []
+        for (let j = 0; j < board.bsize; j++) {
+          if (onlyRowIncludes(board, rowcomb, j, num)) {
+            cnt++;
+          } else {    // 候補削除予定のマス
+            for (let row of rowcomb) {
+              excells.push(row * board.bsize + j);
+            }
+          }
+        }
+        // X-wing発見
+        if (cnt === k) {
+          let retobj = this.removeKouho(board, excells, num);
+          if (retobj.cellinfo.length > 0) {
+            return {ok: true, status: 'newkouho', cellinfo: retobj.cellinfo}
+          }
+        }
+      }
+    }
+    // 列
+    let excols = this.emptyColList(board, num);
+    if (excols.length >= k) {
+      let colcomblist = this.combination(excols, k);
+      for (let colcomb of colcomblist) {
+        let cnt = 0;
+        let excells = []
+        for (let i = 0; i < board.bsize; i++) {
+          if (onlyColIncludes(board, colcomb, i, num)) {
+            cnt++;
+          } else {   // 候補削除予定のマス
+            for (let col of colcomb) {
+              excells.push(i * board.bsize + col);
+            }
+          }
+        }
+        // X-wing発見
+        if (cnt === k) {
+          let retobj = this.removeKouho(board, excells, num);
+          if (retobj.cellinfo.length > 0) {
+            return {ok: true, status: 'newkouho', cellinfo: retobj.cellinfo}
+          }
         }
       }
     }

@@ -215,10 +215,10 @@ class SdkEngine {
       this.lineDrivenEitherwayStrategy,
       this.nakedPairStrategy,
       this.nakedTripleStrategy,
-      this.nakedQuardrapleStrategy,
       this.hiddenPairStrategy,
       this.hiddenTripleStrategy,
-      this.hiddenQuardrapleStrategy,
+      this.nakedQuadrapleStrategy,
+      this.hiddenQuadrapleStrategy,
     ];
     // 分析用のストラテジー関数リスト
     this.strategylist_for_analysis = [
@@ -235,9 +235,9 @@ class SdkEngine {
       this.blockNakedPairStrategy,       // ブロック始動型 逆予約
       this.lineNakedPairStrategy,        // 列始動型 逆予約
       this.blockHiddenTripleStrategy,    // ブロック始動型 3つ組
-      this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
+      //this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
       this.lineHiddenTripleStrategy,     // 列始動型　３つ組
-      this.lineNakedTripleStrategy,      // 列始動型 逆３つ組
+      //this.lineNakedTripleStrategy,      // 列始動型 逆３つ組
       // 唖然手筋
       this.nakedQuadrapleStrategy,      // naked 4つ組
       this.hiddenQuadrapleStrategy,     // hidden 4つ組
@@ -952,7 +952,7 @@ class SdkEngine {
       } else if (prefix === 'Line ') {
         units = board.lines;
       } else {
-        throw 'nakedPairFactory: Invalid prefix Error';
+        throw 'hiddenPairFactory: Invalid prefix Error';
       }
       let suffix = ''
       if (k === 2) {
@@ -962,18 +962,21 @@ class SdkEngine {
       } else if (k === 4) {
         suffix = 'Quad';
       } else {
-        throw 'nakedPairFactory: Invalid suffix Error';
+        throw 'hiddenPairFactory: Invalid suffix Error';
       }
       // 本処理
       for (let u of units) {
-        let ret = this.searchHiddenPair(board, u.cellidx, k);
-        if (ret.ok) {
-          return {ok:true, status:'newcell', cellinfo:[ret.cid], 
-                  strategy: prefix + 'Naked ' + suffix,
-                  msg: prefix + 'Naked ' + suffix};
+        let blankidx = u.cellidx.filter(x => board.board[x].num === '0');
+        if (blankidx.length >= k) {
+          let ret = this.searchHiddenPair(board, blankidx, k);
+          if (ret.ok) {
+            return {ok:true, status:'newkouho', cellinfo:ret.cellinfo, 
+                    strategy: prefix + 'Hidden ' + suffix,
+                    msg: prefix + 'Hidden ' + suffix};
+          }
         }
       }
-      return {ok: false, status: 'notfound', strategy: prefix+'Naked '+suffix};
+      return {ok: false, status: 'notfound', strategy: prefix+'Hidden '+suffix};
     }
   }
   hiddenPairStrategy = this.hiddenPairFactory('', 2);
@@ -991,7 +994,33 @@ class SdkEngine {
    * @param int k       : 何つ組をさがすか
    */
   searchHiddenPair(board, clist, k) {
-    return {ok:false};
+    let kunion = this.kouhoUnion(board, clist);
+    let kcomblist = this.combination(kunion, k);  // 予約候補集合の全リスト
+    for (let kcomb of kcomblist) {
+      let kcells = new Set();
+      for (let kh of kcomb) {
+        for (let c of clist) {
+          if (board.board[c].kouho[kh-1]) {
+            kcells.add(c);
+          }
+        }
+      }
+      // 予約発券時
+      if (kcells.size === k) {
+        // kcombの補集合を生成
+        let revkcomb = []
+        for (let kh = 1; kh <= board.bsize; kh++) {
+          if (!kcomb.includes(kh)) {
+            revkcomb.push(kh);
+          }
+        }
+        let retobj = this.removeMultipleKouho(board, kcells, revkcomb);
+        if (retobj.cellinfo.length > 0) {
+          return {ok: true, status: 'newkouho', cellinfo: kcells}
+        }
+      }
+    }
+    return {ok: false}
   }
 
 }

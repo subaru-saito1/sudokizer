@@ -6,17 +6,14 @@
  * ページ読み込み時に実行する初期化用スクリプト
  */
 
-/**
- * グローバル変数類の初期化処理
- */
+/* =====================================================
+ *                グローバル設定類
+ * ===================================================== */
 
-// Sudokizerグローバル変数。
-// グローバル設定類はすべてこのオブジェクトに格納
-let Sudokizer = {};
-
+let Sudokizer = {};   // グローバル変数をすべてまとめたオブジェクト
 Sudokizer.astack = new ActionStack();   // アクションスタック作成
 Sudokizer.board  = initBoard();         // 初期盤面の作成
-Sudokizer.config = initConfig();        // フォーム設定類
+Sudokizer.config = initConfig();        // 全般設定類
 Sudokizer.engine = new SdkEngine();     // 解答エンジン
 Sudokizer.solvelog = new SolveLog();    // 解答履歴
 
@@ -26,6 +23,7 @@ redraw();             // 初回同期
 
 /**
  * ページロード時の初期盤面作成
+ * @return {Board} 初期盤面
  */
 function initBoard() {
   let board = new Board();                  // 新規盤面作成
@@ -38,7 +36,8 @@ function initBoard() {
 }
 
 /**
- * グローバル設定オブジェクトの作成
+ * 全般設定用のオブジェクトの作成
+ * @return {Object} 全般設定を格納したオブジェクト
  */
 function initConfig() {
   // 色情報を取得
@@ -52,24 +51,22 @@ function initConfig() {
     'l3': $('#menu_dispcolor_l3').val(),
     'l4': $('#menu_dispcolor_l4').val(),
   }
+  // 色情報の初期値を記憶して戻せるようにしておく
   const defcolorset = Object.assign({}, colorset);
 
   return {
-    'cursorpos': 0,                              // カーソル位置
-    // マスのサイズ
-    'dispsize': Number($('#menu_dispsize_size').val()),
-    'dispfont': 'sans-serif',                    // 暫定
-    'colorset': colorset,                        // 色設定
-    'defcolorset': defcolorset,                  // デフォルト色設定
-    // 問題/解答入力モード スイッチ
-    'qamode': $('input:radio[name="modeselect"]:checked').val(),
-    // 候補入力モード フラグ
-    'kouhomode': $('#opform_kmode').prop('checked'),
-    // 仮定レベル スイッチ
-    'kateilevel': Number($('#opform_kateilevel').val()),
+    'debugmode': false,         // デバッグモード
+    'cursorpos': 0,             // カーソル位置
+    'dispsize': Number($('#menu_dispsize_size').val()),  // マスサイズ
+    'dispfont': 'sans-serif',         // フォント
+    'colorset': colorset,             // 色設定
+    'defcolorset': defcolorset,       // デフォルト色設定
+    'qamode': $('input:radio[name="modeselect"]:checked').val(),  // 問題 or 解答モード
+    'kouhomode': $('#opform_kmode').prop('checked'),              // 候補モードフラグ
+    'kateilevel': Number($('#opform_kateilevel').val()),          // 仮定レベル
     'drawmedia': 'canvas',      // 描画する要素 Canvas or svg or console?
     'drawpadding': 13,          // 描画時のパディング
-    'debugmode': false,         // デバッグモード
+    'drawconfig': {},           // 描画時の種々のフラグ
   };
 }
 
@@ -151,7 +148,6 @@ function setEventHandlers() {
   $('#main_board').on('contextmenu', clickBoard)
   $('#main_board').keydown(keyDownBoard);
   $('#main_board').blur(redraw);
-
 
   // -------- ページ離脱時の警告 ----------
   window.addEventListener('beforeunload', function(evt) {

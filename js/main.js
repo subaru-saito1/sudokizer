@@ -220,7 +220,7 @@ class SdkEngine {
       this.nakedQuadrapleStrategy,
       this.hiddenQuadrapleStrategy,
       this.XwingStrategy,
-      this.swordfighStrategy,
+      this.swordfishStrategy,
     ];
     // 分析用のストラテジー関数リスト
     this.strategylist_for_analysis = [
@@ -237,9 +237,9 @@ class SdkEngine {
       this.blockNakedPairStrategy,       // ブロック始動型 逆予約
       this.lineNakedPairStrategy,        // 列始動型 逆予約
       this.blockHiddenTripleStrategy,    // ブロック始動型 3つ組
-      //this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
+      this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
       this.lineHiddenTripleStrategy,     // 列始動型　３つ組
-      //this.lineNakedTripleStrategy,      // 列始動型 逆３つ組
+      this.lineNakedTripleStrategy,      // 列始動型 逆３つ組
       // 唖然手筋
       this.nakedQuadrapleStrategy,      // naked 4つ組
       this.hiddenQuadrapleStrategy,     // hidden 4つ組
@@ -523,7 +523,7 @@ class SdkEngine {
     // 前提条件
     if (!board.board[cpos].ishint && board.board[cpos].num === '0') {
       // 内容：マス入力、仮定レベルリセット、候補リセット、候補仮定レベルリセット
-      board.board[cpos].num = num;
+      board.board[cpos].num = String(num);
       board.board[cpos].klevel = 0;
       for (let k = 0; k < board.bsize; k++) {
         board.board[cpos].kouho[k] = false;
@@ -773,13 +773,22 @@ class SdkEngine {
    * @param int num     数字
    */
   onlyRowIncludes(board, rows, j, num) {
+    let cnt = 0;   // numの候補があったマスの個数
     for (let i = 0; i < board.bsize; i++) {
       let c = i * board.bsize + j;
-      if (board.board[c].kouho[num-1] && !rows.includes(i)) {
-        return false;
+      if (board.board[c].kouho[num-1]) {
+        cnt++;
+        if (!rows.includes(i)) {
+          return false;
+        }
       }
-      return true;
     }
+    if (cnt > 0) {
+      return true;
+    } else {
+      return false;
+    }
+
   }
   /**
    * i列目の数字num候補がcolsにしか現れないかどうか
@@ -788,13 +797,21 @@ class SdkEngine {
    * @param int i     　行番号
    * @param int num     数字
    */
-  onlyRowIncludes(board, cols, i, num) {
+  onlyColIncludes(board, cols, i, num) {
+    let cnt = 0;  // numの候補があったマスの個数
     for (let j = 0; j < board.bsize; j++) {
       let c = i * board.bsize + j;
-      if (board.board[c].kouho[num-1] && !cols.includes(j)) {
-        return false;
+      if (board.board[c].kouho[num-1]) {
+        cnt++;
+        if (!cols.includes(j)) {
+          return false;
+        }
       }
+    }
+    if (cnt > 0) {
       return true;
+    } else {
+      return false;
     }
   }
 
@@ -1138,7 +1155,7 @@ class SdkEngine {
         let ret = this.XwingMain(board, k, n);
         if (ret.ok) {
           return {ok:true, status:'newkouho', cellinfo:ret.cellinfo, 
-                  strategy: suffix,  msg: suffix + ': n'};
+                  strategy: suffix,  msg: suffix + ': ' + n};
         }
       }
       return {ok: false, status: 'notfound', strategy: suffix};
@@ -1163,7 +1180,7 @@ class SdkEngine {
         let cnt = 0;
         let excells = []
         for (let j = 0; j < board.bsize; j++) {
-          if (onlyRowIncludes(board, rowcomb, j, num)) {
+          if (this.onlyRowIncludes(board, rowcomb, j, num)) {
             cnt++;
           } else {    // 候補削除予定のマス
             for (let row of rowcomb) {
@@ -1188,7 +1205,7 @@ class SdkEngine {
         let cnt = 0;
         let excells = []
         for (let i = 0; i < board.bsize; i++) {
-          if (onlyColIncludes(board, colcomb, i, num)) {
+          if (this.onlyColIncludes(board, colcomb, i, num)) {
             cnt++;
           } else {   // 候補削除予定のマス
             for (let col of colcomb) {

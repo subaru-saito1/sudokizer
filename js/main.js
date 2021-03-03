@@ -6,9 +6,9 @@
 class Unit {
   /**
    * コンストラクタ
-   * @param string unittype: 'row', 'col', 'block'
-   * @param int id: 左上から右側、下側に数えた時の番号。0-origin
-   * @param int unitsize: ユニットの構成マス数(9)
+   * @param {string} unittype 'row', 'col', 'block'
+   * @param {int} id          左上から右側、下側に数えた時の番号。0-origin
+   * @param {int} unitsize    ユニットの構成マス数(9)
    */
   constructor(unittype, id, unitsize=9) {
     this.unittype = unittype;
@@ -16,8 +16,10 @@ class Unit {
     this.unitsize = unitsize;
     this.cellidx = this.createCellIndex();
   }
+
   /**
    * ユニットに含まれるマスの番号を配列で返す
+   * @return {Array} マスの番号の配列
    */
   createCellIndex() {
     let cellidx = []
@@ -55,8 +57,8 @@ class Unit {
 class Peer {
   /**
    * コンストラクタ
-   * @param int cid; 中心となるセル番号
-   * @param int bsize: 盤面サイズ (9)
+   * @param {int} cid   中心となるセル番号
+   * @param {int} bsize 盤面サイズ (9)
    */
   constructor(cid, bsize) {
     this.cid = cid;
@@ -103,10 +105,10 @@ class Peer {
 class Cross {
   /**
    * コンストラクタ
-   * @param string linetype: 'row' or 'col'
-   * @param int blockid: ブロックの番号
-   * @param int lineid: 行/列の番号
-   * @param bsize 盤面サイズ(9)
+   * @param {string} linetype 'row' or 'col'
+   * @param {int} blockid    ブロックの番号
+   * @param {int} lineid     行/列の番号
+   * @param {bsize} 盤面サイズ(9)
    */
   constructor(linetype, blockid, lineid, bsize) {
     this.linetype = linetype;
@@ -117,8 +119,10 @@ class Cross {
     this.blockidx = this.createBlockIndex();
     this.lineidx = this.createLineIndex();
   }
+
   /**
    * クロスに含まれる3マスの座標を取得
+   * @return {Array} マスの番号の配列
    */
   createCellIndex() {
     let sqrtsize = Math.sqrt(this.bsize);
@@ -148,8 +152,10 @@ class Cross {
     }
     return cellidx;
   }
+
   /**
    * クロスに含まれない同じブロックの座標リスト
+   * @return {Array} マスの番号の配列
    */
   createBlockIndex() {
     let sqrtsize = Math.sqrt(this.bsize);   // 3
@@ -169,8 +175,10 @@ class Cross {
     }
     return cellidx;
   }
+
   /**
    * クロスに含まれない同じラインの座標リスト
+   * @return {Array} マスの番号の配列
    */
   createLineIndex() {
     let sqrtsize = Math.sqrt(this.bsize);   // 3
@@ -199,6 +207,7 @@ class Cross {
  * 数独エンジンクラス
  */
 class SdkEngine {
+
   /**
    * コンストラクタ：解答エンジンに関する設定とストラテジーリストの設定
    */
@@ -252,8 +261,8 @@ class SdkEngine {
   // ============================== フロントラッパー ==============================
   /**
    * 解答チェック機能（簡易実装版）
-   * @param Board board: チェック対象の盤面オブジェクト
-   * @return bool : 完成しているかどうか
+   * @param {Board} board チェック対象の盤面オブジェクト
+   * @return {boolean} 完成しているかどうか
    */
   ansCheck(board) {
     for (let u in board.units) {
@@ -265,7 +274,9 @@ class SdkEngine {
   }
 
   /**
-   * 自動候補埋め機能。
+   * 自動候補埋め機能
+   * @param {Board} board チェック
+   * @return {Array} 新規盤面とコマンドリスト
    */
   autoIdentifyKouhoWrapper(board) {
     let newboard = board.transCreate();
@@ -277,6 +288,8 @@ class SdkEngine {
 
   /**
    * 一ステップ解答
+   * @param {Board} board チェック
+   * @return {Array} 新規盤面とコマンドリスト
    */
   oneStepSolve(board) {
     let newboard = board.transCreate();
@@ -293,6 +306,8 @@ class SdkEngine {
 
   /**
    * 全解答
+   * @param {Board} board チェック
+   * @return {Array} 新規盤面とコマンドリスト、解答の個数
    */
   allStepSolve(board) {
     let newboard = board.transCreate();
@@ -305,10 +320,9 @@ class SdkEngine {
 
   /**
    * 全解答再帰アルゴリズム
-   * @param Board board 元盤面
-   * @param int klevel  再帰の深さ（デバッグ用）
-   * @return int 解の個数
-   * @return ansboard 解答盤面
+   * @param {Board} board 元盤面
+   * @param {int} klevel  再帰の深さ（デバッグ用）
+   * @return {Array} 解の個数と解答盤面
    */
   allStepSolveRecursive(board, klevel) {
     let newboard = board.transCreate();
@@ -359,12 +373,12 @@ class SdkEngine {
   /**
    * ストラテジーセレクタ
    * - ストラテジーを選択して一ステップだけ解く。候補の同期や破綻判定もやる。
-   * @param Board board: 解く盤面 
-   * @param analyze_mode: 分析モード
-   * @return Object ret: 色々な情報を返す
-   *   - bool ok    : 正常に進めばtrue, 失敗（破綻とお手上げ）ならfalse
-   *   - bool status: 'newcell', 'newkouho', 'noanswer', 'giveup'
-   *   - bool cellinfo: 影響があったマス/破綻したマス のリスト
+   * @param {Board} board: 解く盤面 
+   * @param {boolean} analyze_mode: 分析モードフラグ
+   * @return {Object} ret: 色々な情報を返す
+   *   - booleam ok    : 正常に進めばtrue, 失敗（破綻とお手上げ）ならfalse
+   *   - string status: 'newcell', 'newkouho', 'noanswer', 'giveup'
+   *   - int cellinfo: 影響があったマス/破綻したマス のリスト
    */
   strategySelector(board, analyze_mode=false) {
     let strategies
@@ -402,8 +416,10 @@ class SdkEngine {
   // ============================= ユーティリティ ==============================
   /**
    * 破綻していないか（候補が0個の空白マスがないか）チェック
-   * @return ok: 破綻していなければtrue
-   * @return cell: 破綻していた場合、そのセル番号
+   * @param {Board} board 盤面
+   * @return {Object} 以下の内容のオブジェクト
+   *   boolean ok: 破綻していなければtrue
+   *   int cell: 破綻していた場合、そのセル番号
    */
   noKouhoCheck(board) {
     for (let c = 0; c < board.numcells; c++) {
@@ -420,8 +436,9 @@ class SdkEngine {
 
   /**
    * ユニットに正しく１～９まで入っているか調べる
-   * @param Board board: チェック対象の盤面
-   * @param int unitid: ユニット番号
+   * @param {Board} board: チェック対象の盤面
+   * @param {int} unitid: ユニット番号
+   * @return {Boolean} ユニットが正しいかどうか
    */
   validCheck(board, unitid) {
     let flgfield = 0x00000000;
@@ -445,6 +462,7 @@ class SdkEngine {
 
   /**
    * 自動候補埋め機能（本体）
+   * @param {Board} board: 操作対象盤面
    */
   autoIdentifyKouho(board) {
     for (let c = 0; c < board.numcells; c++) {
@@ -467,8 +485,8 @@ class SdkEngine {
 
   /**
    * 指定ピアの各マスから中心マスの数字に相当する候補を削除
-   * @param Board board : 盤面 
-   * @param int cid     : マス番号
+   * @param {Board} board : 盤面 
+   * @param {int} cid     : マス番号
    */
   peerRemoveKouho(board, cid) {
     let centernum = board.board[cid].num;
@@ -479,10 +497,12 @@ class SdkEngine {
 
   /**
    * 指定したマスリストから指定したnumの候補を削除する
-   * @param Board board: 盤面
-   * @param array clist: マスの番号リスト
-   * @param string num: 数字
-   * @return 削除したマスと候補をまとめたオブジェクト
+   * @param {Board} board: 盤面
+   * @param {array} clist: マスの番号リスト
+   * @param {string} num: 数字
+   * @return {Object} 削除したマスと候補をまとめたオブジェクト
+   *   num: 削除した数字
+   *   cellinfo: 削除したマスのリスト
    */
   removeKouho(board, clist, num) {
     let retobj = {'num':num, 'cellinfo':[]};
@@ -498,10 +518,12 @@ class SdkEngine {
 
   /**
    * 指定したマスリストから指定した候補リストの候補を削除する
-   * @param Board board: 
-   * @param array clist: マスの番号リスト
-   * @param array klist: 候補のリスト
-   * @return object: 削除した候補リストとマスのリスト
+   * @param {Board} board: 
+   * @param {array} clist: マスの番号リスト
+   * @param {array} klist: 候補のリスト
+   * @return {object} 削除した候補リストとマスのリスト
+   *   num: 削除した数字のリスト
+   *   cellinfo: 削除したマスのリスト
    */
   removeMultipleKouho(board, clist, klist) {
     let retobj = {'num':klist, 'cellinfo':[]};
@@ -515,9 +537,9 @@ class SdkEngine {
 
   /**
    * Board.ansInsのアクションを追加しないバージョン。候補入り空白マスへの入力
-   * @param Board board: 変更する盤面オブジェクト
-   * @param int cnum: 変更マス
-   * @param string num: 入れる値
+   * @param {Board} board: 変更する盤面オブジェクト
+   * @param {int} cnum: 変更マス
+   * @param {string} num: 入れる値
    */
   answerInsert(board, cpos, num) {
     // 前提条件
@@ -534,8 +556,8 @@ class SdkEngine {
 
   /**
    * （再帰探索用）最も候補数字の個数の少ないマスを決定する
-   * @param Board board: 盤面
-   * @return int: 最も候補数字の少ないマス
+   * @param {Board} board: 盤面
+   * @return {int} 最も候補数字の少ないマス番号
    */
   decideMinKouhoCell(board) {
     let minnumkouho = board.bsize + 1;
@@ -555,9 +577,9 @@ class SdkEngine {
   /**
    * 組み合わせ。nlistの中からk個取り出す全パターンをリスト形式で返す
    * 例：combination([1,2,3], 2) => [[1,2], [1,3], [2,3]]
-   * @param array nlist: 元となるリスト 
-   * @param int k: 何個分取り出すか
-   * @return list 長さkのリストをnCk個分まとめたリスト
+   * @param {array} nlist: 元となるリスト 
+   * @param {int} k: 何個分取り出すか
+   * @return {Array} 長さkのリストをnCk個分まとめたリスト
    */
   combination(nlist, k) {
     // kの条件
@@ -590,6 +612,9 @@ class SdkEngine {
 
   /**
    * 指定したマスリストの中にnuｍの候補がどれだけあるか調べる
+   * @param {Board} board: 盤面
+   * @param {Array} clist: マス番号のリスト
+   * @param {string} num : 数字
    */
   countKouhoWithin(board, clist, num) {
     let cnt = 0;
@@ -603,9 +628,9 @@ class SdkEngine {
 
   /**
    * 指定マスの候補のリストを返す
-   * @param Board board: 盤面
-   * @param int cid    : マス番号
-   * @return []int     : 候補のリストを文字列のリスト形式で返す
+   * @param {Board} board: 盤面
+   * @param {int} cid    : マス番号
+   * @return {Array} 候補のリストを文字列のリスト形式で返す
    */
   kouhoList(board, cid) {
     let kouholist = []
@@ -619,8 +644,9 @@ class SdkEngine {
 
   /**
    * 指定マスの候補のUnionを返す
-   * @param Board board: 盤面
-   * @param array clist: セルのリスト
+   * @param {Board} board: 盤面
+   * @param {Array} clist: セルのリスト
+   * @return {Array} 候補の和集合を配列形式で返す
    */
   kouhoUnion(board, clist) {
     let kunion = [];
@@ -632,9 +658,9 @@ class SdkEngine {
 
   /**
    * 指定マスリストの中のヒント数を返す
-   * @param Board board: 盤面
-   * @param array clist: セルインデックスのリスト
-   * @return int: 上のリストで指定されたマスのうちヒントが埋まっている個数
+   * @param {Board} board: 盤面
+   * @param {array} clist: セルインデックスのリスト
+   * @return {int}  上のリストで指定されたマスのうちヒントが埋まっている個数
    */
   countHints(board, clist) {
     let cnt = 0;
@@ -650,9 +676,9 @@ class SdkEngine {
    * (Naked Single用)
    * 対象マスを含む3ユニット（行、列、ブロック）のうち
    * 最も多く数字が埋まっているユニットの埋まっている数字の個数を返す
-   * @param Board board: 盤面
-   * @param int cpos: 対象となるマスの番号
-   * @param return cposの所属ユニットにどれだけ数字が埋まっているか
+   * @param {Board} board: 盤面
+   * @param {int}   cpos: 対象となるマスの番号
+   * @return {int} cposの所属ユニットにどれだけ数字が埋まっているか
    */
   maxCountHints(board, cpos) {
     let maxhints = 0;
@@ -667,10 +693,10 @@ class SdkEngine {
 
   /**
    * セルcの候補が全てklist（数字展開済み）に含まれているか判定
-   * @param Board board : 盤面
-   * @param array klist ：候補リスト
-   * @param int c       ：セル
-   * @return bool：cの候補が全てklistに含まれているか
+   * @param {Board} board : 盤面
+   * @param {array} klist ：候補リスト
+   * @param {int}  c       ：セル
+   * @return {boolean}：cの候補が全てklistに含まれているか
    */
   kouhoInclusion(board, klist, c) {
     if (board.board[c].num !== '0') {
@@ -689,11 +715,12 @@ class SdkEngine {
   /**
    * (Hidden Single用)
    * ユニットIDと数字を指定して、そのユニットに唯一入れられる場所があるか非破壊的に探す
-   * @param Board board: 盤面全体
-   * @param obj unitid: 検査対象ユニット
-   * @param int num: 検査対象数字 1-origin
-   * @return bool ok: OKかどうか
-   * @return int cid: OKの場合、埋めるべきマスを返す
+   * @param {Board} board: 盤面全体
+   * @param {obj} unitid: 検査対象ユニット
+   * @param {int} num: 検査対象数字 1-origin
+   * @return {Object} 以下のオブジェクト
+   *   - bool ok: OKかどうか
+   *   - int cid: OKの場合、埋めるべきマスを返す
    */
   hiddenSingleCheck(board, unit, num) {
     let cnt = 0;
@@ -718,9 +745,9 @@ class SdkEngine {
 
   /**
    * numが入っていない行のリストを洗い出す
-   * @param Board board 
-   * @param int num 
-   * @return 行のリスト(0-origin)
+   * @param {Board} board 
+   * @param {int} num 
+   * @return {Array} 行のリスト(0-origin)
    */
   emptyRowList(board, num) {
     let rowlist = []
@@ -742,9 +769,9 @@ class SdkEngine {
   }
   /**
    * numが入っていない列のリストを洗い出す
-   * @param Board board 
-   * @param int num 
-   * @return 列のリスト(0-origin)
+   * @param {Board} board 
+   * @param {int} num 
+   * @return {Array} 列のリスト(0-origin)
    */
   emptyColList(board, num) {
     let collist = []
@@ -767,10 +794,11 @@ class SdkEngine {
 
   /**
    * j列目の数字num候補がrowsにしか現れないかどうか
-   * @param board board 盤面
-   * @param array rows  行番号リスト
-   * @param int j     　列番号
-   * @param int num     数字
+   * @param {Board} board 盤面
+   * @param {Array} rows  行番号リスト
+   * @param {int} j     　列番号
+   * @param {int} num     数字
+   * @param {boolean} 結果
    */
   onlyRowIncludes(board, rows, j, num) {
     let cnt = 0;   // numの候補があったマスの個数
@@ -792,10 +820,11 @@ class SdkEngine {
   }
   /**
    * i列目の数字num候補がcolsにしか現れないかどうか
-   * @param board board 盤面
-   * @param array cols  列番号リスト
-   * @param int i     　行番号
-   * @param int num     数字
+   * @param {Board} board 盤面
+   * @param {Array} cols  列番号リスト
+   * @param {int} i     　行番号
+   * @param {int} num     数字
+   * @return {boolean} 結果
    */
   onlyColIncludes(board, cols, i, num) {
     let cnt = 0;  // numの候補があったマスの個数
@@ -821,12 +850,13 @@ class SdkEngine {
  
   /**
    * NNaked single
-   * @param int minh, maxh: 最小ヒント数と最大ヒント数
-   * @return 以下の仕様を持つ関数
-   *   @param Board board
-   *   @return bool ok
-   *   @return string status: newcell or notfound
-   *   @return array(int) cellinfo
+   * @param {int} minh, maxh: 最小ヒント数と最大ヒント数
+   * @return {Function} 以下の仕様を持つ関数
+   *   @param {Board} board
+   *   @return {Object}
+   *     bool ok
+   *     string status: newcell or notfound
+   *     array cellinfo
    */
   nakedSingleFactory(minh, maxh) {
     return function(board) {
@@ -858,12 +888,13 @@ class SdkEngine {
 
   /**
    * hidden single
-   * @param string prefix: メッセージなどのプレフィックス
-   * @return 以下の仕様を持つ関数
-   *   @param Board board
-   *   @return bool ok
-   *   @return string status: newcell or notfound
-   *   @return array(int) cellinfo
+   * @param {string} prefix: メッセージなどのプレフィックス
+   * @return {Function} 以下の仕様を持つ関数
+   *   @param {Board} board
+   *   @return {Object}
+   *     bool ok
+   *     string status: newcell or notfound
+   *     array cellinfo
    */
   hiddenSingleFactory(prefix) {
     return function(board) {
@@ -903,6 +934,12 @@ class SdkEngine {
 
   /**
    * ブロック駆動型いずれにせよ理論
+   * @param {Board} board: 盤面
+   * @return {Object}
+   *     bool ok
+   *     string status: newcell or notfound
+   *     array cellinfo
+   *     string msg メッセージ
    */
   blockDrivenEitherwayStrategy(board) {
     for (let cr of board.crosses) {
@@ -924,6 +961,12 @@ class SdkEngine {
   }
   /**
    * ライン駆動型いずれにせよ理論
+   * @param {Board} board: 盤面
+   * @return {Object}
+   *     bool ok
+   *     string status: newcell or notfound
+   *     array cellinfo
+   *     string msg メッセージ
    */
   lineDrivenEitherwayStrategy(board) {
     for (let cr of board.crosses) {
@@ -947,13 +990,14 @@ class SdkEngine {
 
   /**
    * naked系手筋ファクトリー
-   * @param string prefix: メッセージなどのプレフィックス
-   * @param int k        : pair, triple, quadraple
-   * @return 以下の仕様を持つ関数
-   *   @param Board board
-   *   @return bool ok
-   *   @return string status: newcell or notfound
-   *   @return array(int) cellinfo
+   * @param {string} prefix: メッセージなどのプレフィックス
+   * @param {int} k        : pair, triple, quadraple
+   * @return {Function} 以下の仕様を持つ関数
+   *   @param {Board} board
+   *   @return {Object}
+   *     bool ok
+   *     string status: newcell or notfound
+   *     array(int) cellinfo
    */
   nakedPairFactory(prefix, k) {
     return function(board) {
@@ -1004,9 +1048,9 @@ class SdkEngine {
 
   /**
    * naked pairの本体
-   * @param Board board : 盤面
-   * @param array clist : 探索対象のマスのリスト
-   * @param int k       : 何つ組をさがすか
+   * @param {Board} board : 盤面
+   * @param {array} clist : 探索対象のマスのリスト
+   * @param {int} k       : 何つ組をさがすか
    */
   searchNakedPair(board, clist, k) {
     let kunion = this.kouhoUnion(board, clist);
@@ -1037,10 +1081,10 @@ class SdkEngine {
 
   /**
    * hidden pairの本体
-   * @param string prefix: メッセージなどのプレフィックス
-   * @param int k        : pair, triple, quadraple
-   * @return 以下の仕様を持つ関数
-   *   @param Board board
+   * @param {string} prefix: メッセージなどのプレフィックス
+   * @param {int} k        : pair, triple, quadraple
+   * @return {Function} 以下の仕様を持つ関数
+   *   @param {Board} board
    *   @return bool ok
    *   @return string status: newcell or notfound
    *   @return array(int) cellinfo
@@ -1093,9 +1137,9 @@ class SdkEngine {
 
   /**
    * hidden pairの本体
-   * @param Board board : 盤面
-   * @param array clist : 探索対象のマスのリスト
-   * @param int k       : 何つ組をさがすか
+   * @param {Board} board : 盤面
+   * @param {Array} clist : 探索対象のマスのリスト
+   * @param {int} k       : 何つ組をさがすか
    */
   searchHiddenPair(board, clist, k) {
     let kunion = this.kouhoUnion(board, clist);
@@ -1130,9 +1174,9 @@ class SdkEngine {
 
   /**
    * X-wing系手筋のファクトリ
-   * @param int k        : X-wing, Swordfish, Jellyfish
-   * @return 以下の仕様を持つ関数
-   *   @param Board board
+   * @param {int} k        : X-wing, Swordfish, Jellyfish
+   * @return {Function} 以下の仕様を持つ関数
+   *   @param {Board} board
    *   @return bool ok
    *   @return string status: newcell or notfound
    *   @return array(int) cellinfo
@@ -1167,9 +1211,9 @@ class SdkEngine {
 
   /**
    * Xwing系手筋のメイン
-   * @param Board board: 盤面
-   * @param int k      : 手筋のレベル
-   * @param int num    : 数字
+   * @param {Board} board: 盤面
+   * @param {int} k      : 手筋のレベル
+   * @param {int} num    : 数字
    */
   XwingMain(board, k, num) {
     // 行

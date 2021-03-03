@@ -3,7 +3,7 @@
 /**
  * front.js
  * 
- * フロントUIに関する処理
+ * フロントエンドインタフェースに関する処理
  */
 
 
@@ -11,31 +11,36 @@
 
 /**
  * 新規盤面作成
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function newFile(evt) {
   if (confirm('新規作成しますか？\n（※この操作は元に戻せません）')) {
     Sudokizer.board = new Board();         // 盤面初期化
     Sudokizer.astack = new ActionStack();  // アクションスタック初期化
-    Sudokizer.solvelog.clear();
+    Sudokizer.solvelog.clear();            // ログクリア
     redraw();
   }
 }
+
 /**
  * 新規盤面作成（戻るで復帰可能バージョン）
  * とりあえず実装だけしておくが今は使っていない
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 /*
 function newFile(evt) {
   if (confirm('新規作成しますか？')) {
-    let ret = Sudokizer.board.clear();    // 新規作成せず盤面状態を消去
+    let ret = Sudokizer.board.clear();            // 盤面状態を消去
     Sudokizer.board = ret[0];                     // 消去後の盤面に差し替え
     Sudokizer.astack.push(new Action(ret[1]));    // 差分をプッシュ
+    Sudokizer.solvelog.clear();                   // ログクリア
     redraw();
   }
 }
 
 /**
  * URL出力
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function urlWrite(evt) {
   let urlprefix = '';
@@ -48,13 +53,11 @@ function urlWrite(evt) {
   let url = urlprefix + '?' + Sudokizer.board.urlWrite(reedit);
   // URL表示
   $('#url_output').val(url);
-  if (Sudokizer.config.debugmode) {
-    console.log(url);
-  }
 }
 
 /**
  * 画像出力
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function imgWrite(evt) {
   // ファイル名取得
@@ -77,6 +80,7 @@ function imgWrite(evt) {
 
 /**
  * pencilBox形式読み込み
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function pencilBoxRead(evt) {
   let file = $('#menu_pbread_fileform').prop('files')[0];
@@ -111,6 +115,7 @@ function pencilBoxRead(evt) {
 
 /**
  * pencilBox出力
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function pencilBoxWrite(evt) {
   let filename = $('#menu_pbwrite_filename').val();
@@ -126,6 +131,7 @@ function pencilBoxWrite(evt) {
     };
     filestring = Sudokizer.board.pbWriteNikolicom(authorinfo);
   }
+  // DL用リンクを一時的に生成してダウンロード
   let dlanchor = document.createElement('a');
   dlanchor.href = URL.createObjectURL(new Blob([filestring], {type: "text/plain"}));
   dlanchor.download = filename;
@@ -137,6 +143,7 @@ function pencilBoxWrite(evt) {
 
 /**
  * 現在の盤面を新しいウィンドウにコピー
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function boardNewWindow(evt) {
   let preurl = location.href.split('?')[0];    // URL本体取得
@@ -144,56 +151,31 @@ function boardNewWindow(evt) {
   open(preurl + '?' + puzurl);
 }
 /**
- * 90度右回転
+ * 盤面変形用ファクトリー関数
+ * @param {string} mode 変形モード
+ * @return {function} 以下の仕様を持つ盤面変形関数
+ *   @param {evt} イベントオブジェクト（未使用）
  */
-function boardRotate90Deg(evt) {
-  let ret = Sudokizer.board.transform('rotate90');
-  Sudokizer.board = ret[0];              // 盤面更新
-  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
-  redraw();
+function boardTransform(mode) {
+  return function(evt) {
+    let ret = Sudokizer.board.transform(mode);  // 新盤面生成
+    Sudokizer.board = ret[0];                  // 盤面更新
+    Sudokizer.astack.push(new Action(ret[1])); // アクション追加
+    redraw();                                  // 再描画
+  }
 }
-/**
- * 180度右回転
- */
-function boardRotate180Deg(evt) {
-  let ret = Sudokizer.board.transform('rotate180');
-  Sudokizer.board = ret[0];              // 盤面更新
-  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
-  redraw();
-}
-/**
- * 90度左回転
- */
-function boardRotate270Deg(evt) {
-  let ret = Sudokizer.board.transform('rotate270');
-  Sudokizer.board = ret[0];              // 盤面更新
-  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
-  redraw();
-}
-/**
- * 上下反転
- */
-function boardInverseUD(evt) {
-  let ret = Sudokizer.board.transform('inverseUD');
-  Sudokizer.board = ret[0];              // 盤面更新
-  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
-  redraw();
-}
-/**
- * 左右反転
- */
-function boardInverseLR(evt) {
-  let ret = Sudokizer.board.transform('inverseLR');
-  Sudokizer.board = ret[0];              // 盤面更新
-  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
-  redraw();
-}
+const boardRotate90Deg  = boardTransform('rotate90');
+const boardRotate180Deg = boardTransform('rotate180');
+const boardRotate270Deg = boardTransform('rotate270');
+const boardInverseUD    = boardTransform('inverseUD');
+const boardInverseLR    = boardTransform('inverseLR');  
 
 
 /* ============================= 表示設定系 ================================ */
 
 /**
- * 表示サイズ設定 ＜完成＞
+ * 表示サイズ設定
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function setCellSize(evt) {
   let sizeobj = $('#menu_dispsize_size');
@@ -202,30 +184,24 @@ function setCellSize(evt) {
   if (csize >= sizeobj.attr('min') && csize <= sizeobj.attr('max')) {
     Sudokizer.config.dispsize = csize;
   }
-  // デバッグモード
-  if (Sudokizer.config.debugmode) {
-    console.log(Sudokizer.config);
-  }
   redraw();
 }
 
 /**
- * 表示色設定 ＜完成＞
+ * 表示色設定
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function setColor(evt) {
   // 変化があった要素を特定。thisでとってこれる。
   let aftercolor = $(this).val();
   let propname = $(this).attr('id').substr(-2);
   Sudokizer.config.colorset[propname] = aftercolor;
-  // デバッグモード
-  if (Sudokizer.config.debugmode) {
-    console.log(Sudokizer.config);
-  }
   redraw();
 }
 
 /**
- * 色設定デフォルト ＜完成＞
+ * 色設定デフォルト
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function setColorDefault(evt) {
   // defcolorset を colorset に shallow copy
@@ -234,17 +210,14 @@ function setColorDefault(evt) {
   for (let propname in Sudokizer.config.colorset) {
     $('#menu_dispcolor_' + propname).val(Sudokizer.config.colorset[propname]);
   }
-  // デバッグモード
-  if (Sudokizer.config.debugmode) {
-    console.log(Sudokizer.config);
-  }
   redraw();
 }
 
 /* ============================= デバッグモード ============================= */
 
 /**
- * デバッグモード切替 ＜完成＞
+ * デバッグモード切替
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function debugMode(evt) {
   Sudokizer.config.debugmode = !Sudokizer.config.debugmode;
@@ -253,34 +226,49 @@ function debugMode(evt) {
   }
 }
 
+
 /* ============================= 入力モード設定 ============================== */
 
 /**
- * 問題入力モード ＜完成＞
+ * 問題入力モード
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function setQMode(evt) {
   Sudokizer.config.qamode = 'question';
   redraw();
 }
 /**
- * 解答入力モード ＜完成＞
+ * 解答入力モード
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function setAMode(evt) {
   Sudokizer.config.qamode = 'answer';
   redraw();
 }
 /**
- * 候補入力モード ＜完成＞
+ * 候補入力モード
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function switchKMode(evt) {
   Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
   redraw();
 }
 
+/**
+ * 仮定レベル変更
+ * @param {Event} evt イベントオブジェクト（未使用）
+ */
+function setKateiLevel(evt) {
+  Sudokizer.config.kateilevel = Number($('#opform_kateilevel').val());
+  redraw();
+}
+
+
 /* ================================ 盤面編集 ================================= */
 
 /**
  * undo
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function actionUndo(evt) {
   Sudokizer.astack.undo();
@@ -288,6 +276,7 @@ function actionUndo(evt) {
 }
 /**
  * redo
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function actionRedo(evt) {
   Sudokizer.astack.redo();
@@ -296,6 +285,7 @@ function actionRedo(evt) {
 
 /**
  * 解答消去
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function answerClear(evt) {
   let ret = Sudokizer.board.ansClear();  // [newboard, diff]
@@ -307,6 +297,7 @@ function answerClear(evt) {
 
 /**
  * 候補消去
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function kouhoClear(evt) {
   let ret = Sudokizer.board.kouhoClear();    // [newboard, diff]
@@ -315,23 +306,12 @@ function kouhoClear(evt) {
   redraw();
 }
 
-/**
- * 仮定レベル変更 ＜完成＞
- */
-function setKateiLevel(evt) {
-  Sudokizer.config.kateilevel = Number($('#opform_kateilevel').val());
-  if (Sudokizer.config.debugmode) {
-    console.log(Sudokizer.config);
-  }
-  redraw();
-}
-
-
 
 /* ================================ 制作支援 ================================= */
 
 /**
  * 解答チェック
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function answerCheck(evt) {
   let okflg = Sudokizer.engine.ansCheck(Sudokizer.board);
@@ -340,16 +320,18 @@ function answerCheck(evt) {
 
 /**
  * 候補自動洗い出し
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function autoKouho(evt) {
   let ret = Sudokizer.engine.autoIdentifyKouhoWrapper(Sudokizer.board);
-  Sudokizer.board = ret[0];              // 盤面更新
-  Sudokizer.astack.push(new Action(ret[1]));         // アクション追加
+  Sudokizer.board = ret[0];                  // 盤面更新
+  Sudokizer.astack.push(new Action(ret[1])); // アクション追加
   redraw();
 }
 
 /**
  * ？ヒント条件から半自動生成
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function autoGenerate(evt) {
   alert('semi-auto generation via ? hints');
@@ -358,6 +340,7 @@ function autoGenerate(evt) {
 
 /**
  * 1ステップ解答
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function stepSolve(evt) {
   let ret = Sudokizer.engine.oneStepSolve(Sudokizer.board);
@@ -368,6 +351,7 @@ function stepSolve(evt) {
 
 /**
  * 全ステップ解答
+ * @param {Event} evt イベントオブジェクト（未使用）
  */
 function allSolve(evt) {
   let ret = Sudokizer.engine.allStepSolve(Sudokizer.board);
@@ -389,6 +373,7 @@ function allSolve(evt) {
 
 /**
  * 盤面へのクリック
+ * @param {Event} evt イベントオブジェクト
  */
 function clickBoard(evt) {
   evt.preventDefault();   // 右クリックでメニューが開かないようにする
@@ -408,8 +393,8 @@ function clickBoard(evt) {
 
 /**
  * セルへのクリック処理 
- * @param int cpos: クリックしたセルの位置
- * @param int button: クリックされたボタン
+ * @param {int} cpos クリックしたセルの位置
+ * @param {int} button クリックされたボタン
  */
 function clickCell(cpos, button) {
   // 未カーソル時はカーソルを合わせるだけ
@@ -436,9 +421,8 @@ function clickCell(cpos, button) {
 
 /**
  * クリック時に、次に入れるべき数字を取得
- * 
- * @param int cpos    セル番号
- * @param int button  0で左、2で右 
+ * @param {int} cpos    セル番号
+ * @param {int} button  0で左、2で右 
  */
 function getNextClickNum(cpos, button) {
   let num = Sudokizer.board.board[cpos].num;
@@ -476,11 +460,11 @@ function getNextClickNum(cpos, button) {
 
 /**
  * 盤面へのキーボード押下
+ * @param {Event} evt イベントオブジェクト
  */
 function keyDownBoard(evt) {
   let cursorkeys = ['h', 'j', 'k', 'l', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   let numkeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  // let kateikeys = ['z', 'x', 'c', 'v', 'b'];
   let kateikeys = ['q', 'w', 'e', 'r', 't'];
   let cpos = Sudokizer.config.cursorpos;
 
@@ -551,8 +535,8 @@ function keyDownBoard(evt) {
 
 /**
  * 矢印キーによるカーソル移動
- * @param int cpos: 現在のカーソル位置
- * @param string keycode: キーボードのコード
+ * @param {int} cpos 現在のカーソル位置
+ * @param {string} keycode キーボードのコード
  */
 function keyDownCursorMove(cpos, keycode) {
   let bs = Sudokizer.board.bsize;  // 9
@@ -584,8 +568,8 @@ function keyDownCursorMove(cpos, keycode) {
 
 /**
  * 数字キーによる数字入力
- * @param int cpos: 現在のカーソル位置
- * @param string keycode: 入力されたキー
+ * @param {int} cpos 現在のカーソル位置
+ * @param {string} keycode 入力されたキー
  */
 function keyDownNumInput(cpos, keycode) {
   // 通常数字入力
@@ -644,9 +628,7 @@ function keyDownKateiSwitch(keycode) {
  */
 
 /**
- * 盤面再描画用呼び出しルーチン
- * Sudokizerの中身が変わった際に呼び出す実装
- * ＜※　再描画他、様々なイベント発生時の後処理として使用する＞
+ * 盤面再描画/フロント同期用呼び出しルーチン
  */
 function redraw() {
   let drawconfig = {

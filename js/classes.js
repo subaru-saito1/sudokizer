@@ -4,7 +4,6 @@
  * classes.js
  * 
  * クラス定義のためのファイル
- * 本当はinit.jsにまとめたいけどホイスティングが効かないとなるとねえ
  */
 
 
@@ -14,10 +13,15 @@
  * Cellsクラス
  */
 class Cell {
+
+  /**
+   * コンストラクタ。マス情報の初期化。
+   * @param {int} bsize 盤面サイズ(9) 
+   */
   constructor(bsize) {
     this.num = '0';        // 0で空白、1~9で数字、?でヒント
     this.ishint = false;   // ヒントフラグ
-    this.klevel = 0;     // 仮定レベル
+    this.klevel = 0;       // 仮定レベル
     this.kouho = [];       // 候補リスト
     this.exkouho = [];     // 除外候補リスト
     this.kklevel = [];     // 候補の仮定レベルリスト
@@ -30,7 +34,7 @@ class Cell {
 
   /**
    * セルの中身をクリアする
-   * @param string mode: クリアモード(question, answer, kouho)
+   * @param {string} mode クリアモード(question, answer, kouho)
    */
   clear(mode) {
     if (mode === 'question') {
@@ -64,13 +68,13 @@ class Cell {
             this.kklevel[i] = 0;
           }
         }
-        
       }
     }
   }
 
   /**
-   * セルの中身をコピーする
+   * セルの中身を自身にコピーする
+   * @param {Cell} fromcell コピー元となるセル
    */
   copyInto(fromcell) {
     this.num = fromcell.num;
@@ -92,16 +96,18 @@ class Cell {
  * Boardクラス
  */
 class Board {
+
   /**
    * コンストラクタ
+   * @param {int} bsize 盤面サイズ(9)
    */
-  constructor() {
-    this.puzzlename = 'sudoku';
-    this.bsize = 9;
-    this.numcells = this.bsize ** 2;
-    this.author_ja = '';      // 作者情報
-    this.author_en = '';      // 作者情報
-    // 盤面の構成単位
+  constructor(bsize = 9) {
+    this.puzzlename = 'sudoku';      // パズル名
+    this.bsize = bsize;              // 盤面サイズ
+    this.numcells = this.bsize ** 2; // セルサイズ
+    this.author_ja = '';             // 作者情報
+    this.author_en = '';             // 作者情報
+    // 盤面の構成単位のマス配列
     this.board = this.createCells();
     this.blocks = this.createUnits('block');
     this.rows = this.createUnits('row');
@@ -115,6 +121,7 @@ class Board {
   // ======================== セルグループのリスト生成　========================
   /**
    * セル x 81の生成
+   * @return {array} セルインデックスの配列
    */
   createCells() {
     let cells = []
@@ -123,9 +130,11 @@ class Board {
     }
     return cells;
   }
+
   /**
    * ユニット（9マス単位） x 27グループの生成
-   * @param string unittype: block, row, col
+   * @param {string} unittype block, row, colのいずれか
+   * @return {array} Unitオブジェクトの配列
    */
   createUnits(unittype) {
     let units = []
@@ -134,8 +143,10 @@ class Board {
     }
     return units;
   }
+
   /**
    * ピア（20マス単位） x 81グループの生成
+   * @return {array} Peerオブジェクトの配列
    */
   createPeers() {
     let peers = []
@@ -144,8 +155,10 @@ class Board {
     }
     return peers;
   }
+
   /**
    * クロス (3 + 6x2マス単位) x 54グループの生成
+   * @return {array} Crossオブジェクトの配列
    */
   createCrosses() {
     let crosses = []
@@ -167,13 +180,21 @@ class Board {
     return crosses;
   }
 
+
   // ============================ AcomicActions ===============================
 
-  // 数字セット
+  /** 数字入力
+   * @param {int} cpos マスの位置
+   * @param {string} num 数字
+   */
   numSetAtomic(cpos, num) {
     this.board[cpos].num = num;
   }
-  // 数字アンセット
+
+  /** 数字削除
+   * @param {int} cpos マスの位置
+   * @param {string} num 数字
+   */
   numUnsetAtomic(cpos, num) {
     if (this.board[cpos].num === num) {
       this.board[cpos].num = '0';
@@ -181,11 +202,19 @@ class Board {
       throw 'numUnsetAtomic Validation Error!';
     }
   }
-  // 仮定レベルセット
+
+  /** 仮定レベルセット
+   * @param {int} cpos マスの位置
+   * @param {int} klevel 仮定レベル
+   */
   klevelSetAtomic(cpos, klevel) {
     this.board[cpos].klevel = klevel;
   }
-  // 仮定レベルアンセット
+
+  /** 仮定レベル削除
+   * @param {int} cpos マスの位置
+   * @param {int} klevel 仮定レベル
+   */
   klevelUnsetAtomic(cpos, klevel) {
     if (this.board[cpos].klevel === klevel) {
       this.board[cpos].klevel = 0;
@@ -193,11 +222,21 @@ class Board {
       throw 'klevelUnsetAtomic Validation Error!';
     }
   }
-  // 候補仮定レベルセット
+
+  /** 仮定レベルセット
+   * @param {int} cpos マスの位置
+   * @param {string} num 候補数字
+   * @param {int} klevel 仮定レベル
+   */
   kklevelSetAtomic(cpos, num, kklevel) {
     this.board[cpos].kklevel[num - 1] = kklevel;
   }
-  // 候補仮定レベルアンセット
+
+  /** 仮定レベル削除
+   * @param {int} cpos マスの位置
+   * @param {string} num 候補数字
+   * @param {int} klevel 仮定レベル
+   */
   kklevelUnsetAtomic(cpos, num, kklevel) {
     if (this.board[cpos].kklevel[num - 1] === kklevel) {
       this.board[cpos].kklevel[num - 1] = 0;
@@ -205,15 +244,27 @@ class Board {
       throw 'kklevelUnsetAtomic Validation Error!';
     }
   }
-  // ヒントフラグスイッチ
+
+  /**
+   * ヒントフラグ切り替え
+   * @param {int} cpos マスの位置
+   */
   ishintSwitchAtomic(cpos) {
     this.board[cpos].ishint = !this.board[cpos].ishint;
   }
-  // 候補フラグスイッチ
+
+  /** 候補フラグ切り替え
+   * @param {int} cpos マスの位置
+   * @param {string} num 数字
+   */
   kouhoSwitchAtomic(cpos, num) {
     this.board[cpos].kouho[num-1] = !this.board[cpos].kouho[num-1];
   }
-  // 除外候補フラグスイッチ
+
+  /** 除外候補フラグ切り替え
+   * @param {int} cpos マスの位置
+   * @param {string} num 数字
+   */
   exkouhoSwitchAtomic(cpos, num) {
     this.board[cpos].exkouho[num-1] = !this.board[cpos].exkouho[num-1];
   }
@@ -223,6 +274,7 @@ class Board {
 
   /**
    * このセクションの各関数の最後で呼び出す共通処理
+   * @param {Array} actionlist 一回分のアクションを構成するコマンドオブジェクトのリスト
    */
   basicAction(actionlist) {
     let action = new Action(actionlist);
@@ -232,6 +284,9 @@ class Board {
 
   /**
    * マス解答入力
+   * @param {int} cpos マスの位置
+   * @param {string} num 候補数字
+   * @param {int} klevel 仮定レベル
    */
   ansIns(cpos, num, klevel) {
     let actionlist = []
@@ -259,6 +314,7 @@ class Board {
 
   /**
    * マス解答消去
+   * @param {int} cpos マスの位置
    */
   ansDel(cpos) {
     let actionlist = []
@@ -293,6 +349,8 @@ class Board {
 
   /**
    * マスヒント入力
+   * @param {int} cpos マスの位置
+   * @param {string} num 候補数字
    */
   hintIns(cpos, num) {
     let actionlist = []
@@ -326,6 +384,7 @@ class Board {
 
   /**
    * マスヒント消去
+   * @param {int} cpos マスの位置
    */
   hintDel(cpos) {
     let actionlist = []
@@ -360,6 +419,9 @@ class Board {
 
   /**
    * 候補設定
+   * @param {int} cpos マスの位置
+   * @param {string} num 候補数字
+   * @param {int} klevel 仮定レベル
    */
   kouhoSet(cpos, num, klevel) {
     let actionlist = []
@@ -381,6 +443,8 @@ class Board {
 
   /**
    * 除外候補設定
+   * @param {int} cpos マスの位置
+   * @param {string} num 候補数字
    */
   exkouhoSet(cpos, num) {
     let actionlist = []
@@ -390,8 +454,10 @@ class Board {
 
 
   // ================ 初期化系 =================
+
   /**
    * 盤面の初期化 
+   * @return {Array} 新規盤面と新規アクション
    */
   clear() {
     let newboard = this.transCreate();
@@ -401,8 +467,10 @@ class Board {
     let alist = this.diff(newboard);
     return [newboard, alist];
   }
+
   /**
    * 解答消去
+   * @return {Array} 新規盤面と新規アクション
    */
   ansClear() {
     let newboard = this.transCreate();   // 差分をとるためコピー先で操作を実行
@@ -412,8 +480,10 @@ class Board {
     let alist = this.diff(newboard);     // 操作の差分を取得
     return [newboard, alist];
   }
+
   /**
    * 候補消去
+   * @return {Array} 新規盤面と新規アクション
    */
   kouhoClear() {
     let newboard = this.transCreate();   // 差分をとるためコピー先で操作を実行
@@ -426,10 +496,11 @@ class Board {
 
 
   // ============== 複合盤面操作 =============
+
   /**
    * 回転・反転のラッパー関数
-   * @param string cmd: 下記参照
-   * @return [newboard, alist] 新規盤面と差分リスト
+   * @param {string} cmd 下記参照
+   * @return {Array} 新規盤面と新規アクション
    */
   transform(cmd) {
     let newboard = this.transCreate(cmd);
@@ -439,9 +510,9 @@ class Board {
 
   /**
    * 回転・反転・コピーを行う関数
-   * @param string cmd: rotate90, rotate180, rotate270, inverseUD, inverseLR
-   * 　　　　　　　　    未指定の場合は新規コピー
-   * @return 変形後の新しい盤面オブジェクト
+   * @param {string} cmd rotate90, rotate180, rotate270, inverseUD, inverseLR
+   *                     未指定の場合は新規コピー
+   * @return {Board} 変形後の新規盤面
    */
   transCreate(cmd) {
     let newboard = new Board();
@@ -485,10 +556,11 @@ class Board {
 
 
   // ============================== 操作差分獲得 ==================================
+
   /**
    * 現在の盤面Aから新規盤面Bに至る差分を取得（B - Aに相当）
-   * @param Board newboard: 差分をとる用の盤面B
-   * @param array: AからBに至るまでのアクションのリスト
+   * @param {Board} newboard 差分をとる元となる盤面 B側
+   * @return {array} AからBに至るまでのコマンドのリスト
    */
   diff(newboard) {
     let actions = []
@@ -548,8 +620,8 @@ class Board {
 
   /**
    * URL出力関数メインルーチン
-   * 
-   * @return string URLのクエリ部分
+   * @param {boolean} reedit 再編集用URLかどうか
+   * @return {string} URLのクエリ文字列部分
    */
   urlWrite(reedit) {
     // URL前半部分を構築
@@ -580,15 +652,13 @@ class Board {
       }
     }
     urlpuz += this.urlWriteSpace(spcnt);
-    
     return prefix + urlpuz;
   }
 
   /**
    * 連続スペースに相当するパズルURL形式の文字列を出力
-   * 
-   * @param int spcnt 連続するスペースの個数
-   * @return string 空白部分の文字列
+   * @param {int} spcnt 連続するスペースの個数
+   * @return {string} 空白部分を文字列換算したもの
    */
   urlWriteSpace(spcnt) {
     let urlpuz = '';
@@ -605,9 +675,7 @@ class Board {
 
   /**
    * URL入力関数メインルーチン
-   * 
-   * @param url string: URLのクエリ部分
-   * this.board に変更あり
+   * @param {string} url URLのクエリ部分
    */
   urlRead(url) {
     let urlparts = url.split('/');
@@ -655,8 +723,7 @@ class Board {
 
   /**
    * URL検証関数
-   * 
-   * @param urlparts array: URLを/で区切った結果の配列
+   * @param {array} urlparts URLを/で区切った結果の配列
    */
   urlValidate(urlparts) {
     if (urlparts.length <= 3) {
@@ -680,8 +747,11 @@ class Board {
 
   /**
    * 通常のpencilbox形式でファイル読み込み
-   * @param array lines  読み込んだ文字列のリスト
-   * @return array 著者情報の配列（nikolicom側とインタフェースを合わせたいので）
+   * @param {Array} lines  読み込んだ文字列の行のリスト
+   * @return {Object}
+   *   newboard: 新規盤面
+   *   actionlist: 盤面変更に伴うコマンドリスト
+   *   authorinfo: 作者の日本語名と英語名
    */
   pbReadNormal(lines) {
     let newboard = new Board();
@@ -721,10 +791,6 @@ class Board {
       console.log(err);
       alert('盤面の読み込みに失敗しました');
     }
-    // デバッグモード
-    if (Sudokizer.config.debugmode) {
-      console.log(newboard);
-    }
     
     return {
       'newboard': newboard,
@@ -735,8 +801,11 @@ class Board {
 
   /**
    * nikolicom形式でファイルを読み込み
-   * @param array lines  読み込んだ文字列のリスト
-   * @return array 著者情報の配列
+   * @param {Array} lines  読み込んだ文字列の行のリスト
+   * @return {Object}
+   *   newboard: 新規盤面
+   *   actionlist: 盤面変更に伴うコマンドリスト
+   *   authorinfo: 作者の日本語名と英語名
    */
   pbReadNikolicom(lines) {
     let newboard = new Board();
@@ -770,10 +839,6 @@ class Board {
       console.log(err);
       alert('盤面の読み込みに失敗しました');
     }
-    // デバッグモード
-    if (Sudokizer.config.debugmode) {
-      console.log(newboard);
-    }
     return {
       'newboard': newboard,
       'actionlist': this.diff(newboard),
@@ -783,6 +848,11 @@ class Board {
 
   /**
    * 独自形式で盤面に読み込み
+   * @param {Array} lines  読み込んだ文字列の行のリスト
+   * @return {Object}
+   *   newboard: 新規盤面
+   *   actionlist: 盤面変更に伴うコマンドリスト
+   *   authorinfo: 作者の日本語名と英語名
    */
   pbReadOriginal(lines) {
     let newboard = new Board();
@@ -811,10 +881,6 @@ class Board {
       console.log(err);
       alert('盤面の読み込みに失敗しました');
     }
-    // デバッグモード
-    if (Sudokizer.config.debugmode) {
-      console.log(newboard);
-    }
     return {
       'newboard': newboard,
       'actionlist': this.diff(newboard),
@@ -824,7 +890,8 @@ class Board {
 
   /**
    * 通常のpencilbox形式での出力
-   * @return dousimasyo
+   * @param {Array} authorinfo 著者情報（日本語名と英語名）
+   * @return {string} 書き出す文字列
    */
   pbWriteNormal(authorinfo) {
     let ret = '';     // ここにファイル内容を文字列で書いていく
@@ -854,16 +921,13 @@ class Board {
       }
       ret += nl;
     }
-    // デバッグモード
-    if (Sudokizer.config.debugmode) {
-      console.log(ret);
-    }
     return ret;
   }
 
   /**
    * nikolicom形式での出力
-   * @return dousimasyo
+   * @param {Array} authorinfo 著者情報（日本語名と英語名）
+   * @return {string} 書き出す文字列
    */
   pbWriteNikolicom(authorinfo) {
     let ret = '';     // ここにファイル内容を文字列で書いていく
@@ -893,17 +957,12 @@ class Board {
       ret += nl;
     }
     ret += '--' + nl;
-    // デバッグモード
-    if (Sudokizer.config.debugmode) {
-      console.log(ret);
-    }
     return ret;
   }
 
   /**
    * nikolicom形式で出力する際の事前バリデーション
-   * - ?ヒントがないか
-   * - 解答がちゃんと埋まっているか
+   * @return {boolean} ちゃんと基準を満たして出力OKかどうか
    */
   validateNikolicom() {
     // 暫定
@@ -911,11 +970,11 @@ class Board {
   }
   
 
-
   // ============================== canvas描画 ====================================
 
   /**
    * canvasへの描画
+   * @param {Object} cfg: 描画用追加設定
    */
   drawBoardCanvas(cfg) {
     let canvas = document.querySelector('#main_board');
@@ -960,9 +1019,9 @@ class Board {
 
   /**
    * canvasへの描画：ヒント数字と候補数字の部分
-   * @param object ctx  : 描画コンテキスト
-   * @param int ofs  : 盤面描画オフセット
-   * @param int csize: セルの大きさ
+   * @param {object} ctx  : 描画コンテキスト
+   * @param {int} ofs  : 盤面描画オフセット
+   * @param {int} csize: セルの大きさ
    */
   drawBoardCanvasTexts(ctx, ofs, csize) {
     for (let i = 0; i < this.bsize; i++) {
@@ -1002,11 +1061,11 @@ class Board {
 
   /**
    * canvasへの候補数字の描画
-   * @param object ctx : 描画コンテキスト
-   * @param int cid    : マス番号
-   * @param int ofsx   : 横方向マスオフセット
-   * @param int ofsy   : 縦方向マスオフセット
-   * @param int csize  : セルサイズ
+   * @param {object} ctx : 描画コンテキスト
+   * @param {int} cid    : マス番号
+   * @param {int} ofsx   : 横方向マスオフセット
+   * @param {int} ofsy   : 縦方向マスオフセット
+   * @param {int} csize  : セルサイズ
    */
   drawBoardCanvasKouho(ctx, cid, ofsx, ofsy, csize) {
     let fontsize = csize / 3.5;         
@@ -1050,9 +1109,9 @@ class Board {
 
   /**
    * canvasへのカーソルの描画
-   * @param object ctx : 描画コンテキスト
-   * @param int ofs    : 盤面のオフセット
-   * @param int csize  : マスのサイズ
+   * @param {object} ctx : 描画コンテキスト
+   * @param {int} ofs    : 盤面のオフセット
+   * @param {int} csize  : マスのサイズ
    */
   drawBoardCanvasCursor(ctx, ofs, csize) {
     let cpos = Sudokizer.config.cursorpos;
@@ -1116,6 +1175,10 @@ class Board {
  * Undo, Redoに関する操作のスタック
  */
 class ActionStack {
+
+  /**
+   * コンストラクタ
+   */
   constructor() {
     this.stack = [
       new Action([{cmd:'default'}])
@@ -1123,8 +1186,10 @@ class ActionStack {
     this.sp = 0;      // スタックポインタ
     this.spmax = 0;   // 現在の最新位置
   }
+
   /**
    * アクションをプッシュ
+   * @param {Action} newaction コマンドのリスト
    */
   push(newaction) {
     if (newaction.oplist.length !== 0) {
@@ -1140,6 +1205,7 @@ class ActionStack {
       }
     }
   }
+
   /**
    * 操作を一つ元に戻す
    */
@@ -1152,6 +1218,7 @@ class ActionStack {
       console.log(this.stack, this.sp, this.spmax);
     }
   }
+
   /**
    * 操作を一つ進める
    */
@@ -1164,6 +1231,7 @@ class ActionStack {
       console.log(this.stack, this.sp, this.spmax);
     }
   }
+
   /**
    * スタックを空にする
    */
@@ -1175,18 +1243,28 @@ class ActionStack {
 
 /**
  * Actionクラス
+ * 
+ * 原始コマンドのリストを管理
  */
 class Action {
+
+  /**
+   * コンストラクタ
+   * @param {Array} oplist コマンドオブジェクトの配列
+   * 
+   * コマンドオブジェクトの構成
+   *   op.cmd   : コマンド名
+   *   op.cpos  : マス番号
+   *   op.num   : 対象数字および記号
+   *   op.klevel: 仮定レベル
+   */
   constructor(oplist) {
     this.oplist = oplist;
   }
 
   /**
    * アクションリストをグローバル盤面に適用する
-   * op.cmd : コマンド名
-   * op.cpos: マス番号
-   * op.num : 対象数字および記号
-   * op.klevel: 仮定レベル 
+   * @param {Board} board コマンドを適用する盤面
    */
   commit(board) {
     for (let op of this.oplist) {
@@ -1216,6 +1294,7 @@ class Action {
 
   /**
    * アクションリストを逆適用する。
+   * @param {Board} board コマンドを適用する盤面
    */
   revert(board) {
     let revlist = this.oplist.slice().reverse();   // 非破壊リバース
@@ -1260,6 +1339,7 @@ class SolveLog {
 
   /**
    * ログをプッシュ
+   * @param {string} msg ログに表示するメッセージ
    */
   push(msg) {
     let msgid = ('000' + this.logstack.length).slice(-3)

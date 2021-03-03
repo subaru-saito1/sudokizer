@@ -1281,6 +1281,8 @@ class SolveLog {
     for (let line of this.logstack) {
       formval += (line + '\n');
     }
-    $('#solvelog_form').val(formval);
+    let formobj = document.querySelector('#solvelog_form');
+    formobj.value = formval;
+    formobj.scrollTop = formobj.scrollHeight;
   }
 }

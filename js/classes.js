@@ -965,8 +965,28 @@ class Board {
    * @return {boolean} ちゃんと基準を満たして出力OKかどうか
    */
   validateNikolicom() {
-    // 暫定
-    return true;
+    // 1. ?ヒントがないか
+    for (let c = 0; c < this.numcells; c++) {
+      if (this.board[c].num === '?') {
+        return {ok:false, msg:'?ヒントが残っています'};
+      }
+    }
+    // 2. ヒントが対象配置かどうか
+    for (let c = 0; c < this.numcells; c++) {
+      if (this.board[c].ishint && !this.board[this.numcells - c - 1].ishint) {
+        return {ok:false, msg:'ヒントが対象配置ではありません'};
+      }
+    }
+    // 3. 解答がすべて埋まっているか
+    if (!Sudokizer.engine.ansCheck(this)) {
+      return {ok:false, msg:'解答が間違っています'};
+    }
+    // 4. 一意解が存在するか
+    let retobj = Sudokizer.engine.allStepSolve(this);
+    if (retobj[2] !== 1) {
+      return {ok:false,msg:'複数解が存在します'};
+    }
+    return {ok:true, msg:'OK'};
   }
   
 

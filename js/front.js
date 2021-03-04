@@ -126,7 +126,9 @@ function pencilBoxWrite(evt) {
     filestring = Sudokizer.board.pbWriteNormal(authorinfo);
   } else {
     // nikolicom仕様の場合、事前にバリデーションが必要
-    if (!Sudokizer.board.validateNikolicom()) {
+    let res = Sudokizer.board.validateNikolicom();
+    if (!res.ok) {
+      alert(res.msg);
       return;
     };
     filestring = Sudokizer.board.pbWriteNikolicom(authorinfo);

@@ -311,6 +311,8 @@ class SdkEngine {
    */
   allStepSolve(board) {
     let newboard = board.transCreate();
+    // 一度盤面を初期化する
+    newboard = newboard.ansClear()[0];
     this.autoIdentifyKouho(newboard)
     // 再帰関数：ret[0]はanscnt, ret[1]
     let ret = this.allStepSolveRecursive(newboard, 0);

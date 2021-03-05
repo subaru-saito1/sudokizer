@@ -330,7 +330,7 @@ class SdkEngine {
     let newboard = board.transCreate();
     // 1ステップ解かせるループ
     while (true) {
-      let retobj = this.strategySelector(newboard, false);
+      let retobj = this.strategySelector(newboard, true);
       Sudokizer.solvelog.push(retobj.msg);
       // OKだった場合：解答チェックしてOKなら脱出
       if (retobj.ok) {

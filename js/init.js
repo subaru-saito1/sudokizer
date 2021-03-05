@@ -56,7 +56,7 @@ function initConfig() {
 
   return {
     'debugmode': false,         // デバッグモード
-    'cursorpos': 0,             // カーソル位置
+    'cursorpos': undefined,     // カーソル位置
     'dispsize': Number($('#menu_dispsize_size').val()),  // マスサイズ
     'dispfont': 'sans-serif',         // フォント
     'colorset': colorset,             // 色設定
@@ -147,7 +147,8 @@ function setEventHandlers() {
   $('#main_board').click(clickBoard);
   $('#main_board').on('contextmenu', clickBoard)
   $('#main_board').keydown(keyDownBoard);
-  $('#main_board').blur(redraw);
+  // $('#main_board').blur(redraw);
+  $('#main_board').blur(blurBoard);
 
   // -------- ページ離脱時の警告 ----------
   window.addEventListener('beforeunload', function(evt) {

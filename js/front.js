@@ -542,6 +542,10 @@ function keyDownBoard(evt) {
  */
 function keyDownCursorMove(cpos, keycode) {
   let bs = Sudokizer.board.bsize;  // 9
+  // カーソルがない時は何もしない（盤面の淵をクリックした場合に発生する）
+  if (Sudokizer.config.cursorpos === undefined) {
+    return;
+  }
   // 上
   if (keycode === 'k' || keycode === 'ArrowUp') {
     if (Math.floor(cpos / bs) !== 0) {
@@ -628,6 +632,15 @@ function keyDownKateiSwitch(keycode) {
  *                        盤面描画ルーチン
  * =============================================================
  */
+
+/**
+ * 盤面からフォーカスが外れた時の処理
+ * @param {Event} evt: イベントオブジェクト
+ */
+function blurBoard(evt) {
+  Sudokizer.config.cursorpos = undefined;
+  redraw();
+}
 
 /**
  * 盤面再描画/フロント同期用呼び出しルーチン

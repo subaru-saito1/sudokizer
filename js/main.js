@@ -294,9 +294,11 @@ class SdkEngine {
   oneStepSolve(board) {
     let newboard = board.transCreate();
     // 候補のない空白マスがあったら自動候補埋めから再開
+    /*
     if (!this.noKouhoCheck(board).ok) {
       this.autoIdentifyKouho(newboard);
     } 
+    */
     // 1ステップ解答を実行してログをとる
     let retobj = this.strategySelector(newboard, true);
     let actionlist = board.diff(newboard);
@@ -468,7 +470,7 @@ class SdkEngine {
    */
   autoIdentifyKouho(board) {
     for (let c = 0; c < board.numcells; c++) {
-      if (board.board[c].num === '0') {
+      if (board.board[c].num === '0' || board.board[c].num === '?') {
         // 空白マスの候補状態を初期化
         for (let k = 0; k < board.bsize; k++) {
           board.board[c].kouho[k] = true;
@@ -479,6 +481,9 @@ class SdkEngine {
           let c2num = board.board[c2].num;
           if (c2num !== '0' && c2num !== '?') {
             board.board[c].kouho[c2num - 1] = false;
+            if (board.board[c].num === '?') {
+              board.board[c].exkouho[c2num - 1] = true;
+            }
           }
         }
       }

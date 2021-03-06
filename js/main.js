@@ -500,9 +500,11 @@ class SdkEngine {
           let c2num = board.board[c2].num;
           if (c2num !== '0' && c2num !== '?') {
             board.board[c].kouho[c2num - 1] = false;
+            /* 除外候補
             if (board.board[c].num === '?') {
               board.board[c].exkouho[c2num - 1] = true;
             }
+            */
           }
         }
       }

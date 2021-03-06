@@ -67,6 +67,7 @@ function imgWrite(evt) {
   Sudokizer.drawer.redraw(Sudokizer.board, {
       'cursor': false,
       'dispsize': $('#menu_imgwrite_size').val(),
+      'cellerror': false,
     });
   // 画像保存
   canvas.toBlob((blob) => {

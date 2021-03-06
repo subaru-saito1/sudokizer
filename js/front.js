@@ -386,15 +386,19 @@ function allSolve(evt) {
 function clickBoard(evt) {
   evt.preventDefault();   // 右クリックでメニューが開かないようにする
   let csize = Sudokizer.config.dispsize;
-  let bsize = Sudokizer.board.bsize;
+  let bsize = Sudokizer.board.bsize;     // 9
+  let bsqrt = Math.sqrt(bsize);          // 3
   let mx = evt.offsetX - Sudokizer.config.drawpadding;  // 盤面座標系のx座標
   let my = evt.offsetY - Sudokizer.config.drawpadding;  // 盤面座標系のy座標
   // 範囲内に収まっているか検査
   if (mx >= 0 && mx < csize * bsize && my >= 0 && my < csize * bsize) {
     let cx = Math.floor(mx / Sudokizer.config.dispsize);  // 盤面の横座標
     let cy = Math.floor(my / Sudokizer.config.dispsize);  // 盤面の縦座標
+    let scx = Math.floor(mx * bsqrt / Sudokizer.config.dispsize) % bsqrt // 候補x座標
+    let scy = Math.floor(my * bsqrt / Sudokizer.config.dispsize) % bsqrt // 候補y座標
     let ci = cy * Sudokizer.board.bsize + cx;
-    clickCell(ci, evt.button);
+    let ki = scy * bsqrt + scx + 1;
+    clickCell(ci, ki, evt.button);
   }
   Sudokizer.drawer.redraw(Sudokizer.board);
 }
@@ -402,26 +406,33 @@ function clickBoard(evt) {
 /**
  * セルへのクリック処理 
  * @param {int} cpos クリックしたセルの位置
+ * @param {int} k    候補モードONの場合の候補
  * @param {int} button クリックされたボタン
  */
-function clickCell(cpos, button) {
+function clickCell(cpos, k, button) {
   // 未カーソル時はカーソルを合わせるだけ
   if (cpos !== Sudokizer.config.cursorpos) {
     Sudokizer.config.cursorpos = cpos;
   } else {
-    let nextnum = getNextClickNum(cpos, button);   // 入力予定の数字取得
-    if (Sudokizer.config.qamode === 'answer') {
-      if (nextnum === '0') {
-        Sudokizer.board.ansDel(cpos);
+    //　通常の数字入力
+    if (!Sudokizer.config.kouhomode) {
+      let nextnum = getNextClickNum(cpos, button);   // 入力予定の数字取得
+      if (Sudokizer.config.qamode === 'answer') {
+        if (nextnum === '0') {
+          Sudokizer.board.ansDel(cpos);
+        } else {
+          Sudokizer.board.ansIns(cpos, nextnum, Sudokizer.config.kateilevel);
+        }
       } else {
-        Sudokizer.board.ansIns(cpos, nextnum, Sudokizer.config.kateilevel);
+        if (nextnum === '0') {
+          Sudokizer.board.hintDel(cpos);
+        } else {
+          Sudokizer.board.hintIns(cpos, nextnum);
+        }
       }
+    // 候補数字入力
     } else {
-      if (nextnum === '0') {
-        Sudokizer.board.hintDel(cpos);
-      } else {
-        Sudokizer.board.hintIns(cpos, nextnum);
-      }
+      Sudokizer.board.kouhoSet(cpos, k, Sudokizer.config.kateilevel);
     }
 
   }
@@ -506,35 +517,21 @@ function keyDownBoard(evt) {
   }
   // 問題解答スイッチ
   if (evt.key === 'F2') {
-    if (Sudokizer.config.qamode === 'question') {
-      Sudokizer.config.qamode = 'answer';
-      $('#opform_qmode').prop("checked", false);
-      $('#opform_amode').prop("checked", true);
-    } else {
-      Sudokizer.config.qamode = 'question';
-      $('#opform_qmode').prop("checked", true);
-      $('#opform_amode').prop("checked", false);
-    }
+    keyDownQASwitch();
   }
   // 候補スイッチ
   if (evt.key === 'Shift') {
-    Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
-    // UIの方も連動して状態を変更する
-    let chk_status = $('#opform_kmode').prop("checked");
-    if (chk_status) {
-      $('#opform_kmode').prop("checked", false);
-    } else {
-      $('#opform_kmode').prop("checked", true);
-    }
+    keyDownKouhoSwitch();
   }
   // 仮定スイッチ
   if (kateikeys.includes(evt.key)) {
     keyDownKateiSwitch(evt.key);
   }
-  // undoとredo
+  // undo
   if (evt.key === 'z' && evt.ctrlKey) {
     Sudokizer.astack.undo();
   }
+  // redo
   if (evt.key === 'y' && evt.ctrlKey) {
     Sudokizer.astack.redo();
   }
@@ -617,6 +614,33 @@ function keyDownNumInput(cpos, keycode) {
   }
 }
 
+/**
+ * キーボードによる問題解答モード切替
+ */
+function keyDownQASwitch() {
+  if (Sudokizer.config.qamode === 'question') {
+    Sudokizer.config.qamode = 'answer';
+    $('#opform_qmode').prop("checked", false);
+    $('#opform_amode').prop("checked", true);
+  } else {
+    Sudokizer.config.qamode = 'question';
+    $('#opform_qmode').prop("checked", true);
+    $('#opform_amode').prop("checked", false);
+  }
+}
+/**
+ * キーボードによる候補モード切替
+ */
+function keyDownKouhoSwitch() {
+  Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
+  // UIの方も連動して状態を変更する
+  let chk_status = $('#opform_kmode').prop("checked");
+  if (chk_status) {
+    $('#opform_kmode').prop("checked", false);
+  } else {
+    $('#opform_kmode').prop("checked", true);
+  }
+}
 /**
  * キーボードにより仮定レベルの切り替え
  */

@@ -1008,7 +1008,7 @@ class Drawer {
       'cursor': true,
       'dispsize': Sudokizer.config.dispsize,
       'offset'  : Sudokizer.config.drawpadding,
-      'errorcells': [],
+      'cellerror': true,
     }
   }
 
@@ -1095,18 +1095,19 @@ class Drawer {
     let ofs = cfg.offset;
     let csize = cfg.dispsize;
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     for (let i = 0; i < board.bsize; i++) {
       for (let j = 0; j < board.bsize; j++) {
         let c = i * board.bsize + j;
         // エラーマス
-        if (cfg.errorcells.includes(c)) {
-          ctx.fillStyle = Sudokizer.config.colorset.er;  
+        if (!Sudokizer.engine.duplicateCheck(board, c)) {
+          ctx.fillStyle = Sudokizer.config.colorset.er;
         // 正常マス   
         } else {
           ctx.fillStyle = Sudokizer.config.colorset.bg;
         }
         ctx.strokeRect(ofs + csize * j, ofs + csize * i, csize, csize);
+        ctx.fillRect(ofs + csize * j, ofs + csize * i, csize, csize);
       }
     }
   }
@@ -1250,7 +1251,7 @@ class Drawer {
     if (Sudokizer.config.kouhomode) {  // 候補モード：点線
       ctx.setLineDash([5, 3]);
     }
-    ctx.strokeRect(ofs + cx * csize + 2, ofs + cy * csize + 2, csize - 4, csize - 4);
+    ctx.strokeRect(ofs + cx * csize + 1, ofs + cy * csize + 1, csize - 3, csize - 3);
     // 各種描画プロパティを元に戻す
     ctx.setLineDash([]); 
     ctx.strokeStyle = "black";

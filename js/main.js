@@ -96,6 +96,7 @@ class Peer {
     // 重複排除と自身のマス排除
     this.cellidx = this.cellidx.concat(this.rowidx, this.colidx, this.blockidx)
     this.cellidx = Array.from(new Set(this.cellidx));
+    this.cellidx = this.cellidx.filter(c => c !== this.cid);
   }
 }
 
@@ -457,6 +458,24 @@ class SdkEngine {
     for (let i = 0; i < board.bsize; i++) {
       if ((flgfield & 0x00000001 << i) === 0) {
         return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * ピアに重複がないか調べる。なければＯＫ。
+   * @param {Board} board: 盤面 
+   * @param {int} cid: マス番号
+   * @param {Boolean} 重複がなければtrue, あればfalse
+   */
+  duplicateCheck(board, cid) {
+    let centernum = board.board[cid].num;
+    if (centernum !== '0' && centernum !== '?') {
+      for (let c of board.peers[cid].cellidx) {
+        if (board.board[c].num === centernum) {
+          return false;
+        }
       }
     }
     return true;

@@ -1499,5 +1499,45 @@ class SolveLog {
     let formobj = document.querySelector('#solvelog_form');
     formobj.value = formval;
     formobj.scrollTop = formobj.scrollHeight;
+    this.difficultyAnalyze()
   }
+
+  /**
+   * 手筋ログから難易度を推定
+   */
+  difficultyAnalyze() {
+    let difficulty = '???';
+    let max_strid = -1;
+    for (let line of this.logstack) {
+      let mainline = line.substring(5);
+      // 特殊なケースの処理
+      if (mainline === 'Give Up...') {
+        max_strid = -1;
+        difficulty = 'ニコリ基準外';
+        break;
+      } else if (mainline === 'No Answer!') {
+        max_strid = -1;
+        difficulty = '???';
+        break;
+      } else if (mainline === 'Congratulations!') {
+        break;
+      }
+      // 通常ケースの処理
+      let strid = Number(mainline.substr(0, 2));
+      max_strid = (max_strid < strid) ? strid : max_strid;
+    }
+    if (max_strid > 0) {
+      if (max_strid <= 2) {
+        difficulty = 'らくらく';
+      } else if (max_strid <= 5) {
+        difficulty = 'おてごろ';
+      } else if (max_strid <= 15) {
+        difficulty = 'たいへん';
+      } else {
+        difficulty = 'アゼン　';
+      }
+    }
+    $('#difficulty').text(difficulty);
+  }
+  
 }

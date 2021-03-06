@@ -236,10 +236,11 @@ class SdkEngine {
     this.strategylist_for_analysis = [
       this.easyNakedSingleStrategy,   // ユニットヒント数6~8個のnaked single
       this.blockHiddenSingleStrategy, // ブロッケン
+      // ここからおてごろ手筋
       this.mediumNakedSingleStrategy, // ユニットヒント数5個
       this.lineHiddenSingleStrategy,  // レッツミー
       this.hardNakedSingleStrategy,   // ユニットヒント数3,4個
-      // ここからHard必須手筋
+      // ここからたいへん必須手筋
       this.blockDrivenEitherwayStrategy, // ブロック始動型いずれにせよ理論
       this.blockHiddenPairStrategy,      // ブロック型 予約
       this.lineDrivenEitherwayStrategy,  // 列始動型いずれにせよ理論
@@ -250,7 +251,7 @@ class SdkEngine {
       this.blockNakedTripleStrategy,     // ブロック始動型　逆3つ組
       this.lineHiddenTripleStrategy,     // 列始動型　３つ組
       this.lineNakedTripleStrategy,      // 列始動型 逆３つ組
-      // 唖然手筋
+      // アゼン手筋
       this.nakedQuadrapleStrategy,      // naked 4つ組
       this.hiddenQuadrapleStrategy,     // hidden 4つ組
       this.XwingStrategy,               // X-wing 井桁理論
@@ -403,6 +404,7 @@ class SdkEngine {
           return {ok:false, status:'noanswer', msg:'No Answer!'};
         }
         // 正常成功
+        ret['msg'] =  ('00' + String(Number(i)+1)).slice(-2) + '-' + ret['msg']
         return ret;
       }
     }
@@ -896,7 +898,7 @@ class SdkEngine {
               let y = Math.floor(c / board.bsize) + 1;
               return {ok:true, status:'newcell', cellinfo:[c], strategy:'Naked Single',
                       msg: 'Naked Single (' + maxhints + ' hints):' + 
-                            'Cell(' + x + ', ' + y + ') to ' + kouholist[0]};
+                            '(' + x + ', ' + y + ') to ' + kouholist[0]};
             }
           }
         }
@@ -944,7 +946,7 @@ class SdkEngine {
             let y = Math.floor(ret.cid / board.bsize) + 1;
             return {ok:true, status:'newcell', cellinfo:[ret.cid], 
                     strategy: prefix + 'Hidden Single',
-                    msg: prefix + 'Hidden Single: Cell(' + x + ', ' + y + ') to ' + (n+1)};
+                    msg: prefix + 'Hidden Single: (' + x + ', ' + y + ') to ' + (n+1)};
           }
         }
       }

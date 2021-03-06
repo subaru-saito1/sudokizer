@@ -279,13 +279,17 @@
       <!-- 情報 -->
       <aside>
         <div id="solvelog">
-          <label for="solvelog_form"> 手筋ログ </label> <br>
+          <div id="solvelog_header">
+            <div id="solvelog_label">
+              <label for="solvelog_form"> 手筋ログ </label> 
+            </div>
+            <div id="puzzleinfo">
+              難易度：<span id="difficulty">???</span>
+            </div>
+          </div>
           <textarea name="solvelog_form" id="solvelog_form" cols="45" rows="10" readonly></textarea>
         </div>
-        <div id="puzzleinfo">
-          <div>難易度：<span class="difficulty">???</span></div>
-          <div>難易度計算値：??? pt</div>
-        </div>
+        
       </aside>
     </div>
   </main>

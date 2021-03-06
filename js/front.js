@@ -647,3 +647,21 @@ function blurBoard(evt) {
   Sudokizer.config.cursorpos = undefined;
   Sudokizer.drawer.redraw(Sudokizer.board);
 }
+
+/**
+ * 候補のハイライトをONにする
+ * @param {Event} evt: イベントオブジェクト
+ */
+function kouhoHighlightOn(evt) {
+  let kouho = Number(this.innerHTML);
+  Sudokizer.drawer.redraw(Sudokizer.board, {highlight:kouho})
+}
+
+/**
+ * 候補のハイライトをOFFにする
+ * @param {Event} evt: イベントオブジェクト
+ */
+ function kouhoHighlightOff(evt) {
+  // let kouho = Number(this.innerHTML);
+  Sudokizer.drawer.redraw(Sudokizer.board);
+}

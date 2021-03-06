@@ -52,6 +52,7 @@ function initConfig() {
     'l3': $('#menu_dispcolor_l3').val(),
     'l4': $('#menu_dispcolor_l4').val(),
     'er': $('#menu_dispcolor_er').val(),
+    'hl': $('#menu_dispcolor_hl').val(),
   }
   // 色情報の初期値を記憶して戻せるようにしておく
   const defcolorset = Object.assign({}, colorset);
@@ -149,6 +150,10 @@ function setEventHandlers() {
   $('#main_board').on('contextmenu', clickBoard)
   $('#main_board').keydown(keyDownBoard);
   $('#main_board').blur(blurBoard);
+
+  // -------------- 候補ハイライト ------------------
+  $('[id^="hlight"]').mouseover(kouhoHighlightOn);
+  $('[id^="hlight"]').mouseout(kouhoHighlightOff);
 
   // -------- ページ離脱時の警告 ----------
   window.addEventListener('beforeunload', function(evt) {

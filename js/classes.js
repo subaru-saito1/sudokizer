@@ -1009,6 +1009,7 @@ class Drawer {
       'dispsize': Sudokizer.config.dispsize,
       'offset'  : Sudokizer.config.drawpadding,
       'cellerror': true,
+      'highlight': 0,
     }
   }
 
@@ -1105,12 +1106,24 @@ class Drawer {
         // 正常マス   
         } else {
           ctx.fillStyle = Sudokizer.config.colorset.bg;
+          // マスハイライト
+          if (cfg.highlight !== 0 && String(cfg.highlight) === board.board[c].num) {
+            ctx.fillStyle = Sudokizer.config.colorset.hl;
+          }
         }
         ctx.strokeRect(ofs + csize * j, ofs + csize * i, csize, csize);
         ctx.fillRect(ofs + csize * j, ofs + csize * i, csize, csize);
+        // 候補ハイライト
       }
     }
   }
+
+  /**
+   * canvasの候補セル描画
+   * @param {Object} ctx: 描画コンテキスト
+   * @param {Board} board: 描画対象の盤面
+   * @param {Drawoption} cfg: 描画オプション
+   */
 
   /**
    * canvasへの境界線の描画

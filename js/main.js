@@ -294,11 +294,9 @@ class SdkEngine {
   oneStepSolve(board) {
     let newboard = board.transCreate();
     // 候補のない空白マスがあったら自動候補埋めから再開
-    /*
     if (!this.noKouhoCheck(board).ok) {
       this.autoIdentifyKouho(newboard);
     } 
-    */
     // 1ステップ解答を実行してログをとる
     let retobj = this.strategySelector(newboard, true);
     let actionlist = board.diff(newboard);

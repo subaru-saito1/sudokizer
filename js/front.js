@@ -18,7 +18,7 @@ function newFile(evt) {
     Sudokizer.board = new Board();         // 盤面初期化
     Sudokizer.astack = new ActionStack();  // アクションスタック初期化
     Sudokizer.solvelog.clear();            // ログクリア
-    redraw();
+    Sudokizer.drawer.redraw(Sudokizer.board);
   }
 }
 
@@ -34,7 +34,7 @@ function newFile(evt) {
     Sudokizer.board = ret[0];                     // 消去後の盤面に差し替え
     Sudokizer.astack.push(new Action(ret[1]));    // 差分をプッシュ
     Sudokizer.solvelog.clear();                   // ログクリア
-    redraw();
+    Sudokizer.drawer.redraw(Sudokizer.board);
   }
 }
 
@@ -63,9 +63,11 @@ function imgWrite(evt) {
   // ファイル名取得
   let filename = $('#menu_imgwrite_filename').val();
   let canvas = document.querySelector('#main_board');
-  // let csize = $('#menu_imgwrite_dispsize').val();
-  // 保存用に一時的に描画モードを変更
-  drawForDownload();
+  // 保存用にいったん別モードで描画
+  Sudokizer.drawer.redraw(Sudokizer.board, {
+      'cursor': false,
+      'dispsize': $('#menu_imgwrite_size').val(),
+    });
   // 画像保存
   canvas.toBlob((blob) => {
     let dlanchor = document.createElement('a');
@@ -74,8 +76,8 @@ function imgWrite(evt) {
     dlanchor.click();
     dlanchor.remove();
   })
-  // 元の盤面に戻す
-  redraw();
+  // 元の盤面を再描画
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -109,7 +111,7 @@ function pencilBoxRead(evt) {
     $('#menu_pbwrite_authoren').val(ret.authorinfo[1]);
     // ログのクリア
     Sudokizer.solvelog.clear();
-    redraw();
+    Sudokizer.drawer.redraw(Sudokizer.board);
   }
 }
 
@@ -163,7 +165,7 @@ function boardTransform(mode) {
     let ret = Sudokizer.board.transform(mode);  // 新盤面生成
     Sudokizer.board = ret[0];                  // 盤面更新
     Sudokizer.astack.push(new Action(ret[1])); // アクション追加
-    redraw();                                  // 再描画
+    Sudokizer.drawer.redraw(Sudokizer.board);  // 再描画
   }
 }
 const boardRotate90Deg  = boardTransform('rotate90');
@@ -185,8 +187,10 @@ function setCellSize(evt) {
   // 有効範囲にいる場合のみ変更
   if (csize >= sizeobj.attr('min') && csize <= sizeobj.attr('max')) {
     Sudokizer.config.dispsize = csize;
+    Sudokizer.drawer.default_drawoption.dispsize = csize;
+    $('#menu_imgwrite_size').val(csize);
   }
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -198,7 +202,7 @@ function setColor(evt) {
   let aftercolor = $(this).val();
   let propname = $(this).attr('id').substr(-2);
   Sudokizer.config.colorset[propname] = aftercolor;
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -212,7 +216,7 @@ function setColorDefault(evt) {
   for (let propname in Sudokizer.config.colorset) {
     $('#menu_dispcolor_' + propname).val(Sudokizer.config.colorset[propname]);
   }
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /* ============================= デバッグモード ============================= */
@@ -237,7 +241,7 @@ function debugMode(evt) {
  */
 function setQMode(evt) {
   Sudokizer.config.qamode = 'question';
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 /**
  * 解答入力モード
@@ -245,7 +249,7 @@ function setQMode(evt) {
  */
 function setAMode(evt) {
   Sudokizer.config.qamode = 'answer';
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 /**
  * 候補入力モード
@@ -253,7 +257,7 @@ function setAMode(evt) {
  */
 function switchKMode(evt) {
   Sudokizer.config.kouhomode = !Sudokizer.config.kouhomode;
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -262,7 +266,7 @@ function switchKMode(evt) {
  */
 function setKateiLevel(evt) {
   Sudokizer.config.kateilevel = Number($('#opform_kateilevel').val());
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 
@@ -274,7 +278,7 @@ function setKateiLevel(evt) {
  */
 function actionUndo(evt) {
   Sudokizer.astack.undo();
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 /**
  * redo
@@ -282,7 +286,7 @@ function actionUndo(evt) {
  */
 function actionRedo(evt) {
   Sudokizer.astack.redo();
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -294,7 +298,7 @@ function answerClear(evt) {
   Sudokizer.board = ret[0];              // 盤面更新
   Sudokizer.astack.push(new Action(ret[1]));  // アクション追加
   Sudokizer.solvelog.clear();            // ログのクリア
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -305,7 +309,7 @@ function kouhoClear(evt) {
   let ret = Sudokizer.board.kouhoClear();    // [newboard, diff]
   Sudokizer.board = ret[0];                  // 盤面更新
   Sudokizer.astack.push(new Action(ret[1])); // アクション追加
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 
@@ -328,7 +332,7 @@ function autoKouho(evt) {
   let ret = Sudokizer.engine.autoIdentifyKouhoWrapper(Sudokizer.board);
   Sudokizer.board = ret[0];                  // 盤面更新
   Sudokizer.astack.push(new Action(ret[1])); // アクション追加
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -348,7 +352,7 @@ function stepSolve(evt) {
   let ret = Sudokizer.engine.oneStepSolve(Sudokizer.board);
   Sudokizer.board = ret[0]
   Sudokizer.astack.push(new Action(ret[1]));
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -359,7 +363,7 @@ function allSolve(evt) {
   let ret = Sudokizer.engine.allStepSolve(Sudokizer.board);
   Sudokizer.board = ret[0]
   Sudokizer.astack.push(new Action(ret[1]));
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
   // 状況提示
   if (ret[2] === 0) {
     alert('解なし');
@@ -390,7 +394,7 @@ function clickBoard(evt) {
     let ci = cy * Sudokizer.board.bsize + cx;
     clickCell(ci, evt.button);
   }
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -532,7 +536,7 @@ function keyDownBoard(evt) {
   if (evt.key === 'y' && evt.ctrlKey) {
     Sudokizer.astack.redo();
   }
-  redraw();
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }
 
 /**
@@ -639,62 +643,5 @@ function keyDownKateiSwitch(keycode) {
  */
 function blurBoard(evt) {
   Sudokizer.config.cursorpos = undefined;
-  redraw();
-}
-
-/**
- * 盤面再描画/フロント同期用呼び出しルーチン
- */
-function redraw() {
-  let drawconfig = {
-    'cursor': false,
-    'dispsize': Sudokizer.config.dispsize,
-  }
-  // canvasフォーカス時のみカーソルを表示
-  if (document.activeElement.getAttribute('id') === 'main_board') {
-    drawconfig.cursor = true;
-  }
-  // 描画媒体の選択
-  if (Sudokizer.config.drawmedia === 'canvas') {
-    Sudokizer.board.drawBoardCanvas(drawconfig);
-  } else if (Sudokizer.config.drawmedia === 'svg') {
-    Sudokizer.board.drawBoardSVG(drawconfig);
-  } else {
-    if (Sudokizer.config.debugmode) {
-      Sudokizer.board.drawBoardConsole();
-    }
-  }
-  // 再描画以外の諸々の同期処理
-  sync_undoredo();             // 戻る、進むボタンのdisabled状態制御
-  Sudokizer.solvelog.flush();  // 解答ログの反映
-}
-
-/**
- * 盤面保存用描画ルーチン
- * カーソルを描画しない等の別処理
- */
-function drawForDownload() {
-  let drawconfig = {
-    'cursor': false,
-    'dispsize': $('#menu_imgwrite_size').val(),
-  };
-  Sudokizer.board.drawBoardCanvas(drawconfig);
-}
-
-/**
- * Undo, Redoボタンの状態同期
- */
-function sync_undoredo() {
-  // Undo: スタックが空 (sp = 0) のとき
-  if (Sudokizer.astack.sp === 0) {
-    $('#opform_undo').prop('disabled', true);
-  } else {
-    $('#opform_undo').prop('disabled', false);
-  }
-  // Redo: スタックが最新 (sp = spmax) のとき
-  if (Sudokizer.astack.sp === Sudokizer.astack.spmax) {
-    $('#opform_redo').prop('disabled', true);
-  } else {
-    $('#opform_redo').prop('disabled', false);
-  }
+  Sudokizer.drawer.redraw(Sudokizer.board);
 }

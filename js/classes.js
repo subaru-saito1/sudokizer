@@ -988,90 +988,189 @@ class Board {
     }
     return {ok:true, msg:'OK'};
   }
-  
+}
 
-  // ============================== canvas描画 ====================================
+
+// ============================== canvas描画 ====================================
+
+/**
+ * Drawerクラス
+ * 
+ * もともとBoardクラスの中で定義していたが新たに別のクラスとして分離
+ */
+class Drawer {
+  /**
+   * コンストラクタ
+   * デフォルトの描画オプションの設定
+   */
+  constructor() {
+    this.default_drawoption = {
+      'cursor': true,
+      'dispsize': Sudokizer.config.dispsize,
+      'offset'  : Sudokizer.config.drawpadding,
+      'errorcells': [],
+    }
+  }
+
+  /**
+   * デフォルト設定で足りない設定を補う
+   * @param {Object} drawoption drawoptionを一部設定したもの
+   * @return {Object} drawoptionの完全体
+   */
+  setDrawOption(drawoption) {
+    let ret_drawoption = {}
+    for (let key in this.default_drawoption) {
+      if (drawoption && drawoption[key]) {
+        ret_drawoption[key] = drawoption[key];
+      } else {
+        ret_drawoption[key] = this.default_drawoption[key];
+      }
+    }
+    return ret_drawoption;
+  }
+
+  /**
+   * 盤面再描画/フロント同期用呼び出しルーチン
+   * @param {Board} board: 書き出す盤面
+   * @param {Object} drawoption: 描画用オプション
+   *   - boolean cursor: カーソルを表示するか
+   *   - int dispsize:   マスの表示サイズ
+   *   - Array errorcells: 誤りセルのリスト
+   */
+  redraw(board, drawoption) {
+    // デフォルト設定を補ってくる
+    drawoption = this.setDrawOption(drawoption);
+    // canvasフォーカス時のみカーソルを表示
+    if (document.activeElement.getAttribute('id') === 'main_board') {
+      drawoption.cursor = true;
+    }
+    // canvas描画本体 + 同期処理
+    this.drawBoardCanvas(board, drawoption);
+    Sudokizer.astack.sync_undoredo();   // 戻る、進むボタンのdisabled状態制御
+    Sudokizer.solvelog.flush();         // 解答ログの反映
+  }
 
   /**
    * canvasへの描画
    * @param {Object} cfg: 描画用追加設定
    */
-  drawBoardCanvas(cfg) {
+  drawBoardCanvas(board, cfg) {
     let canvas = document.querySelector('#main_board');
     let ctx = canvas.getContext('2d');
-    let ofs = Sudokizer.config.drawpadding;
-    let csize = cfg.dispsize;
-    // 全体のサイズ設定
-    let allsize = ofs * 2 + csize * this.bsize;
-    $('#main_board').attr('width', allsize);
-    $('#main_board').attr('height', allsize);
+    // 描画プロセス
+    this.drawBack(ctx, board, cfg)        // 背景描画
+    this.drawCells(ctx, board, cfg);      // セル描画
+    this.drawBorders(ctx, board, cfg);    // 境界描画
+    this.drawTexts(ctx, board, cfg);      // テキスト類描画
+    if (cfg.cursor) {
+      this.drawCursor(ctx, board, cfg);   // カーソル描画
+    }
+  }
 
-    // 背景描画
+  /**
+   * canvasの背景描画
+   * @param {Object} ctx 
+   * @param {Board} board 
+   * @param {Drawoption} cfg 
+   */
+  drawBack(ctx, board, cfg) {
+    let ofs = cfg.offset;
+    let csize = cfg.dispsize;
+    let wholesize = ofs * 2 + csize * board.bsize;
+    // キャンバスのサイズ変更
+    $('#main_board').attr('width', wholesize);
+    $('#main_board').attr('height', wholesize);
+    // 背景色
     ctx.fillStyle = Sudokizer.config.colorset.bg;
-    ctx.fillRect(0, 0, allsize, allsize);
+    ctx.fillRect(0, 0, wholesize, wholesize); 
+  }
+
+  /**
+   * canvasへのセルの描画
+   * @param {Object} ctx: 描画コンテキスト
+   * @param {Board} board: 描画対象の盤面
+   * @param {Drawoption} cfg: 描画オプション
+   */
+  drawCells(ctx, board, cfg) {
+    let ofs = cfg.offset;
+    let csize = cfg.dispsize;
     ctx.strokeStyle = "black";
-    // セルの描画
     ctx.lineWidth = 1;
-    for (let i = 0; i < this.bsize; i++) {
-      for (let j = 0; j < this.bsize; j++) {
+    for (let i = 0; i < board.bsize; i++) {
+      for (let j = 0; j < board.bsize; j++) {
+        let c = i * board.bsize + j;
+        // エラーマス
+        if (cfg.errorcells.includes(c)) {
+          ctx.fillStyle = Sudokizer.config.colorset.er;  
+        // 正常マス   
+        } else {
+          ctx.fillStyle = Sudokizer.config.colorset.bg;
+        }
         ctx.strokeRect(ofs + csize * j, ofs + csize * i, csize, csize);
       }
     }
-    // 境界線描画
+  }
+
+  /**
+   * canvasへの境界線の描画
+   * @param {Object} ctx: 描画コンテキスト
+   * @param {Board} board: 描画対象の盤面
+   * @param {Drawoption} cfg: 描画オプション
+   */
+  drawBorders(ctx, board, cfg) {
+    let ofs = cfg.offset;
+    let csize = cfg.dispsize;
     ctx.lineWidth = 3;
-    let csqrt = Math.sqrt(this.bsize);
+    let csqrt = Math.sqrt(board.bsize);
     for (let i = 0; i < csqrt; i++) {
       for (let j = 0; j < csqrt; j++) {
         ctx.strokeRect(ofs + csize * j * csqrt, ofs + csize * i * csqrt,
                        csize * csqrt, csize * csqrt);
       }
     }
-    ctx.lineWidth = 1;
-    // テキスト描画
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    this.drawBoardCanvasTexts(ctx, ofs, csize);
-    // カーソル描画
-    if (cfg === undefined || cfg.cursor) {
-      this.drawBoardCanvasCursor(ctx, ofs, csize);
-    }
   }
 
   /**
    * canvasへの描画：ヒント数字と候補数字の部分
-   * @param {object} ctx  : 描画コンテキスト
-   * @param {int} ofs  : 盤面描画オフセット
-   * @param {int} csize: セルの大きさ
+   * @param {Object} ctx: 描画コンテキスト
+   * @param {Board} board: 描画対象の盤面
+   * @param {Drawoption} cfg: 描画オプション
    */
-  drawBoardCanvasTexts(ctx, ofs, csize) {
-    for (let i = 0; i < this.bsize; i++) {
-      for (let j = 0; j < this.bsize; j++) {
-        let cid = i * this.bsize + j;
+  drawTexts(ctx, board, cfg) {
+    let ofs = cfg.offset;
+    let csize = cfg.dispsize;
+    ctx.lineWidth = 1;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < board.bsize; i++) {
+      for (let j = 0; j < board.bsize; j++) {
+        let cid = i * board.bsize + j;
         let ofsx = ofs + j * csize;
         let ofsy = ofs + i * csize;
         let fontsize = csize / 1.2;
         // ヒントマス
-        if (this.board[cid].ishint) {
+        if (board.board[cid].ishint) {
           // ヒント数字
-          if (this.board[cid].num !== '0') {
+          if (board.board[cid].num !== '0') {
             ctx.fillStyle = Sudokizer.config.colorset.ht;
             ctx.font = fontsize + 'px ' + Sudokizer.config.dispfont;
-            ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
+            ctx.fillText(board.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
           }
           // 除外候補数字 (?ヒントマスのみ)
-          if (this.board[cid].num === '?') {
-            this.drawBoardCanvasKouho(ctx, cid, ofsx, ofsy, csize);
+          if (board.board[cid].num === '?') {
+            this.drawKouho(ctx, board, cfg, cid, ofsx, ofsy);
           }
         // 通常マス
         } else {
           // 入力数字（非ヒントの入力済みマス）
-          if (this.board[cid].num !== '0') {
-            ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].klevel];
+          if (board.board[cid].num !== '0') {
+            ctx.fillStyle = Sudokizer.config.colorset['l' + board.board[cid].klevel];
             ctx.font = fontsize + 'px ' + Sudokizer.config.dispfont;
-            ctx.fillText(this.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
+            ctx.fillText(board.board[cid].num, ofsx + csize / 2, ofsy + csize / 2);
           // 候補数字（非ヒントの空白マス）
           } else {
-            this.drawBoardCanvasKouho(ctx, cid, ofsx, ofsy, csize);
+            this.drawKouho(ctx, board, cfg, cid, ofsx, ofsy);
           }
         }
       }
@@ -1082,29 +1181,31 @@ class Board {
   /**
    * canvasへの候補数字の描画
    * @param {object} ctx : 描画コンテキスト
+   * @param {Board} board: 盤面
+   * @param {Drawoption} cfg: 描画設定
    * @param {int} cid    : マス番号
    * @param {int} ofsx   : 横方向マスオフセット
    * @param {int} ofsy   : 縦方向マスオフセット
-   * @param {int} csize  : セルサイズ
    */
-  drawBoardCanvasKouho(ctx, cid, ofsx, ofsy, csize) {
+  drawKouho(ctx, board, cfg, cid, ofsx, ofsy) {
+    let csize = cfg.dispsize;
     let fontsize = csize / 3.5;         
-    let csqrt = Math.sqrt(this.bsize);  // 3
+    let csqrt = Math.sqrt(board.bsize);  // 3
 
     ctx.font = fontsize + 'px sans-serif';
     // 通常候補
-    if (!this.board[cid].ishint) {
+    if (!board.board[cid].ishint) {
       for (let ki = 0; ki < csqrt; ki++) {
         for (let kj = 0; kj < csqrt; kj++) {
           let k = ki * csqrt + kj;
-          if (this.board[cid].kouho[k]) {
+          if (board.board[cid].kouho[k]) {
             ctx.fillStyle = Sudokizer.config.colorset['l0'];
             let posx = ofsx + (csize / csqrt) * (kj + 0.5);    // フォントx座標
             let posy = ofsy + (csize / csqrt) * (ki + 0.5);   // フォントy座標
             ctx.fillText(k + 1, posx, posy);
             // 候補レベルに応じて斜線を引く
-            if (this.board[cid].kklevel[k] > 0) {
-              ctx.fillStyle = Sudokizer.config.colorset['l' + this.board[cid].kklevel[k]];
+            if (board.board[cid].kklevel[k] > 0) {
+              ctx.fillStyle = Sudokizer.config.colorset['l' + board.board[cid].kklevel[k]];
               ctx.fillText('＼', posx, posy);
             }
           }
@@ -1116,7 +1217,7 @@ class Board {
       for (let ki = 0; ki < csqrt; ki++) {
         for (let kj = 0; kj < csqrt; kj++) {
           let k = ki * csqrt + kj;
-          if (this.board[cid].exkouho[k]) {
+          if (board.board[cid].exkouho[k]) {
             let posx = ofsx + (csize / csqrt) * (kj + 0.5);    // フォントx座標
             let posy = ofsy + (csize / csqrt) * (ki + 0.5);   // フォントy座標
             ctx.fillText(k + 1, posx, posy);
@@ -1129,14 +1230,16 @@ class Board {
 
   /**
    * canvasへのカーソルの描画
-   * @param {object} ctx : 描画コンテキスト
-   * @param {int} ofs    : 盤面のオフセット
-   * @param {int} csize  : マスのサイズ
+   * @param {Object} ctx: 描画コンテキスト
+   * @param {Board} board: 描画対象の盤面
+   * @param {Drawoption} cfg: 描画オプション
    */
-  drawBoardCanvasCursor(ctx, ofs, csize) {
+  drawCursor(ctx, board, cfg) {
+    let ofs = cfg.offset;
+    let csize = cfg.dispsize;
     let cpos = Sudokizer.config.cursorpos;
-    let cx = cpos % this.bsize;
-    let cy = Math.floor(cpos / this.bsize);
+    let cx = cpos % board.bsize;
+    let cy = Math.floor(cpos / board.bsize);
 
     ctx.lineWidth = 2;
     if (Sudokizer.config.qamode === 'question') {   // 問題モード
@@ -1155,16 +1258,10 @@ class Board {
   }
 
   /**
-   * SVGへの描画
-   */
-  drawBoardSVG() {
-    console.log('draw Board SVG');
-  }
-
-  /**
    * コンソールへの出力（デバッグ用）
+   * 直接コンソールからたたいて呼び出すこと
    */
-  drawBoardConsole() {
+  drawBoardConsole(board) {
     let line = '';
     let horizon = ' +-------+-------+-------+';
     for (let i = 0; i < this.numcells; i++) {
@@ -1174,7 +1271,7 @@ class Board {
       if (i % 3 === 0) {
         line += ' |';
       }
-      line += ' ' + this.board[i].num;
+      line += ' ' + board.board[i].num;
       if (i % 9 === 8) {
         line += ' |'
         console.log(line);
@@ -1183,7 +1280,6 @@ class Board {
     }
     console.log(horizon);
   }
-
 }
 
 
@@ -1258,6 +1354,24 @@ class ActionStack {
   clear() {
     this.sp = 0;
     this.spmax = 0;
+  }
+
+  /**
+   * Undo, Redoボタンの状態同期
+   */
+   sync_undoredo() {
+    // Undo: スタックが空 (sp = 0) のとき
+    if (this.sp === 0) {
+      $('#opform_undo').prop('disabled', true);
+    } else {
+      $('#opform_undo').prop('disabled', false);
+    }
+    // Redo: スタックが最新 (sp = spmax) のとき
+    if (this.sp === this.spmax) {
+      $('#opform_redo').prop('disabled', true);
+    } else {
+      $('#opform_redo').prop('disabled', false);
+    }
   }
 }
 

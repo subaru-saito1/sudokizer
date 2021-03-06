@@ -270,10 +270,27 @@ textarea#url_output {
 /** ============================================================
  * キャンバス
  */
+#canvas_wrapper {
+}
 #main_board {
   background-color: white;
 }
-
+#highlight_wrapper {
+  margin: 0px 20px 5px;
+}
+.highlight_button {
+  display: inline-block;
+  width: 30px;
+  height: 24px;
+  text-align: center;
+  background-color: #ccccff;
+  border: 1px solid #333333;
+  border-radius: 5px;
+}
+.highlight_button:hover {
+  background-color: #9999ff;
+  cursor: pointer;
+}
 
 /** ===========================================================
  * ボタン部分

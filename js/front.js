@@ -361,6 +361,7 @@ function stepSolve(evt) {
  * @param {Event} evt イベントオブジェクト（未使用）
  */
 function allSolve(evt) {
+  Sudokizer.solvelog.clear();            // ログのクリア
   let ret = Sudokizer.engine.allStepSolve(Sudokizer.board);
   Sudokizer.board = ret[0]
   Sudokizer.astack.push(new Action(ret[1]));

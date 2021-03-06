@@ -92,12 +92,13 @@ aside::after {
   display: table;
 }
 #solvelog {
-  float: left;
-  margin: 10px;
+  margin: 5px;
+  width: 250px;
 }
-#puzzleinfo {
-  float: left;
-  padding-top: 30px;
+#solvelog_header {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
 }
 
 /* 400px ~ 650px以下 */

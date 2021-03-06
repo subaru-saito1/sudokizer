@@ -597,18 +597,22 @@ function keyDownNumInput(cpos, keycode) {
     }
   // 候補数字入力
   } else {
-    // 問題モード：？ヒントの場合、除外候補を設定
+    if ((Sudokizer.board.board[cpos].ishint && Sudokizer.board.board[cpos].num === '?') ||
+        (!Sudokizer.board.board[cpos].ishint && Sudokizer.board.board[cpos].num === '0')) {
+      Sudokizer.board.kouhoSet(cpos, keycode, Sudokizer.config.kateilevel);
+    /*　旧候補数字入力ルーチン
     if (Sudokizer.config.qamode === 'question') {
       if (Sudokizer.board.board[cpos].ishint && 
           Sudokizer.board.board[cpos].num === '?') {
         Sudokizer.board.exkouhoSet(cpos, keycode);
       }
-    // 解答モード：候補数字を設定
     } else {
       if (!Sudokizer.board.board[cpos].ishint && 
           Sudokizer.board.board[cpos].num === '0') {
         Sudokizer.board.kouhoSet(cpos, keycode, Sudokizer.config.kateilevel);
       }
+    }
+    */
     }
   }
 }
@@ -661,7 +665,7 @@ function kouhoHighlightOn(evt) {
  * 候補のハイライトをOFFにする
  * @param {Event} evt: イベントオブジェクト
  */
- function kouhoHighlightOff(evt) {
+function kouhoHighlightOff(evt) {
   // let kouho = Number(this.innerHTML);
   Sudokizer.drawer.redraw(Sudokizer.board);
 }

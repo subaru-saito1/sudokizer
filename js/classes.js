@@ -23,11 +23,9 @@ class Cell {
     this.ishint = false;   // ヒントフラグ
     this.klevel = 0;       // 仮定レベル
     this.kouho = [];       // 候補リスト
-    this.exkouho = [];     // 除外候補リスト
     this.kklevel = [];     // 候補の仮定レベルリスト
     for (let i = 0; i < bsize; i++) {
       this.kouho.push(false);
-      this.exkouho.push(false);
       this.kklevel.push(0);
     }
   }
@@ -42,7 +40,6 @@ class Cell {
       this.ishint = false;
       this.klevel = 0;
       for (let i = 0; i < Sudokizer.board.bsize; i++) {
-        this.exkouho[i] = false;
         this.kouho[i] = false;
         this.kklevel[i] = 0;
       }
@@ -55,10 +52,17 @@ class Cell {
             this.num = '0';
             this.klevel = 0;
           }
-          for (let i = 0; i < Sudokizer.board.bsize; i++) {
-            this.exkouho[i] = false;
+        }
+        // 候補数字消去
+        for (let i = 0; i < Sudokizer.board.bsize; i++) {
+          if (Sudokizer.config.kateilevel === 0) {
+            this.kouho[i] = false;
+            this.kklevel[i] = 0;
+          } else if (Sudokizer.config.kateilevel === this.kklevel[i]) {
+            this.kklevel[i] = 0;
           }
         }
+      } else if (this.num === '?') {
         // 候補数字消去
         for (let i = 0; i < Sudokizer.board.bsize; i++) {
           if (Sudokizer.config.kateilevel === 0) {
@@ -82,7 +86,6 @@ class Cell {
     this.klevel = fromcell.klevel;
     for (let k = 0; k < Sudokizer.board.bsize; k++) {
       this.kouho[k] = fromcell.kouho[k];
-      this.exkouho[k] = fromcell.exkouho[k];
       this.kklevel[k] = fromcell.kklevel[k];
     }
   }
@@ -261,14 +264,6 @@ class Board {
     this.board[cpos].kouho[num-1] = !this.board[cpos].kouho[num-1];
   }
 
-  /** 除外候補フラグ切り替え
-   * @param {int} cpos マスの位置
-   * @param {string} num 数字
-   */
-  exkouhoSwitchAtomic(cpos, num) {
-    this.board[cpos].exkouho[num-1] = !this.board[cpos].exkouho[num-1];
-  }
-
 
   // ==================== 基本アクション ======================
 
@@ -318,11 +313,11 @@ class Board {
    */
   ansDel(cpos) {
     let actionlist = []
-    if (!this.board[cpos].ishint) {
+    if (!this.board[cpos].ishint || this.board[cpos].num === '?') {
       let num = this.board[cpos].num;
       let klevel = this.board[cpos].klevel;
       // 空白マス：候補除去
-      if (num === '0') {
+      if (num === '0' || num === '?') {
         for (let k = 0; k < this.bsize; k++) {
           if (this.board[cpos].kouho[k]) {
             if (Sudokizer.config.kateilevel === 0) {
@@ -369,14 +364,9 @@ class Board {
         actionlist.push({cmd: 'numUnset', cpos:cpos, num:this.board[cpos].num});
       }
       actionlist.push({cmd:'ishintSwitch', cpos:cpos});
-    // ヒント塗り替えの場合：既入力済み記号と除外候補消去
+    // ヒント塗り替えの場合：既入力済み記号s消去
     } else {
       actionlist.push({cmd:'numUnset', cpos:cpos, num:this.board[cpos].num});
-      for (let k = 0; k < this.bsize; k++) {
-        if (this.board[cpos].exkouho[k]) {
-          actionlist.push({cmd:'exkouhoSwitch', cpos:cpos, num:k+1});
-        }
-      }
     }
     actionlist.push({cmd: 'numSet', cpos:cpos, num:num});
     this.basicAction(actionlist);
@@ -394,9 +384,13 @@ class Board {
     if (this.board[cpos].ishint) {
       actionlist.push({cmd:'numUnset', cpos:cpos, num:num});
       actionlist.push({cmd:'ishintSwitch', cpos:cpos});
-      for (let k = 0; k < this.bsize; k++) {
-        if (this.board[cpos].exkouho[k]) {
-          actionlist.push({cmd:'exkouhoSwitch', cpos:cpos, num:k+1});
+      if (this.board[cpos].num === '?') {
+        for (let k = 0; k < this.bsize; k++) {
+          if (this.board[cpos].kouho[k]) {
+            actionlist.push({cmd:'kouhoSwitch', cpos:cpos, num:k+1});
+            actionlist.push({cmd:'kklevelUnset',
+              cpos:cpos, num:k+1, klevel:this.board[cpos].kklevel[k]});
+          }
         }
       }
     } else {
@@ -438,17 +432,6 @@ class Board {
         }
       }
     }
-    this.basicAction(actionlist);
-  }
-
-  /**
-   * 除外候補設定
-   * @param {int} cpos マスの位置
-   * @param {string} num 候補数字
-   */
-  exkouhoSet(cpos, num) {
-    let actionlist = []
-    actionlist.push({cmd: 'exkouhoSwitch', cpos:cpos, num:num});
     this.basicAction(actionlist);
   }
 
@@ -593,10 +576,6 @@ class Board {
         // 候補フラグ
         if (ca.kouho[k] !== cb.kouho[k]) {
           actions.push({cmd: 'kouhoSwitch', cpos: c, num: k+1});
-        }
-        // 除外候補フラグ
-        if (ca.exkouho[k] !== cb.exkouho[k]) {
-          actions.push({cmd: 'exkouhoSwitch', cpos: c, num: k+1});
         }
         // 候補仮定レベル
         if (ca.kklevel[k] !== cb.kklevel[k]) {
@@ -1232,7 +1211,7 @@ class Drawer {
 
     ctx.font = fontsize + 'px sans-serif';
     // 通常候補
-    if (!board.board[cid].ishint) {
+    if (!board.board[cid].ishint || board.board[cid].num === '?') {
       for (let ki = 0; ki < csqrt; ki++) {
         for (let kj = 0; kj < csqrt; kj++) {
           let k = ki * csqrt + kj;
@@ -1249,7 +1228,9 @@ class Drawer {
           }
         }
       }
-    // 除外候補
+    }
+    /*
+    // 除外候補を表示する
     } else {
       ctx.fillStyle = Sudokizer.config.colorset.ex;
       for (let ki = 0; ki < csqrt; ki++) {
@@ -1264,6 +1245,7 @@ class Drawer {
         }
       }
     }
+    */
   }
 
   /**
@@ -1456,8 +1438,6 @@ class Action {
         board.ishintSwitchAtomic(op.cpos);
       } else if (op.cmd === 'kouhoSwitch') {
         board.kouhoSwitchAtomic(op.cpos, op.num);
-      } else if (op.cmd === 'exkouhoSwitch') {
-        board.exkouhoSwitchAtomic(op.cpos, op.num);
       } else {
         throw 'Commit Error: ' + op.cmd;
       }
@@ -1487,8 +1467,6 @@ class Action {
         board.ishintSwitchAtomic(op.cpos);
       } else if (op.cmd === 'kouhoSwitch') {
         board.kouhoSwitchAtomic(op.cpos, op.num);
-      } else if (op.cmd === 'exkouhoSwitch') {
-        board.exkouhoSwitchAtomic(op.cpos, op.num);
       } else {
         throw 'Revert Error';
       }

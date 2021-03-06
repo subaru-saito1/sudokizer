@@ -14,11 +14,12 @@ let Sudokizer = {};   // グローバル変数をすべてまとめたオブジ�
 Sudokizer.astack = new ActionStack();   // アクションスタック作成
 Sudokizer.board  = initBoard();         // 初期盤面の作成
 Sudokizer.config = initConfig();        // 全般設定類
+Sudokizer.drawer = new Drawer();        // 描画クラス
 Sudokizer.engine = new SdkEngine();     // 解答エンジン
 Sudokizer.solvelog = new SolveLog();    // 解答履歴
 
 setEventHandlers();   // イベントハンドラを仕掛ける
-redraw();             // 初回同期
+Sudokizer.drawer.redraw(Sudokizer.board);  // 初回同期
 
 
 /**
@@ -50,6 +51,7 @@ function initConfig() {
     'l2': $('#menu_dispcolor_l2').val(),
     'l3': $('#menu_dispcolor_l3').val(),
     'l4': $('#menu_dispcolor_l4').val(),
+    'er': $('#menu_dispcolor_er').val(),
   }
   // 色情報の初期値を記憶して戻せるようにしておく
   const defcolorset = Object.assign({}, colorset);
@@ -57,16 +59,15 @@ function initConfig() {
   return {
     'debugmode': false,         // デバッグモード
     'cursorpos': undefined,     // カーソル位置
+    'qamode': $('input:radio[name="modeselect"]:checked').val(),  // 問題 or 解答モード
+    'kouhomode': $('#opform_kmode').prop('checked'),              // 候補モードフラグ
+    'kateilevel': Number($('#opform_kateilevel').val()),          // 仮定レベル
+    'drawpadding': 13,          // 描画時のパディング
     'dispsize': Number($('#menu_dispsize_size').val()),  // マスサイズ
     'dispfont': 'sans-serif',         // フォント
     'colorset': colorset,             // 色設定
     'defcolorset': defcolorset,       // デフォルト色設定
-    'qamode': $('input:radio[name="modeselect"]:checked').val(),  // 問題 or 解答モード
-    'kouhomode': $('#opform_kmode').prop('checked'),              // 候補モードフラグ
-    'kateilevel': Number($('#opform_kateilevel').val()),          // 仮定レベル
-    'drawmedia': 'canvas',      // 描画する要素 Canvas or svg or console?
-    'drawpadding': 13,          // 描画時のパディング
-    'drawconfig': {},           // 描画時の種々のフラグ
+    
   };
 }
 
@@ -147,7 +148,6 @@ function setEventHandlers() {
   $('#main_board').click(clickBoard);
   $('#main_board').on('contextmenu', clickBoard)
   $('#main_board').keydown(keyDownBoard);
-  // $('#main_board').blur(redraw);
   $('#main_board').blur(blurBoard);
 
   // -------- ページ離脱時の警告 ----------

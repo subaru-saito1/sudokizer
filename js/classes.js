@@ -1111,19 +1111,43 @@ class Drawer {
             ctx.fillStyle = Sudokizer.config.colorset.hl;
           }
         }
-        ctx.strokeRect(ofs + csize * j, ofs + csize * i, csize, csize);
-        ctx.fillRect(ofs + csize * j, ofs + csize * i, csize, csize);
+        let ofsx = ofs + csize * j;
+        let ofsy = ofs + csize * i;
+        ctx.strokeRect(ofsx, ofsy, csize, csize);
+        ctx.fillRect(ofsx, ofsy, csize, csize);
         // 候補ハイライト
+        if (cfg.highlight !== 0) {
+          this.drawSubcellHighlight(ctx, board, cfg, c, ofsx, ofsy);
+        }
       }
     }
   }
 
   /**
-   * canvasの候補セル描画
-   * @param {Object} ctx: 描画コンテキスト
-   * @param {Board} board: 描画対象の盤面
-   * @param {Drawoption} cfg: 描画オプション
+   * 候補数字のハイライト
+   * @param {object} ctx : 描画コンテキスト
+   * @param {Board} board: 盤面
+   * @param {Drawoption} cfg: 描画設定
+   * @param {int} cid    : マス番号
+   * @param {int} ofsx   : 横方向マスオフセット
+   * @param {int} ofsy   : 縦方向マスオフセット
    */
+  drawSubcellHighlight(ctx, board, cfg, cid, ofsx, ofsy) {
+    let csize = cfg.dispsize;     
+    let csqrt = Math.sqrt(board.bsize);
+    let subcsize = csize / csqrt;
+    ctx.fillStyle = Sudokizer.config.colorset.hl;
+    for (let ki = 0; ki < csqrt; ki++) {
+      for (let kj = 0; kj < csqrt; kj++) {
+        let k = ki * csqrt + kj;
+        if (k === cfg.highlight - 1 && board.board[cid].kouho[cfg.highlight - 1]) {
+          let posx = ofsx + subcsize * kj;
+          let posy = ofsy + subcsize * ki;
+          ctx.fillRect(posx, posy, subcsize, subcsize);
+        }
+      }
+    }
+  }
 
   /**
    * canvasへの境界線の描画

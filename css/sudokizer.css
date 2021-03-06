@@ -302,9 +302,15 @@ div#opform {
 }
 
 fieldset {
-  padding: 5px;
+  padding: 5px auto;
   margin: 5px;
   width: 150px;
+  /* background-image: linear-gradient( #cceeff, #ccccff); */
+  background-color: #cceeff;
+  box-shadow: 2px 2px 4px 4px #ccccff inset;
+}
+legend {
+  font-weight: bold;
 }
 #edit_form_undoredo {
   float: left;
@@ -329,4 +335,5 @@ fieldset#support_form button {
  */
 textarea#solvelog_form {
   resize: none;
+  box-shadow: 1px 1px 3px 3px #cccccc inset;
 }

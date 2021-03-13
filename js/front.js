@@ -341,8 +341,7 @@ function autoKouho(evt) {
  * @param {Event} evt イベントオブジェクト（未使用）
  */
 function autoGenerate(evt) {
-  alert('semi-auto generation via ? hints');
-  // Sudokizer.astack.push(action);
+  Sudokizer.engine.generate(Sudokizer.board);
 }
 
 /**

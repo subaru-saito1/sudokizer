@@ -138,8 +138,6 @@ function setEventHandlers() {
   $('#opform_anscheck').click(answerCheck);
   // 自動候補入力
   $('#opform_autokouho').click(autoKouho);
-  // 半自動生成
-  $('#opform_autogen').click(autoGenerate);
   // 1ステップ解答
   $('#opform_stepsolve').click(stepSolve);
   // 全回答

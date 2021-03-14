@@ -1284,7 +1284,7 @@ class Drawer {
   drawBoardConsole(board) {
     let line = '';
     let horizon = ' +-------+-------+-------+';
-    for (let i = 0; i < this.numcells; i++) {
+    for (let i = 0; i < board.numcells; i++) {
       if (i % 27 === 0) {
         console.log(horizon);
       }

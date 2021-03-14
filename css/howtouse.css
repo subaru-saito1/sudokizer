@@ -1,0 +1,23 @@
+@charset "utf-8";
+
+h2 {
+  font-size: 1.8em;
+}
+h3 {
+  font-size: 1.5em;
+  margin: 10px 0px;
+}
+section {
+  border: 3px solid black;
+  border-radius: 15px;
+  padding: 10px 20px;
+  margin: 25px 10px;
+}
+dt {
+  font-weight: bold;
+}
+li.menu {
+  font-size: 1.2em;
+  font-weight: bold;
+  font-size: 
+}

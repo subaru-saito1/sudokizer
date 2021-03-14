@@ -73,7 +73,7 @@ main {
   min-height: 75vh;
 }
 footer {
-  min-height: 10vh;
+  min-height: 5vh;
 }
 #main_wrapper {
   display: table;
@@ -260,7 +260,7 @@ textarea#url_output {
   left: 25%;
 }
 #menu_dispcolor + .dropdown_cc {
-  width: 8em;
+  width: 8.5em;
   text-align: left;
   left: 0%;
 }

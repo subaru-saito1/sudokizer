@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Sudokizer 操作説明</title>
+  <meta charset="utf-8">
+  <meta name="author" content="Subaru Saito">
+  <meta name="description" content="How to use Sudokizer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- fonts-->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+  <!-- static assets -->
+  <link rel="stylesheet" href="css/sudokizer.css">
+  <link rel="stylesheet" href="css/howtouse.css">
+</head>
+
+
+<body>
+  <header>
+    <div id="header_in">
+      <h1> Sudokizer </h1>
+      <p>数独作成支援ツール</p>
+    </div>
+  </header>
+  <main>
+    <div id="main_wrapper">
+      <h2>操作方法</h2>
+
+      <section>
+      <h3>全般</h3>
+      <hr>
+      <p>
+        PCによるキーボード操作が主になります。<br>
+        クリックやタップによる数字入力、候補入力も実装はしていますが使いづらいです。<br>
+        恐らくまだバグの温床ですので、バグなどを発見しましたら、<br>
+        <a href="https://github.com/subaru-saito1/sudokizer/issues" target="_blank">GitHubのIssues</a>に立てていただけると対応するかもしれません。
+      </p>
+      </section>
+
+      <section>
+      <h3>キーボード操作</h3>
+      <hr>
+      <dl>
+        <dt>←↓↑→</dt><dd>カーソルを移動します。それぞれ H,J,K,L キーでも可能です。</dd>
+        <dt>1~9</dt><dd>対応する数字を入力します。</dd>
+        <dt>Space</dt><dd>現在のカーソルのマスの中身を消去します。</dd>
+        <dt>-</dt><dd>?ヒントを入力します（問題入力モードのみ）</dd>
+        <dt>F2</dt><dd>問題入力モードと解答入力モードを切り替えます。</dd>
+        <dt>Shift</dt><dd>候補入力モードのON/OFFを切り替えます。</dd>
+        <dt>Ctrl + Z</dt><dd>操作を一つ戻します（アンドゥ）</dd>
+        <dt>Ctrl + Y</dt><dd>操作を一つ進めます（リドゥ）</dd>
+        <dt>Q,W,E,R,T</dt><dd>仮定レベルを変更します。Q=仮定なし, W=仮定レベル1, ..., T=仮定レベル4 です。</dd>
+      </dl>
+      </section>
+
+      <section>
+      <h3>操作フォーム説明</h3>
+      <hr>
+      <ul>
+        <li class="menu">入力モード</li>
+        <dl>
+          <dt>問題</dt><dd>問題入力モードに切り替えます(F2)</dd>
+          <dt>解答</dt><dd>解答入力モードに切り替えます(F2)</dd>
+          <dt>候補入力</dt><dd>候補入力モードのON/OFFを切り替えます(Shift)。</dd>
+        </dl>
+        <li class="menu">編集</li>
+        <dl>
+          <dt><i class="fas fa-undo"></i></dt><dd>操作を一つ戻します(Ctrl + Z)。</dd>
+          <dt><i class="fas fa-redo"></i></dt><dd>操作を一つ進めます(Ctrl + Y)。</dd>
+          <dt>解答消去</dt><dd>解答をすべて消去します。</dd>
+          <dt>候補消去</dt><dd>候補をすべて消去します。</dd>
+        </dl>
+        <li class="menu">制作支援</li>
+        <dl>
+          <dt>チェック</dt><dd>正解かどうかチェックします。</dd>
+          <dt>自動候補</dt><dd>空いている全マスの候補を自動的に埋めます。</dd>
+          <dt><i class="fas fa-angle-right"></i></dt><dd>1ステップ分だけ自動解答させます。</dd>
+          <dt><i class="fas fa-angle-double-right"></i></dt><dd>自動解答させて解の個数も調べます。数秒程度かかる場合があります。</dd>
+        </dl>
+        <li class="menu">盤面下の数字</li>
+        <dl>
+          <dd>各数字を候補含めてハイライト表示します。</dd>
+        </dl>
+        <li class="menu">手筋ログ</li>
+        <dl>
+          <dd><i class="fas fa-angle-right"></i>　や　<i class="fas fa-angle-double-right"></i>　で
+            自動解答させた際に使った手筋のリストを表示します。<br>
+            使った手筋に応じてニコリ基準での難易度推定も行えます。
+          </dd>
+        </dl>
+      </ul>
+      </section>
+
+      <section>
+      <h3>メニュー説明</h3>
+      <hr>
+      <ul>
+        <li class="menu">ファイル</li>
+        <dl>
+          <dt>新規作成</dt><dd>現在の盤面をリセットして新しい盤面を作成します。</dd>
+          <dt>URL出力</dt><dd>ぱずぷれv3 or puzzlink形式で盤面URLを出力します。</dd>
+          <dt>画像出力</dt><dd>盤面を画像形式で保存します。</dd>
+          <dt>Pencilbox読込</dt><dd>pencilbox形式のファイルから盤面を読み込みます（nikoli.com形式対応）</dd>
+          <dt>Pencilbox出力</dt><dd>pencilbox形式でファイルを保存します（nikoli.com形式対応）</dd>
+        </dl>
+        <li class="menu">編集</li>
+        <dl>
+          <dt>盤面の複製</dt><dd>現在の盤面を新しいタブで開きなおします（※解答はリセットされます）。</dd>
+          <dt>盤面の変形</dt><dd>盤面の回転や反転を行います。</dd>
+        </dl>
+        <li class="menu">表示</li>
+        <dl>
+          <dt>表示サイズ</dt><dd>盤面のマスのサイズ（ピクセル数）を指定します。</dd>
+          <dt>表示色</dt><dd>解答入力や背景色などの色を設定します。</dd>
+        </dl>
+        <li class="menu">その他</li>
+        <dl>
+          <dt>デバッグモード</dt><dd>（開発用）コンソールへのデバッグ情報のON/OFFを切り替えます。</dd>
+        </dl>
+      </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div id="footer_in">
+      <p><a href="http://subaru-saito.squares.net/index.html">トップに戻る</a></p>
+      <p><small> Copyright 2021~. Subaru Saito, All Rights Reserved. </small></p>
+    </div>
+  </footer>
+
+</body>
+
+</html>

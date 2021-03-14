@@ -216,6 +216,7 @@ class SdkEngine {
     // 解答エンジンに関する諸設定
     this.config = {
       multians_thres: 100,  // 別解発生時に探索を打ち切る解の個数
+      dummyhints_thres: 3,  // 生成時の最大？ヒント数
     }
     // 高速解答用のストラテジー関数のリスト
     this.strategylist = [
@@ -317,7 +318,7 @@ class SdkEngine {
     newboard = newboard.ansClear()[0];
     this.autoIdentifyKouho(newboard)
     // 再帰関数：ret[0]はanscnt, ret[1]
-    let ret = this.allStepSolveRecursive(newboard, 0);
+    let ret = this.allStepSolveRecursive(newboard, 0, true);
     let actionlist = board.diff(ret[1]);
     return [ret[1], actionlist, ret[0]];
   }
@@ -328,12 +329,14 @@ class SdkEngine {
    * @param {int} klevel  再帰の深さ（デバッグ用）
    * @return {Array} 解の個数と解答盤面
    */
-  allStepSolveRecursive(board, klevel) {
+  allStepSolveRecursive(board, klevel, logmode=true) {
     let newboard = board.transCreate();
     // 1ステップ解かせるループ
     while (true) {
       let retobj = this.strategySelector(newboard, true);
-      Sudokizer.solvelog.push(retobj.msg);
+      if (logmode) {
+        Sudokizer.solvelog.push(retobj.msg);
+      }
       // OKだった場合：解答チェックしてOKなら脱出
       if (retobj.ok) {
         if (retobj.status === 'done') {
@@ -354,7 +357,7 @@ class SdkEngine {
               let newboard2 = newboard.transCreate();
               this.answerInsert(newboard2, mincpos, String(k+1));
               this.peerRemoveKouho(newboard2, mincpos);
-              let ret = this.allStepSolveRecursive(newboard2, klevel+1);
+              let ret = this.allStepSolveRecursive(newboard2, klevel+1, logmode);
               anscnt += ret[0];
               if (ret[0] >= 1) {
                 ansboard = ret[1];
@@ -1295,6 +1298,121 @@ class SdkEngine {
       }
     }
     return {ok: false}
+  }
+
+
+  /* ===========================================================
+   *                自動生成エンジン
+   * ========================================================= */
+
+  /**
+   * ?ヒントの個数が3つ以下の場合、一意解になる盤面とその難易度をコンソール出力
+   * @param {Board} board: 盤面
+   * @return なし
+   */
+  generate(board) {
+    let dummyhints = this.countDummyHints(board);
+    if (dummyhints > this.config.dummyhints_thres) {
+      console.log("?ヒントが多すぎます! （" + this.config.dummyhints_thres + "個以下で）");
+      return;
+    } else if (dummyhints === 0) {
+      console.log("?ヒントがありません!");
+      return;
+    }
+    // ?ヒントの候補組み合わせ生成
+    let newboard = board.transCreate();
+    this.autoIdentifyKouho(newboard);
+    let kouhocomb = this.dummyHintsKouhoComb(newboard);
+    let kouhoperm = this.allChoice(kouhocomb);
+
+    // 全て組み合わせに対して解の個数を実行
+    let results = []
+    for (let klist of kouhoperm) {
+      console.log(".");
+      let newboard2 = newboard.transCreate();
+      // ?ヒントを埋めていく(通常ヒントマスに差し替える）
+      let kcnt = 0;
+      for (let c = 0; c < newboard2.numcells; c++) {
+        if (newboard2.board[c].num === '?') {
+          newboard2.board[c].num = String(klist[kcnt++]);
+          this.peerRemoveKouho(newboard2, c);
+          for (let k = 0; k < newboard2.bsize; k++) {
+            newboard2.board[c].kouho[k] = false;
+            newboard2.board[c].kklevel[k] = 0;
+          }
+        }
+      }
+      // 全解答を実行して解の個数を調べる。戻り値はanscntとansboard
+      let ret = this.allStepSolveRecursive(newboard2, 0, false);
+      if (ret[0] === 1) {
+        // Sudokizer.drawer.drawBoardConsole(ret[1]);
+        results.push(klist)
+      }
+    }
+    // 結果表示
+    for (let res of results) {
+      console.log(res);
+    }
+  }
+
+  /**
+   * ？ヒントの個数を調べる
+   * @param {Board} board 調査対象の盤面
+   * @return {int} ？ヒントの個数
+   */
+  countDummyHints(board) {
+    let cnt = 0;
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '?' && board.board[c].ishint) {
+        cnt++;
+      }
+    }
+    return cnt;
+  }
+
+  /**
+   * ？ヒントが持つ候補の組み合わせを作成
+   * 前提：あらかじめallKouhoIndentify等で候補を埋めておくこと
+   * @param {Board} board 候補が埋まっている盤面
+   * @return {Array} 候補を二重リスト形式でまとめたもの
+   */
+  dummyHintsKouhoComb(board) {
+    let retlist = []
+    for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '?') {
+        retlist.push(this.kouhoList(board, c));
+      }
+    }
+    return retlist;
+  }
+
+  /**
+   * 二重リストを受け取り、中身のリストから1つずつ抽出したリストの全組み合わせを返す
+   * [[1,2], [3,4,5]] => [[1,3], [1,4], [1,5], [2,3], [2,4], [2,5]] みたいな感じ
+   * @param {Array} lists 
+   * @return {Array}
+   */
+  allChoice(lists) {
+    // 原始条件：[[1,2,3]] => [[1],[2],[3]]
+    if (lists.length === 1) {
+      let retlist = [];
+      for (let l of lists[0]) {
+        retlist.push([l]);
+      }
+      return retlist;
+    }
+    // 再帰条件
+    if (lists.length >= 2) {
+      let retlist = [];
+      for (let l of lists[0]) {
+        let subresult = this.allChoice(lists.slice(1));
+        for (let sublist of subresult) {
+          // lをsublistの各中身のリストの先頭に追加
+          retlist.push([l].concat(sublist));
+        }
+      }
+      return retlist;
+    }
   }
 
 }

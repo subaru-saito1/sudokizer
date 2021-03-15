@@ -1514,11 +1514,12 @@ class SolveLog {
     let formobj = document.querySelector('#solvelog_form');
     formobj.value = formval;
     formobj.scrollTop = formobj.scrollHeight;
-    this.difficultyAnalyze()
+    $('#difficulty').text(this.difficultyAnalyze());
   }
 
   /**
    * 手筋ログから難易度を推定
+   * @return {String} 難易度の文字列
    */
   difficultyAnalyze() {
     let difficulty = '???';
@@ -1552,7 +1553,8 @@ class SolveLog {
         difficulty = 'アゼン　';
       }
     }
-    $('#difficulty').text(difficulty);
+    return difficulty;
+    
   }
   
 }

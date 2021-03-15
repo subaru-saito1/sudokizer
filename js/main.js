@@ -314,6 +314,10 @@ class SdkEngine {
    */
   allStepSolve(board) {
     let newboard = board.transCreate();
+    // ヒントマスの破綻チェック
+    if (!this.validHints(newboard)) {
+      return [newboard, [], 0];
+    } 
     // 一度盤面を初期化する
     newboard = newboard.ansClear()[0];
     this.autoIdentifyKouho(newboard)
@@ -480,6 +484,20 @@ class SdkEngine {
         if (board.board[c].num === centernum) {
           return false;
         }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * ヒントマスが破綻していないかチェック
+   * @param {Board} board 
+   * @returns {boolean} 正常ならtrue, 異常ならfalse
+   */
+  validHints(board) {
+    for (let c = 0; c < board.numcells; c++) {
+      if (!this.duplicateCheck(board, c)) {
+        return false;
       }
     }
     return true;
@@ -1341,6 +1359,10 @@ class SdkEngine {
             newboard2.board[c].kklevel[k] = 0;
           }
         }
+      }
+      // 入れたヒントが破綻していないか
+      if (!this.validHints(newboard2)) {
+        continue;
       }
       // 全解答を実行して解の個数を調べる。戻り値はanscntとansboard
       let ret = this.allStepSolveRecursive(newboard2, 0, tmplog);

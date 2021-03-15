@@ -216,7 +216,7 @@ class SdkEngine {
     // 解答エンジンに関する諸設定
     this.config = {
       multians_thres: 100,  // 別解発生時に探索を打ち切る解の個数
-      dummyhints_thres: 3,  // 生成時の最大？ヒント数
+      dummyhints_thres: 5,  // 生成時の最大？ヒント数
     }
     // 高速解答用のストラテジー関数のリスト
     this.strategylist = [
@@ -318,7 +318,7 @@ class SdkEngine {
     newboard = newboard.ansClear()[0];
     this.autoIdentifyKouho(newboard)
     // 再帰関数：ret[0]はanscnt, ret[1]
-    let ret = this.allStepSolveRecursive(newboard, 0, true);
+    let ret = this.allStepSolveRecursive(newboard, 0, Sudokizer.solvelog);
     let actionlist = board.diff(ret[1]);
     return [ret[1], actionlist, ret[0]];
   }
@@ -327,16 +327,15 @@ class SdkEngine {
    * 全解答再帰アルゴリズム
    * @param {Board} board 元盤面
    * @param {int} klevel  再帰の深さ（デバッグ用）
+   * @param {SolveLog} logstack 手筋ログ保存用スタック
    * @return {Array} 解の個数と解答盤面
    */
-  allStepSolveRecursive(board, klevel, logmode=true) {
+  allStepSolveRecursive(board, klevel, logstack) {
     let newboard = board.transCreate();
     // 1ステップ解かせるループ
     while (true) {
       let retobj = this.strategySelector(newboard, true);
-      if (logmode) {
-        Sudokizer.solvelog.push(retobj.msg);
-      }
+      logstack.push(retobj.msg);
       // OKだった場合：解答チェックしてOKなら脱出
       if (retobj.ok) {
         if (retobj.status === 'done') {
@@ -357,7 +356,7 @@ class SdkEngine {
               let newboard2 = newboard.transCreate();
               this.answerInsert(newboard2, mincpos, String(k+1));
               this.peerRemoveKouho(newboard2, mincpos);
-              let ret = this.allStepSolveRecursive(newboard2, klevel+1, logmode);
+              let ret = this.allStepSolveRecursive(newboard2, klevel+1, logstack);
               anscnt += ret[0];
               if (ret[0] >= 1) {
                 ansboard = ret[1];
@@ -1328,7 +1327,8 @@ class SdkEngine {
     // 全て組み合わせに対して解の個数を実行
     let results = []
     for (let klist of kouhoperm) {
-      console.log(".");
+      console.log(klist);   // 経過観察用
+      let tmplog = new SolveLog();
       let newboard2 = newboard.transCreate();
       // ?ヒントを埋めていく(通常ヒントマスに差し替える）
       let kcnt = 0;
@@ -1343,15 +1343,18 @@ class SdkEngine {
         }
       }
       // 全解答を実行して解の個数を調べる。戻り値はanscntとansboard
-      let ret = this.allStepSolveRecursive(newboard2, 0, false);
+      let ret = this.allStepSolveRecursive(newboard2, 0, tmplog);
       if (ret[0] === 1) {
-        // Sudokizer.drawer.drawBoardConsole(ret[1]);
-        results.push(klist)
+        results.push(klist);
+        results.push(tmplog.difficultyAnalyze());
       }
     }
     // 結果表示
     for (let res of results) {
       console.log(res);
+    }
+    if (results.length === 0) {
+      console.log('該当候補なし');
     }
   }
 

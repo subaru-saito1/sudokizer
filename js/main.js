@@ -490,12 +490,15 @@ class SdkEngine {
   }
 
   /**
-   * ヒントマスが破綻していないかチェック
+   * ヒントマスが破綻もしくは？ヒントがないかチェック
    * @param {Board} board 
    * @returns {boolean} 正常ならtrue, 異常ならfalse
    */
   validHints(board) {
     for (let c = 0; c < board.numcells; c++) {
+      if (board.board[c].num === '?') {
+        return false;
+      }
       if (!this.duplicateCheck(board, c)) {
         return false;
       }

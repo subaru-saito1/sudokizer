@@ -1105,6 +1105,10 @@ class SdkEngine {
    */
   searchNakedPair(board, clist, k) {
     let kunion = this.kouhoUnion(board, clist);
+    // 破綻していた場合（3マスに入る候補が2つのみ、という場合）
+    if (kunion.length < k) {
+      return {ok: false}
+    }
     let kcomblist = this.combination(kunion, k);  // 予約候補集合の全リスト
     for (let kcomb of kcomblist) {
       let cnt = 0;
@@ -1194,6 +1198,10 @@ class SdkEngine {
    */
   searchHiddenPair(board, clist, k) {
     let kunion = this.kouhoUnion(board, clist);
+    // 破綻していた場合（3マスに入る候補が2つのみ、という場合）
+    if (kunion.length < k) {
+      return {ok: false}
+    }
     let kcomblist = this.combination(kunion, k);  // 予約候補集合の全リスト
     for (let kcomb of kcomblist) {
       let kcells = new Set();

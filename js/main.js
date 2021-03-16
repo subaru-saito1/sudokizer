@@ -1025,14 +1025,14 @@ class SdkEngine {
           retobj = this.removeKouho(board, cr.blockidx, String(n+1));
           // 削除確定、メッセージ設定
           if (retobj.cellinfo.length > 0) {
-            return {ok:true, status:'newkouho', strategy:'Block-driven Eitherway',
+            return {ok:true, status:'newkouho', strategy:'Line-driven Eitherway',
                     cellinfo: retobj.cellinfo,
-                    msg: 'Block-driven Eitherway (Number: ' + retobj.num + ')'}
+                    msg: 'Line-driven Eitherway (Number: ' + retobj.num + ')'}
           }
         }
       }
     }
-    return {ok:false, status:'notfound', strategy:'Block-driven Eitherway'};
+    return {ok:false, status:'notfound', strategy:'Line-driven Eitherway'};
   }
 
 

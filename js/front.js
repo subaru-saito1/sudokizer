@@ -184,9 +184,10 @@ const boardInverseLR    = boardTransform('inverseLR');
  */
 function setCellSize(evt) {
   let sizeobj = $('#menu_dispsize_size');
-  let csize = sizeobj.val();
+  let csize = Number(sizeobj.val());
   // 有効範囲にいる場合のみ変更
-  if (csize >= sizeobj.attr('min') && csize <= sizeobj.attr('max')) {
+  if (csize >= Number(sizeobj.attr('min')) && 
+      csize <= Number(sizeobj.attr('max'))) {
     Sudokizer.config.dispsize = csize;
     Sudokizer.drawer.default_drawoption.dispsize = csize;
     $('#menu_imgwrite_size').val(csize);

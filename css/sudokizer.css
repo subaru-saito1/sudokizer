@@ -264,7 +264,13 @@ textarea#url_output {
   text-align: left;
   left: 0%;
 }
-
+#menu_versioninfo + .dropdown_cc {
+  width: 10em;
+  left: 10%;
+}
+#menu_versioninfo + .dropdown_cc p {
+  margin: 5px auto;
+}
 
 
 /** ============================================================

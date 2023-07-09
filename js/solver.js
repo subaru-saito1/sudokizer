@@ -932,8 +932,8 @@ class SdkEngine {
     }
   }
   nakedSingleStrategy = this.nakedSingleFactory(1, 9);
-  easyNakedSingleStrategy = this.nakedSingleFactory(6, 8);
-  mediumNakedSingleStrategy = this.nakedSingleFactory(5, 5);
+  easyNakedSingleStrategy = this.nakedSingleFactory(8, 8);
+  mediumNakedSingleStrategy = this.nakedSingleFactory(5, 7);
   hardNakedSingleStrategy = this.nakedSingleFactory(3, 4);
 
 
